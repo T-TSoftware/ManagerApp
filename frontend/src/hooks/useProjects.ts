@@ -4,7 +4,7 @@ import { Project } from "../types/project/Project";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading ] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getAllProjects()

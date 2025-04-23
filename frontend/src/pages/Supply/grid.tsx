@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef } from "react";
-import { useSupply,  } from "./hook";
+import { useSupply } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
   CellValueChangedEvent,
@@ -8,7 +8,7 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { SupplyRows } from "./supply.types";
- 
+
 const SupplyGrid = () => {
   const {
     localData,
@@ -21,11 +21,10 @@ const SupplyGrid = () => {
 
   const baseGridRef = useRef<BaseGridHandle<SupplyRows>>(null);
 
-
   const colDefs: ColDef<SupplyRows>[] = [
     { field: "code", editable: true, minWidth: 150 },
     { field: "category", editable: true, minWidth: 150 },
-    { field: "quantityItem", editable: true, minWidth: 150 },
+    { field: "quantityItemCode", editable: true, minWidth: 150 },
     { field: "companyName", editable: true, minWidth: 150 },
     { field: "unit", editable: true, minWidth: 150 },
     { field: "unitPrice", editable: true, minWidth: 150 },
@@ -41,14 +40,15 @@ const SupplyGrid = () => {
     { field: "updatedatetime", editable: true, minWidth: 150 },
   ];
 
-
-  // Benzersiz ID'yi string olarak döndür
   const getRowId = (params: GetRowIdParams<SupplyRows>) =>
     String(params.data.code);
- 
- const handleCellChange = (e: CellValueChangedEvent<SupplyRows>) => {
-   updateRow(e.data);
- };
+
+  const handleCellChange = (e: CellValueChangedEvent<SupplyRows>) => {
+    updateRow({
+      ...e.data,
+      updatedatetime: new Date(), 
+    });
+  };
 
   return (
     <BaseGrid<SupplyRows>
@@ -71,5 +71,5 @@ const SupplyGrid = () => {
     />
   );
 };
- 
+
 export default SupplyGrid;

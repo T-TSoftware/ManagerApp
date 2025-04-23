@@ -12,7 +12,6 @@ type ProjectMenuProps = {
 
 const ProjectMenu = ({ items }: ProjectMenuProps) => {
   const { projects } = useProjects();
-  console.log("projects",projects)
   const { projectId } = useParams();
   const selectedProject = projects.find((p) => p.id === projectId);
 

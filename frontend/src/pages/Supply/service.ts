@@ -1,41 +1,69 @@
 import { API_BASE_URL } from "../../config/api";
 import { SupplyRows } from "./supply.types";
 
-export const getAllSupplies = async (companyId:string): Promise<SupplyRows[]> => {
-  const res = await fetch(
-    `${API_BASE_URL}projects/a085fa43-a0cc-4c7b-86b0-e4f332109ba3/suppliers`,
-    {
-      headers: {
-        Authorization: `Bearer ${companyId}`,
-        "Content type": "application/json",
-      },
-    }
-  );
+export const getAllSupplies = async (
+  projectId: string,
+  token: string
+): Promise<SupplyRows[]> => {
+  const res = await fetch(`${API_BASE_URL}projects/${projectId}/suppliers`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  console.log("company:", token);
   if (!res.ok) throw new Error("Fetch Error");
   return res.json();
 };
 
 export const addSupply = async (
-  companyId: string,
+  token: string,
+  projectId: string,
   item: Omit<SupplyRows, "isNew">
 ) => {
-  const res = await fetch(`${API_BASE_URL}`, {
+  const res = await fetch(`${API_BASE_URL}projects/${projectId}/suppliers`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(item),
   });
-  if (!res.ok) throw new Error("Add error");
+  if (!res.ok) {
+    const errMsg = await res.text();
+    console.error("Add error →", errMsg);
+    throw new Error("Add error");
+  }
+
   return res.json();
 };
 
-export const updateSupply = async (companyId: string, item: SupplyRows) => {
-  const res = await fetch(`${API_BASE_URL}/${item.code}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item),
-  });
+export const updateSupply = async (
+  token: string,
+  projectId: string,
+  item: SupplyRows
+) => {
+  const res = await fetch(
+    `${API_BASE_URL}projects/${projectId}/suppliers/${encodeURIComponent(
+      item.code
+    )}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(item),
+    }
+  );
+  console.log("result put:", JSON.stringify(item));
+  const result = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    console.error("Update error →", result || res.statusText);
+    throw new Error("Update error");
+  }
   if (!res.ok) throw new Error("Update error");
-  return res.json();
+  return result;
 };
 
 export const deleteSupply = async (companyId: string, code: string) => {
