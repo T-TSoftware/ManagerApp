@@ -29,7 +29,7 @@ const ProjectMenuItemsList = ({ items }: Props) => {
           </div>
           {item.separatorLater && (
             <div
-              className="col-span-full mx-3.5 my-1 h-px border-0 bg-zinc-950/5 sm:mx-3 dark:bg-white/10 dark:forced-colors:bg-[CanvasText]"
+              className="col-span-full mx-3.5 my-1 h-px border-0 pointer-events-none bg-zinc-950/5 sm:mx-3 dark:bg-white/10 dark:forced-colors:bg-[CanvasText]"
               role="separator"
             />
           )}

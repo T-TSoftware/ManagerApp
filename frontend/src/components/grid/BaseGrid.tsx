@@ -8,6 +8,7 @@ import {
   ColDef,
   GetRowIdParams,
   RowSelectionOptions,
+  CellValueChangedEvent
 } from "ag-grid-community";
 import ActionButton from "./ActionButton";
 import {
@@ -24,6 +25,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 export type BaseGridHandle<T> = {
   addRow: (row: T) => void;
   deleteSelectedRows: () => void;
+  onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
 };
 
 // Props tipi
@@ -41,12 +43,13 @@ type BaseGridProps<T> = {
     options?: { label: string; onClick: () => void }[];
   };
   showButtons?: {
-    bar?:boolean;
+    bar?: boolean;
     refresh?: boolean;
     add?: boolean;
     delete?: boolean;
     save?: boolean;
   };
+  onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
 };
 
 const BaseGridInner = <T,>(
@@ -60,6 +63,7 @@ const BaseGridInner = <T,>(
     isLoading = false,
     topLeftButton,
     showButtons = { refresh: true, add: true, delete: true, save: true },
+    onCellValueChanged,
   }: BaseGridProps<T>,
   ref: Ref<BaseGridHandle<T>>
 ) => {
@@ -158,6 +162,7 @@ const { agGridThemeClass, agGridThemeObject } = useTheme();
           cellSelection={true}
           getRowId={getRowId}
           onGridReady={onGridReady}
+          onCellValueChanged={onCellValueChanged}
         />
       </div>
     </div>

@@ -1,99 +1,65 @@
 "use client";
 import React, { useState, useRef } from "react";
-import { useSupply } from "./hook";
+import { useSupply,  } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
+  CellValueChangedEvent,
   ColDef,
-  ValueFormatterParams,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { SupplyRows } from "./supply.types";
  
 const SupplyGrid = () => {
-  const { supplies, loading } = useSupply();
- 
-  // BaseGrid ref tanımı
+  const {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+  } = useSupply();
+
   const baseGridRef = useRef<BaseGridHandle<SupplyRows>>(null);
- 
-  // Kolonlar
+
+
   const colDefs: ColDef<SupplyRows>[] = [
-    { field: "code" },
-    { field: "category" },
-    { field: "quantityItem" },
-    { field: "companyName" },
-    { field: "unit" },
-    { field: "unitPrice" },
-    { field: "quantity" },
-    { field: "contractAmount" },
-    { field: "paidAmount" },
-    { field: "remainingAmount" },
-    { field: "status" },
-    { field: "description" },
-    { field: "createdBy" },
-    { field: "updatedBy" },
-    { field: "createdatetime" },
-    { field: "updatedatetime" },
-    // {
-    //   field: "receivableBalance",
-    //   valueFormatter: (params: ValueFormatterParams) =>
-    //     `£${params.value.toLocaleString()}`,
-    // },
-    // {
-    //   field: "debtBalance",
-    //   valueFormatter: (params: ValueFormatterParams) =>
-    //     `£${params.value.toLocaleString()}`,
-    // },
+    { field: "code", editable: true, minWidth: 150 },
+    { field: "category", editable: true, minWidth: 150 },
+    { field: "quantityItem", editable: true, minWidth: 150 },
+    { field: "companyName", editable: true, minWidth: 150 },
+    { field: "unit", editable: true, minWidth: 150 },
+    { field: "unitPrice", editable: true, minWidth: 150 },
+    { field: "quantity", editable: true, minWidth: 150 },
+    { field: "contractAmount", editable: true, minWidth: 150 },
+    { field: "paidAmount", editable: true, minWidth: 150 },
+    { field: "remainingAmount", editable: true, minWidth: 150 },
+    { field: "status", editable: true, minWidth: 150 },
+    { field: "description", editable: true, minWidth: 150 },
+    { field: "createdBy", editable: true, minWidth: 150 },
+    { field: "updatedBy", editable: true, minWidth: 150 },
+    { field: "createdatetime", editable: true, minWidth: 150 },
+    { field: "updatedatetime", editable: true, minWidth: 150 },
   ];
- 
+
+
   // Benzersiz ID'yi string olarak döndür
   const getRowId = (params: GetRowIdParams<SupplyRows>) =>
     String(params.data.code);
  
-  // Satır ekleme işlemi
-  const handleAddRow = () => {
-    const newItem: SupplyRows = {
-  code: "",
-  category: "",
-  quantityItem: "",
-  companyName: "",
-  unit: "",
-  unitPrice: "",
-  quantity: "",
-  contractAmount: "",
-  paidAmount: "",
-  remainingAmount: "",
-  status: "",
-  description: "",
-  createdBy: "",
-  updatedBy: "",
-  createdatetime: "",
-  updatedatetime: "",
-    };
-    baseGridRef.current?.addRow(newItem);
-  };
- 
-  // Seçilen satırları silme
-  const handleDeleteRow = (selected: SupplyRows[]) => {
-    baseGridRef.current?.deleteSelectedRows();
-    console.log("Silinecek satırlar:", selected);
-    
-  };
- 
-  // Tüm verileri kaydet
-  const handleSaveChanges = (allRows: SupplyRows[]) => {
-    console.log("Kaydedilecek tüm satırlar:", allRows);
-    
-  };
- 
+ const handleCellChange = (e: CellValueChangedEvent<SupplyRows>) => {
+   updateRow(e.data);
+ };
+
   return (
     <BaseGrid<SupplyRows>
       ref={baseGridRef}
-      rowData={supplies}
+      rowData={localData}
       columnDefs={colDefs}
       getRowId={getRowId}
-      onAddRow={handleAddRow}
-      onDeleteRow={handleDeleteRow}
-      onSaveChanges={handleSaveChanges}
+      onAddRow={addRow}
+      onDeleteRow={deleteRows}
+      onSaveChanges={saveChanges}
+      onCellValueChanged={handleCellChange}
       isLoading={loading}
       showButtons={{
         refresh: true,

@@ -1,5 +1,5 @@
 import React from "react";
-import SubcontractorGrid from "./Grid";
+import SubcontractorGrid from "./grid";
 import Alert from "../../components/ui/Alert";
 
 const Subcontractor: React.FC = () => {

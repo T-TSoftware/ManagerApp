@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { getProjects } from "../components/menu/projectMenu/ProjectService";
+import { getAllProjects } from "../components/menu/projectMenu/ProjectService";
 import { Project } from "../types/project/Project";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading ] = useState(true);
 
   useEffect(() => {
-    getProjects().then(setProjects);
+    getAllProjects()
+      .then(setProjects)
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
-  return { projects };
+  return { projects, loading };
 };

@@ -1,79 +1,107 @@
 import { useEffect, useState } from "react";
 import { SupplyRows } from "./supply.types";
-import { getAllSupplies } from "./service";
+import {
+  getAllSupplies,
+  addSupply,
+  updateSupply,
+  deleteSupply,
+} from "./service";
 import { useApp } from "../../hooks/useApp";
 
-/*const mockCurrents: SupplyRows[] = [
-  {
-      currentNo: 1,
-      currentName: "Tuğçe Ece",
-      receivableBalance: 64950,
-      debtBalance: 1000,
-      currency: "$",
-    },
-    {
-      currentNo: 2,
-      currentName: "Taylan Güloğlu",
-      receivableBalance: 33850,
-      debtBalance: 1000,
-      currency: "$",
-    },
-    {
-      currentNo: 3,
-      currentName: "Deniz Güloğlu",
-      receivableBalance: 29600,
-      debtBalance: 1000,
-      currency: "$",
-    },
-    {
-      currentNo: 4,
-      currentName: "Ali Cem Ece",
-      receivableBalance: 48890,
-      debtBalance: 1000,
-      currency: "$",
-    },
-    {
-      currentNo: 5,
-      currentName: "Tuğba Ece",
-      receivableBalance: 15774,
-      debtBalance: 1000,
-      currency: "$",
-    },
-    {
-      currentNo: 6,
-      currentName: "Nil Ece",
-      receivableBalance: 20675,
-      debtBalance: 1000,
-      currency: "$",
-    },
-     {
-      currentNo: 7,
-      currentName: "Tuğba Ece",
-      receivableBalance: 15774,
-      debtBalance: 1000,
-      currency: "$",
-    },
-    {
-      currentNo: 8,
-      currentName: "Nil Ece",
-      receivableBalance: 20675,
-      debtBalance: 1000,
-      currency: "$",
-    },
-];
-*/
 export const useSupply = () => {
-  const [supplies, setSupplies] = useState<SupplyRows[]>([]);
+  const [originalData, setOriginalData] = useState<SupplyRows[]>([]);
+  const [localData, setLocalData] = useState<SupplyRows[]>([]);
+  const [deletedRows, setDeletedRows] = useState<SupplyRows[]>([]);
   const [loading, setLoading] = useState(true);
   const {companyId} = useApp();
-  
-  useEffect(() => {
-    if (!companyId) return;
-    getAllSupplies(companyId)
-      .then(setSupplies)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [companyId]);
 
-  return { supplies, loading };
+     useEffect(() => {
+       fetchData();
+     }, []);
+
+    //Get Data's
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (!companyId) return;
+        const data = await getAllSupplies(companyId);
+        setOriginalData(data);
+        setLocalData(data);
+        setDeletedRows([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    //crud 
+    const addRow = () => {
+      const newRow: SupplyRows = {
+        code: "",
+        category: "",
+        quantityItem: "",
+        companyName: "",
+        unit: "",
+        unitPrice: "",
+        quantity: "",
+        contractAmount: "",
+        paidAmount: "",
+        remainingAmount: "",
+        status: "",
+        description: "",
+        createdBy: "",
+        updatedBy: "",
+        createdatetime: "",
+        updatedatetime: "",
+        isNew: true,
+      };
+      setLocalData((prev) => [...prev, newRow]);
+    };
+
+    const updateRow = (row: SupplyRows) => {
+      setLocalData((prev) =>
+        prev.map((item) => (item.code === row.code ? row : item))
+      );
+    };
+
+    const deleteRows = (selected: SupplyRows[]) => {
+      setLocalData((prev) =>
+        prev.filter((item) => !selected.find((s) => s.code === item.code))
+      );
+      setDeletedRows((prev) => [...prev, ...selected]);
+    };
+
+    const saveChanges = async () => {
+      const added = localData.filter((item) => item.isNew);
+      const updated = localData.filter(
+        (item) =>
+          !item.isNew &&
+          originalData.some(
+            (orig) =>
+              orig.code === item.code &&
+              JSON.stringify(orig) !== JSON.stringify(item)
+          )
+      );
+      try {
+        if (deletedRows.length > 0) {
+           if (!companyId) return;
+          await Promise.all(
+            deletedRows.map((item) => deleteSupply(companyId,item.code))
+          );
+        }
+        if (added.length > 0) {
+           if (!companyId) return;
+          await Promise.all(
+            added.map(({ isNew, ...row }) => addSupply(companyId,row))
+          );
+        }
+        if (updated.length > 0) {
+           if (!companyId) return;
+          //await Promise.all(updated.map(updateSupply(companyId, updateSupply)));
+        }
+        await fetchData(); 
+      } catch (err) {
+        console.error("Save error:", err);
+      }
+    };
+
+  return { localData, loading, addRow, updateRow, deleteRows, saveChanges };
 };

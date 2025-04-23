@@ -15,4 +15,5 @@ export interface SupplyRows {
   updatedBy: string;
   createdatetime: string;
   updatedatetime: string;
+  isNew?: boolean;
 }

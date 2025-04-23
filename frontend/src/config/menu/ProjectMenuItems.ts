@@ -4,7 +4,7 @@ import { ProjectMenuItemType } from "../../types/menu/ProjectMenu";
 export const projectMenuItems: ProjectMenuItemType[] = [
   {
     label: "Projeler",
-    href: "#",
+    href: "",
     icon: HomeModernIcon,
     separatorLater: true,
   },
