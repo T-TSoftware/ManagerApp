@@ -49,6 +49,12 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       adminYN: true,
     },
     {
+      label: "Hesap Bakiyeleri",
+      href: "/balances",
+      icon: CreditCardIcon,
+      adminYN: true,
+    },
+    {
       label: "Admin Dashboard",
       href: "/adminDashboard",
       icon: CreditCardIcon,

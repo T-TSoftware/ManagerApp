@@ -1,80 +1,44 @@
-// pages/Login/index.tsx
-"use client";
-import { useState} from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
-import { useApp } from "../../hooks/useApp";
-
-const LoginPage = () => {
-
-  const { setCompanyId } = useApp();
-
+const Login = () => {
+  const { login, loading, error } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) throw new Error("Login failed");
-      const data = await res.json();
-      setCompanyId("123");
-      navigate("/adminDashboard");
-      console.log("Success", data);
-    } catch (err) {
-      console.error(err);
-    }
+    login(email, password);
   };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-tertiary p-8 rounded-xl shadow-lg w-full max-w-sm"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center text-black dark:text-white">
-          Giriş Yap
-        </h1>
-        <div className="mb-4">
-          <label className="block text-sm mb-1 text-gray-600 dark:text-gray-300">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black dark:text-white dark:bg-gray-800"
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-sm mb-1 text-gray-600 dark:text-gray-300">
-            Şifre
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black dark:text-white dark:bg-gray-800"
-            required
-          />
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+        <h2 className="text-xl font-bold mb-4">Admin Giriş</h2>
+        <input
+          type="text"
+          placeholder="Kullanıcı Adı"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-3 p-2 border rounded"
+        />
+        <input
+          type="password"
+          placeholder="Şifre"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-3 p-2 border rounded"
+        />
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
         <button
           type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-         //href="/adminDashboard"
+          className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700"
+          disabled={loading}
         >
-          Giriş Yap
+          {loading ? "Loading..." : "Giriş"}
         </button>
       </form>
     </div>
   );
 };
 
-export default LoginPage;
+export default Login;

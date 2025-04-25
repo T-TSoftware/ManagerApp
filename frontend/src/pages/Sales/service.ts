@@ -1,10 +1,13 @@
 import { API_BASE_URL } from "../../config/api";
 import { SalesRows } from "./sales.types";
 
-export const getAllSales = async (companyId: string): Promise<SalesRows[]> => {
+export const getAllSales = async (
+  token: string,
+  projectId: string
+): Promise<SalesRows[]> => {
   const res = await fetch(`${API_BASE_URL}`, {
     headers: {
-      Authorization: `Bearer ${companyId}`,
+      Authorization: `Bearer ${token}`,
       "Content Type": "application/json",
     },
   });

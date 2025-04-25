@@ -3,73 +3,62 @@ import React, { useState, useRef } from "react";
 import { useSubcontractor } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
+  CellValueChangedEvent,
   ColDef,
-  ValueFormatterParams,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { SubcontractorRows } from "./subcontractor.types";
 
 const SubcontractorGrid = () => {
-  const { subcontractor, loading } = useSubcontractor();
+  const {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+  } = useSubcontractor();
 
-  // BaseGrid ref tanımı
   const baseGridRef = useRef<BaseGridHandle<SubcontractorRows>>(null);
 
-  // Kolonlar
   const colDefs: ColDef<SubcontractorRows>[] = [
-    { field: "currentNo" },
-    { field: "currentName" },
-    {
-      field: "receivableBalance",
-      valueFormatter: (params: ValueFormatterParams) =>
-        `£${params.value.toLocaleString()}`,
-    },
-    {
-      field: "debtBalance",
-      valueFormatter: (params: ValueFormatterParams) =>
-        `£${params.value.toLocaleString()}`,
-    },
-    { field: "currency" },
+    { field: "code", editable: true, minWidth: 150 },
+    { field: "category", editable: true, minWidth: 150 },
+    { field: "companyName", editable: true, minWidth: 150 },
+    { field: "unit", editable: true, minWidth: 150 },
+    { field: "unitPrice", editable: true, minWidth: 150 },
+    { field: "quantity", editable: true, minWidth: 150 },
+    { field: "contractAmount", editable: true, minWidth: 150 },
+    { field: "paidAmount", editable: true, minWidth: 150 },
+    { field: "remainingAmount", editable: true, minWidth: 150 },
+    { field: "status", editable: true, minWidth: 150 },
+    { field: "description", editable: true, minWidth: 150 },
+    { field: "createdBy", editable: true, minWidth: 150 },
+    { field: "updatedBy", editable: true, minWidth: 150 },
+    { field: "createdatetime", editable: true, minWidth: 150 },
+    { field: "updatedatetime", editable: true, minWidth: 150 },
   ];
 
-  // Benzersiz ID'yi string olarak döndür
   const getRowId = (params: GetRowIdParams<SubcontractorRows>) =>
-    String(params.data.currentNo);
+    String(params.data.code);
 
-  // Satır ekleme işlemi
-  const handleAddRow = () => {
-    const newItem: SubcontractorRows = {
-      currentNo: Math.floor(Math.random() * 100000),
-      currentName: "",
-      receivableBalance: 0,
-      debtBalance: 0,
-      currency: "",
-    };
-    baseGridRef.current?.addRow(newItem);
-  };
-
-  // Seçilen satırları silme
-  const handleDeleteRow = (selected: SubcontractorRows[]) => {
-    baseGridRef.current?.deleteSelectedRows();
-    console.log("Silinecek satırlar:", selected);
-    // İstersen burada bir API ile silme işlemi yapabilirsin
-  };
-
-  // Tüm verileri kaydet
-  const handleSaveChanges = (allRows: SubcontractorRows[]) => {
-    console.log("Kaydedilecek tüm satırlar:", allRows);
-    // API gönderimi buraya yapılabilir
+  const handleCellChange = (e: CellValueChangedEvent<SubcontractorRows>) => {
+    updateRow({
+      ...e.data,
+      updatedatetime: new Date(), 
+    });
   };
 
   return (
     <BaseGrid<SubcontractorRows>
       ref={baseGridRef}
-      rowData={subcontractor}
+      rowData={localData}
       columnDefs={colDefs}
       getRowId={getRowId}
-      onAddRow={handleAddRow}
-      onDeleteRow={handleDeleteRow}
-      onSaveChanges={handleSaveChanges}
+      onAddRow={addRow}
+      onDeleteRow={deleteRows}
+      onSaveChanges={saveChanges}
+      onCellValueChanged={handleCellChange}
       isLoading={loading}
       showButtons={{
         refresh: true,

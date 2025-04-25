@@ -2,27 +2,27 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
 type AppContextType = {
-  companyId: string | null;
-  setCompanyId: (id: string) => void;
+  projectId: string | null;
+  setProjectId: (id: string) => void;
 };
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-  const [companyId, setCompanyIdState] = useState<string | null>(null);
+  const [projectId, setProjectIdState] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("companyId");
-    if (stored) setCompanyIdState(stored);
+    const stored = localStorage.getItem("projectId");
+    if (stored) setProjectIdState(stored);
   }, []);
 
-  const setCompanyId = (id: string) => {
-    localStorage.setItem("companyId", id);
-    setCompanyIdState(id);
+  const setProjectId = (id: string) => {
+    localStorage.setItem("projectId", id);
+    setProjectIdState(id);
   };
 
   return (
-    <AppContext.Provider value={{ companyId, setCompanyId }}>
+    <AppContext.Provider value={{ projectId, setProjectId }}>
       {children}
     </AppContext.Provider>
   );

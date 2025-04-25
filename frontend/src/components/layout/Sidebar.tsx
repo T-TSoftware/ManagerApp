@@ -4,7 +4,6 @@ import PagesMenu from "../menu/pagesMenu/PagesMenu";
 import UserMenu from "../menu/userMenu/UserMenu";
 import { projectMenuItems } from "../../config/menu/ProjectMenuItems";
 import { userMenuItems } from "../../config/menu/UserMenuItems";
-import ThemeToggle from "./ThemeToggle";
 
 type SidebarProps = {
   className?: string;
@@ -24,7 +23,6 @@ const Sidebar = ({ className = "", onClose }: SidebarProps) => {
           <ProjectMenu items={projectMenuItems} />
         </div>
         <div className="flex flex-1 flex-col overflow-y-auto p-4">
-          <ThemeToggle />
           <PagesMenu />
         </div>
         <div className="max-lg:hidden flex flex-col border-t p-4 border-gray-100 dark:border-white/5">

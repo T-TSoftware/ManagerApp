@@ -1,8 +1,7 @@
-import { ElementType } from "react";
-
 export type UserMenuItemType = {
-  label: string;
-  href: string;
-  icon?: ElementType;
+  label?: string;
+  href?: string;
+  icon?: React.ElementType;
   separatorBefore?: boolean;
+  element?: React.ReactNode;
 };

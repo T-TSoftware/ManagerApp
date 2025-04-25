@@ -1,11 +1,8 @@
 import { API_BASE_URL } from "../../config/api";
-import { SupplyRows } from "./supply.types";
+import { BalanceRows } from "./types";
 
-export const getAllSupplies = async (
-  projectId: string,
-  token: string
-): Promise<SupplyRows[]> => {
-  const res = await fetch(`${API_BASE_URL}projects/${projectId}/suppliers`, {
+export const getAllBalance = async (token: string): Promise<BalanceRows[]> => {
+  const res = await fetch(`${API_BASE_URL}balances`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -16,10 +13,9 @@ export const getAllSupplies = async (
 
 export const addSupply = async (
   token: string,
-  projectId: string,
-  item: Omit<SupplyRows, "isNew">
+  item: Omit<BalanceRows, "isNew">
 ) => {
-  const res = await fetch(`${API_BASE_URL}projects/${projectId}/suppliers`, {
+  const res = await fetch(`${API_BASE_URL}balances`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -36,17 +32,12 @@ export const addSupply = async (
   return res.json();
 };
 
-export const updateSupply = async (
-  token: string,
-  projectId: string,
-  item: SupplyRows
-) => {
+export const updateSupply = async (token: string, item: BalanceRows) => {
+  if (!item.id) return;
   const res = await fetch(
-    `${API_BASE_URL}projects/${projectId}/suppliers/${encodeURIComponent(
-      item.code
-    )}`,
+    `${API_BASE_URL}balances/${encodeURIComponent(item.id)}`,
     {
-      method: "PATCH",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -65,8 +56,8 @@ export const updateSupply = async (
   return result;
 };
 
-export const deleteSupply = async (companyId: string, code: string) => {
-  const res = await fetch(`${API_BASE_URL}/${code}`, {
+export const deleteSupply = async (id: string) => {
+  const res = await fetch(`${API_BASE_URL}/${id}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Delete error");
