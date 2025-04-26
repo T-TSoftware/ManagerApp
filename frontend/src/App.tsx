@@ -23,9 +23,9 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            //<ProtectedRoute>
               <MainLayout />
-            </ProtectedRoute>
+           // </ProtectedRoute>
           }
         >
           <Route path="adminDashboard" element={<AdminDashboard />} />
@@ -38,9 +38,9 @@ function App() {
         <Route
           path="/project/:projectId"
           element={
-            <ProtectedRoute>
+            //<ProtectedRoute>
               <MainLayout />
-            </ProtectedRoute>
+            //</ProtectedRoute>
           }
         >
           <Route path="dashboard" element={<Dashboard />} />

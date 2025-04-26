@@ -2,76 +2,88 @@
 import React, { useState, useRef } from "react";
 import { useCurrent } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
-import { HomeModernIcon } from "@heroicons/react/24/outline";
 import type {
+  CellValueChangedEvent,
   ColDef,
-  ValueFormatterParams,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { CurrentRows } from "./current.types";
 
 const CurrentGrid = () => {
-  const { currents, loading } = useCurrent();
-  const [selectedSite, setSelectedSite] = useState("All");
+  const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
+    useCurrent();
 
-  // BaseGrid ref tanımı
   const baseGridRef = useRef<BaseGridHandle<CurrentRows>>(null);
 
-  // Kolonlar
   const colDefs: ColDef<CurrentRows>[] = [
-    { field: "currentNo" },
-    { field: "currentName" },
+    { field: "id", editable: false, minWidth: 150, hide: true },
     {
-      field: "receivableBalance",
-      valueFormatter: (params: ValueFormatterParams) =>
-        `£${params.value.toLocaleString()}`,
+      field: "type",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
     },
     {
-      field: "debtBalance",
-      valueFormatter: (params: ValueFormatterParams) =>
-        `£${params.value.toLocaleString()}`,
+      field: "balance",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
     },
-    { field: "currency" },
+    {
+      field: "amount",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "currency",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
+    { field: "description", editable: true, minWidth: 150 },
+    {
+      field: "transactionDate",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
+    { field: "createdBy", editable: false, minWidth: 150 },
+    { field: "updatedBy", editable: false, minWidth: 150 },
+    { field: "createdatetime", editable: false, minWidth: 150 },
+    { field: "updatedatetime", editable: false, minWidth: 150 },
   ];
 
-  // Benzersiz ID'yi string olarak döndür
   const getRowId = (params: GetRowIdParams<CurrentRows>) =>
-    String(params.data.currentNo);
+    String(params.data.id);
 
-  // Satır ekleme işlemi
-  const handleAddRow = () => {
-    const newItem: CurrentRows = {
-      currentNo: Math.floor(Math.random() * 100000), 
-      currentName: "",
-      receivableBalance: 0,
-      debtBalance: 0,
-      currency: "",
-    };
-    baseGridRef.current?.addRow(newItem);
-  };
-
-  // Seçilen satırları silme
-  const handleDeleteRow = (selected: CurrentRows[]) => {
-    baseGridRef.current?.deleteSelectedRows(); 
-    console.log("Silinecek satırlar:", selected);
-    // İstersen burada bir API ile silme işlemi yapabilirsin
-  };
-
-  // Tüm verileri kaydet
-  const handleSaveChanges = (allRows: CurrentRows[]) => {
-    console.log("Kaydedilecek tüm satırlar:", allRows);
-    // API gönderimi buraya yapılabilir
+  const handleCellChange = (e: CellValueChangedEvent<CurrentRows>) => {
+    updateRow({
+      ...e.data,
+      updatedatetime: new Date(),
+    });
   };
 
   return (
     <BaseGrid<CurrentRows>
       ref={baseGridRef}
-      rowData={currents}
+      rowData={localData}
       columnDefs={colDefs}
       getRowId={getRowId}
-      onAddRow={handleAddRow}
-      onDeleteRow={handleDeleteRow}
-      onSaveChanges={handleSaveChanges}
+      onAddRow={addRow}
+      onDeleteRow={deleteRows}
+      onSaveChanges={saveChanges}
+      onCellValueChanged={handleCellChange}
       isLoading={loading}
       showButtons={{
         refresh: true,

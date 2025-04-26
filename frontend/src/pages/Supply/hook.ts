@@ -49,7 +49,7 @@ export const useSupply = () => {
       contractAmount: 0,
       paidAmount: 0,
       remainingAmount: 0,
-      status: "",
+      status: "Pending",
       description: "",
       createdBy: "",
       updatedBy: "",

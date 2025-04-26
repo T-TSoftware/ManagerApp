@@ -48,7 +48,7 @@ export const useSubcontractor = () => {
       contractAmount: 0,
       paidAmount: 0,
       remainingAmount: 0,
-      status: "",
+      status: "Pending",
       description: "",
       createdBy: "",
       updatedBy: "",
@@ -56,7 +56,7 @@ export const useSubcontractor = () => {
       updatedatetime: new Date(),
       isNew: true,
     };
-    setLocalData((prev) => [...prev, newRow]);
+    setLocalData((prev) => [newRow, ...prev]);
   };
 
   const updateRow = (row: SubcontractorRows) => {

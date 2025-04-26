@@ -23,15 +23,36 @@ const SubcontractorGrid = () => {
 
   const colDefs: ColDef<SubcontractorRows>[] = [
     { field: "code", editable: false, minWidth: 150 },
-    { field: "category", editable: true, minWidth: 150 },
+    {
+      field: "category",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
     { field: "companyName", editable: true, minWidth: 150 },
-    { field: "unit", editable: true, minWidth: 150 },
+    {
+      field: "unit",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
     { field: "unitPrice", editable: true, minWidth: 150 },
     { field: "quantity", editable: true, minWidth: 150 },
     { field: "contractAmount", editable: true, minWidth: 150 },
     { field: "paidAmount", editable: true, minWidth: 150 },
     { field: "remainingAmount", editable: false, minWidth: 150 },
-    { field: "status", editable: true, minWidth: 150 },
+    {
+      field: "status",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
     { field: "description", editable: true, minWidth: 150 },
     { field: "createdBy", editable: false, minWidth: 150 },
     { field: "updatedBy", editable: false, minWidth: 150 },

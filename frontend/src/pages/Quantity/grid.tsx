@@ -18,10 +18,38 @@ const QuantityGrid = () => {
   const colDefs: ColDef<QuantityRows>[] = [
     { field: "id", editable: false, minWidth: 150, hide: true },
     { field: "code", editable: false, minWidth: 150 },
-    { field: "category", editable: true, minWidth: 150 },
-    { field: "quantityItemCode", editable: true, minWidth: 150 },
-    { field: "unit", editable: true, minWidth: 150 },
-    { field: "quantity", editable: true, minWidth: 150 },
+    {
+      field: "category",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "quantityItemCode",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "unit",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "quantity",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
     { field: "description", editable: true, minWidth: 150 },
     { field: "createdBy", editable: false, minWidth: 150 },
     { field: "updatedBy", editable: false, minWidth: 150 },

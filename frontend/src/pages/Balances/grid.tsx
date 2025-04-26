@@ -16,10 +16,35 @@ const BalanceGrid = () => {
   const baseGridRef = useRef<BaseGridHandle<BalanceRows>>(null);
 
   const colDefs: ColDef<BalanceRows>[] = [
-    { field: "code", editable: false, minWidth: 150 },
-    { field: "name", editable: true, minWidth: 150 },
-    { field: "amount", editable: true, minWidth: 150 },
-    { field: "currency", editable: true, minWidth: 150 },
+    {
+      field: "code",
+      editable: false,
+      minWidth: 150
+    },
+    {
+      field: "name",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "amount",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "currency",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+      },
+    },
   ];
 
   const getRowId = (params: GetRowIdParams<BalanceRows>) => {

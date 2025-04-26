@@ -41,10 +41,10 @@ export const useBalance = () => {
       code: "",
       name: "",
       amount: 0,
-      currency: "",
+      currency: "TL",
       isNew: true,
     };
-    setLocalData((prev) => [...prev, newRow]);
+    setLocalData((prev) => [newRow, ...prev ]);
   };
 
   const updateRow = (row: BalanceRows) => {
