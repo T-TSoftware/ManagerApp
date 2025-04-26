@@ -10,34 +10,63 @@ import type {
 import type { SupplyRows } from "./supply.types";
 
 const SupplyGrid = () => {
-  const {
-    localData,
-    loading,
-    addRow,
-    updateRow,
-    deleteRows,
-    saveChanges,
-  } = useSupply();
+  const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
+    useSupply();
 
   const baseGridRef = useRef<BaseGridHandle<SupplyRows>>(null);
 
   const colDefs: ColDef<SupplyRows>[] = [
-    { field: "code", editable: true, minWidth: 150 },
-    { field: "category", editable: true, minWidth: 150 },
-    { field: "quantityItemCode", editable: true, minWidth: 150 },
-    { field: "companyName", editable: true, minWidth: 150 },
-    { field: "unit", editable: true, minWidth: 150 },
+    { field: "code", editable: false, minWidth: 150 },
+    {
+      field: "category",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "quantityItem",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "companyName",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
+    {
+      field: "unit",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
     { field: "unitPrice", editable: true, minWidth: 150 },
     { field: "quantity", editable: true, minWidth: 150 },
     { field: "contractAmount", editable: true, minWidth: 150 },
     { field: "paidAmount", editable: true, minWidth: 150 },
-    { field: "remainingAmount", editable: true, minWidth: 150 },
-    { field: "status", editable: true, minWidth: 150 },
+    { field: "remainingAmount", editable: false, minWidth: 150 },
+    {
+      field: "status",
+      editable: true,
+      minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
+    },
     { field: "description", editable: true, minWidth: 150 },
-    { field: "createdBy", editable: true, minWidth: 150 },
-    { field: "updatedBy", editable: true, minWidth: 150 },
-    { field: "createdatetime", editable: true, minWidth: 150 },
-    { field: "updatedatetime", editable: true, minWidth: 150 },
+    { field: "createdBy", editable: false, minWidth: 150 },
+    { field: "updatedBy", editable: false, minWidth: 150 },
+    { field: "createdatetime", editable: false, minWidth: 150 },
+    { field: "updatedatetime", editable: false, minWidth: 150 },
   ];
 
   const getRowId = (params: GetRowIdParams<SupplyRows>) =>
@@ -46,7 +75,7 @@ const SupplyGrid = () => {
   const handleCellChange = (e: CellValueChangedEvent<SupplyRows>) => {
     updateRow({
       ...e.data,
-      updatedatetime: new Date(), 
+      updatedatetime: new Date(),
     });
   };
 

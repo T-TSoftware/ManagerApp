@@ -1,37 +1,27 @@
 "use client";
 import React, { useState, useRef } from "react";
-import { useSubcontractor } from "./hook";
+import { useQuantity } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
   CellValueChangedEvent,
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
-import type { SubcontractorRows } from "./subcontractor.types";
+import type { QuantityRows } from "./quantity.types";
 
-const SubcontractorGrid = () => {
-  const {
-    localData,
-    loading,
-    addRow,
-    updateRow,
-    deleteRows,
-    saveChanges,
-  } = useSubcontractor();
+const QuantityGrid = () => {
+  const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
+    useQuantity();
 
-  const baseGridRef = useRef<BaseGridHandle<SubcontractorRows>>(null);
+  const baseGridRef = useRef<BaseGridHandle<QuantityRows>>(null);
 
-  const colDefs: ColDef<SubcontractorRows>[] = [
+  const colDefs: ColDef<QuantityRows>[] = [
+    { field: "id", editable: false, minWidth: 150, hide: true },
     { field: "code", editable: false, minWidth: 150 },
     { field: "category", editable: true, minWidth: 150 },
-    { field: "companyName", editable: true, minWidth: 150 },
+    { field: "quantityItemCode", editable: true, minWidth: 150 },
     { field: "unit", editable: true, minWidth: 150 },
-    { field: "unitPrice", editable: true, minWidth: 150 },
     { field: "quantity", editable: true, minWidth: 150 },
-    { field: "contractAmount", editable: true, minWidth: 150 },
-    { field: "paidAmount", editable: true, minWidth: 150 },
-    { field: "remainingAmount", editable: false, minWidth: 150 },
-    { field: "status", editable: true, minWidth: 150 },
     { field: "description", editable: true, minWidth: 150 },
     { field: "createdBy", editable: false, minWidth: 150 },
     { field: "updatedBy", editable: false, minWidth: 150 },
@@ -39,18 +29,18 @@ const SubcontractorGrid = () => {
     { field: "updatedatetime", editable: false, minWidth: 150 },
   ];
 
-  const getRowId = (params: GetRowIdParams<SubcontractorRows>) =>
-    String(params.data.code);
+  const getRowId = (params: GetRowIdParams<QuantityRows>) =>
+    String(params.data.id);
 
-  const handleCellChange = (e: CellValueChangedEvent<SubcontractorRows>) => {
+  const handleCellChange = (e: CellValueChangedEvent<QuantityRows>) => {
     updateRow({
       ...e.data,
-      updatedatetime: new Date(), 
+      updatedatetime: new Date(),
     });
   };
 
   return (
-    <BaseGrid<SubcontractorRows>
+    <BaseGrid<QuantityRows>
       ref={baseGridRef}
       rowData={localData}
       columnDefs={colDefs}
@@ -71,4 +61,4 @@ const SubcontractorGrid = () => {
   );
 };
 
-export default SubcontractorGrid;
+export default QuantityGrid;

@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { SupplyRows } from "./supply.types";
+import { QuantityRows } from "./quantity.types";
 import { useParams } from "react-router-dom";
 import {
-  getAllSupplies,
-  addSupply,
-  updateSupply,
-  deleteSupply,
+  getAllQuantities,
+  addQuantity,
+  updateQuantity,
+  deleteQuantity,
 } from "./service";
 import { getToken } from "../../utils/token";
 
-export const useSupply = () => {
-  const [originalData, setOriginalData] = useState<SupplyRows[]>([]);
-  const [localData, setLocalData] = useState<SupplyRows[]>([]);
-  const [deletedRows, setDeletedRows] = useState<SupplyRows[]>([]);
+export const useQuantity = () => {
+  const [originalData, setOriginalData] = useState<QuantityRows[]>([]);
+  const [localData, setLocalData] = useState<QuantityRows[]>([]);
+  const [deletedRows, setDeletedRows] = useState<QuantityRows[]>([]);
   const [loading, setLoading] = useState(true);
   const { projectId } = useParams();
   const token = getToken();
@@ -27,7 +27,7 @@ export const useSupply = () => {
     setLoading(true);
     try {
       if (!projectId || !token) return;
-      const data = await getAllSupplies(projectId, token);
+      const data = await getAllQuantities(projectId, token);
       setOriginalData(data);
       setLocalData(data);
       setDeletedRows([]);
@@ -38,35 +38,31 @@ export const useSupply = () => {
   //CRUD
 
   const addRow = () => {
-    const newRow: SupplyRows = {
+    const newRow: QuantityRows = {
+      id:"",
       code: "",
-      category: "",
-      quantityItem: "",
-      companyName: "",
-      unit: "",
-      unitPrice: 0,
+      quantityItemCode: "",
+      quantityItemName: "",
       quantity: 0,
-      contractAmount: 0,
-      paidAmount: 0,
-      remainingAmount: 0,
-      status: "",
+      unit: "",
       description: "",
+      category: "",
       createdBy: "",
       updatedBy: "",
       createdatetime: new Date(),
       updatedatetime: new Date(),
       isNew: true,
     };
-    setLocalData((prev) => [newRow, ...prev]);
+    setLocalData((prev) => [...prev, newRow]);
   };
 
-  const updateRow = (row: SupplyRows) => {
+  const updateRow = (row: QuantityRows) => {
     setLocalData((prev) =>
       prev.map((item) => (item.code === row.code ? row : item))
     );
   };
 
-  const deleteRows = (selected: SupplyRows[]) => {
+  const deleteRows = (selected: QuantityRows[]) => {
     setLocalData((prev) =>
       prev.filter((item) => !selected.find((s) => s.code === item.code))
     );
@@ -88,21 +84,21 @@ export const useSupply = () => {
       if (deletedRows.length > 0) {
         if (!projectId || !token) return;
         await Promise.all(
-          deletedRows.map((item) => deleteSupply(projectId, item.code))
+          deletedRows.map((item) => deleteQuantity(projectId, item.code))
         );
       }
       if (added.length > 0) {
         if (!projectId || !token) return;
         await Promise.all(
           added.map(({ isNew, ...row }) => {
-            return addSupply(token, projectId, row);
+            return addQuantity(token, projectId, row);
           })
         );
       }
       if (updated.length > 0) {
         if (!projectId || !token) return;
         await Promise.all(
-          updated.map((row) => updateSupply(token, projectId, row))
+          updated.map((row) => updateQuantity(token, projectId, row))
         );
       }
       await fetchData();

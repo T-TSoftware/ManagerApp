@@ -1,7 +1,7 @@
 export interface SupplyRows {
   code: string;
   category: string;
-  quantityItemCode: string;
+  quantityItem: string;
   companyName: string;
   unit: string;
   unitPrice: number;

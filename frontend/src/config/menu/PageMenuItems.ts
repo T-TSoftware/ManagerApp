@@ -1,10 +1,17 @@
-import { BuildingOfficeIcon, CircleStackIcon, BanknotesIcon, CreditCardIcon, Square2StackIcon, UsersIcon, ReceiptPercentIcon } from "@heroicons/react/20/solid";
+import {
+  BuildingOfficeIcon,
+  CircleStackIcon,
+  BanknotesIcon,
+  CreditCardIcon,
+  Square2StackIcon,
+  UsersIcon,
+  ReceiptPercentIcon,
+} from "@heroicons/react/20/solid";
 import { PagesMenuItemType } from "../../types/menu/PagesMenu";
 
 export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
-  
   const basePath = projectId ? `/project/${projectId}` : "";
-  
+
   return [
     {
       label: "Dashboard",
@@ -53,6 +60,18 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       href: "/balances",
       icon: CreditCardIcon,
       adminYN: true,
+    },
+    {
+      label: "Metraj",
+      href: `${basePath}/quantity`,
+      icon: CreditCardIcon,
+      adminYN: false,
+    },
+    {
+      label: "Maliyet Özeti",
+      href: `${basePath}/costSummary`,
+      icon: CreditCardIcon,
+      adminYN: false,
     },
     {
       label: "Admin Dashboard",

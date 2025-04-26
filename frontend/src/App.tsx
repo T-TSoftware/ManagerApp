@@ -11,6 +11,8 @@ import LoginPage from "./pages/Login";
 import CashFlow from "./pages/CashFlow";
 import ProtectedRoute from "./components/layout/ProtectedRoute"; // 🔒
 import Balances from "./pages/Balances";
+import Quantity from "./pages/Quantity";
+import CostSummary from "./pages/CostSummary";
 
 function App() {
   return (
@@ -45,6 +47,8 @@ function App() {
           <Route path="supply" element={<Supply />} />
           <Route path="sales" element={<Sales />} />
           <Route path="subcontractor" element={<Subcontractor />} />
+          <Route path="quantity" element={<Quantity />} />
+          <Route path="costSummary" element={<CostSummary />} />
         </Route>
       </Routes>
     </BrowserRouter>
