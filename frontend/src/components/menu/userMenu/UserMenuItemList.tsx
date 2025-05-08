@@ -22,15 +22,22 @@ const UserMenuItemsList = ({ items }: Props) => {
               <>{item.element}</>
             ) : (
               <MenuItem>
-                <a
-                  href={item.href}
-                  className="grid grid-cols-[auto_1fr] gap-x-2 items-center px-4 py-2 text-sm rounded-md text-black hover:bg-light_primary dark:text-white dark:hover:bg-secondary"
-                >
-                  {item.icon && (
-                    <item.icon className="size-4 dark:text-white" />
-                  )}
-                  <p>{item.label}</p>
-                </a>
+                {({ active }) => (
+                  <button
+                    type="button"
+                    onClick={item.onClick}
+                    className={`grid w-full text-left grid-cols-[auto_1fr] gap-x-2 items-center px-4 py-2 text-sm rounded-md ${
+                      active
+                        ? "bg-light_primary dark:bg-secondary"
+                        : "text-black dark:text-white"
+                    }`}
+                  >
+                    {item.icon && (
+                      <item.icon className="size-4 dark:text-white" />
+                    )}
+                    <p>{item.label}</p>
+                  </button>
+                )}
               </MenuItem>
             )}
           </div>

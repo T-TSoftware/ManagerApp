@@ -24,13 +24,12 @@ function App() {
           path="/"
           element={
             //<ProtectedRoute>
-              <MainLayout />
-           // </ProtectedRoute>
+            <MainLayout />
+            //</ProtectedRoute>
           }
         >
           <Route path="adminDashboard" element={<AdminDashboard />} />
           <Route path="stock" element={<Stock />} />
-          <Route path="current" element={<Current />} />
           <Route path="cashFlow" element={<CashFlow />} />
           <Route path="balances" element={<Balances />} />
         </Route>
@@ -39,7 +38,7 @@ function App() {
           path="/project/:projectId"
           element={
             //<ProtectedRoute>
-              <MainLayout />
+            <MainLayout />
             //</ProtectedRoute>
           }
         >
@@ -49,6 +48,7 @@ function App() {
           <Route path="subcontractor" element={<Subcontractor />} />
           <Route path="quantity" element={<Quantity />} />
           <Route path="costSummary" element={<CostSummary />} />
+          <Route path="current" element={<Current />} />
         </Route>
       </Routes>
     </BrowserRouter>

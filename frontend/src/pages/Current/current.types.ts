@@ -1,6 +1,6 @@
 export interface CurrentRows {
   id: string;
-  balance: number;
+  balanceCode: string;
   type: string;
   amount: string;
   currency: string;
@@ -10,5 +10,5 @@ export interface CurrentRows {
   updatedBy: string;
   createdatetime: Date;
   updatedatetime: Date;
-  isNew?:boolean;
+  isNew?: boolean;
 }

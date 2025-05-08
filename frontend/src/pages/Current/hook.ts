@@ -40,10 +40,10 @@ export const useCurrent = () => {
   const addRow = () => {
     const newRow: CurrentRows = {
       id: "",
-      balance: 0,
+      balanceCode: "",
       type: "",
       amount: "",
-      currency: "TL",
+      currency: "TRY",
       description: "",
       transactionDate: new Date(),
       createdBy: "",

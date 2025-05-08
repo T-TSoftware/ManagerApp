@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useRef } from "react";
-import { useBalance } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
   CellValueChangedEvent,
@@ -8,10 +7,20 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { BalanceRows } from "./types";
+import { useBalance } from "./hook";
+import Alert from "../../components/ui/Alert";
 
 const BalanceGrid = () => {
-  const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
-    useBalance();
+  const {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+    alert,
+    setAlert,
+  } = useBalance();
 
   const baseGridRef = useRef<BaseGridHandle<BalanceRows>>(null);
 
@@ -19,7 +28,7 @@ const BalanceGrid = () => {
     {
       field: "code",
       editable: false,
-      minWidth: 150
+      minWidth: 150,
     },
     {
       field: "name",
@@ -58,24 +67,27 @@ const BalanceGrid = () => {
   };
 
   return (
-    <BaseGrid<BalanceRows>
-      ref={baseGridRef}
-      rowData={localData}
-      columnDefs={colDefs}
-      getRowId={getRowId}
-      onAddRow={addRow}
-      onDeleteRow={deleteRows}
-      onSaveChanges={saveChanges}
-      onCellValueChanged={handleCellChange}
-      isLoading={loading}
-      showButtons={{
-        refresh: true,
-        add: true,
-        delete: true,
-        save: true,
-        bar: true,
-      }}
-    />
+    <>
+      {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
+      <BaseGrid<BalanceRows>
+        ref={baseGridRef}
+        rowData={localData}
+        columnDefs={colDefs}
+        getRowId={getRowId}
+        onAddRow={addRow}
+        onDeleteRow={deleteRows}
+        onSaveChanges={saveChanges}
+        onCellValueChanged={handleCellChange}
+        isLoading={loading}
+        showButtons={{
+          refresh: true,
+          add: true,
+          delete: true,
+          save: true,
+          bar: true,
+        }}
+      />
+    </>
   );
 };
 

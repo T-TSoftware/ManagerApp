@@ -26,7 +26,7 @@ const CurrentGrid = () => {
       },
     },
     {
-      field: "balance",
+      field: "balanceCode",
       editable: true,
       minWidth: 150,
       cellClassRules: {

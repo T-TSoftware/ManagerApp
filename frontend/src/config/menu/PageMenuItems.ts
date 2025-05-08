@@ -45,9 +45,9 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Cari",
-      href: "/current",
+      href: `${basePath}/current`,
       icon: BanknotesIcon,
-      adminYN: true,
+      adminYN: false,
     },
     {
       label: "Nakit Akış",

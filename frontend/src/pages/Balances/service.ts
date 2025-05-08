@@ -11,7 +11,7 @@ export const getAllBalance = async (token: string): Promise<BalanceRows[]> => {
   return res.json();
 };
 
-export const addSupply = async (
+export const addBalance = async (
   token: string,
   item: Omit<BalanceRows, "isNew">
 ) => {
@@ -32,7 +32,7 @@ export const addSupply = async (
   return res.json();
 };
 
-export const updateSupply = async (token: string, item: BalanceRows) => {
+export const updateBalance = async (token: string, item: BalanceRows) => {
   if (!item.id) return;
   const res = await fetch(
     `${API_BASE_URL}balances/${encodeURIComponent(item.id)}`,
@@ -56,7 +56,7 @@ export const updateSupply = async (token: string, item: BalanceRows) => {
   return result;
 };
 
-export const deleteSupply = async (id: string) => {
+export const deleteBalance = async (id: string) => {
   const res = await fetch(`${API_BASE_URL}/${id}`, {
     method: "DELETE",
   });
