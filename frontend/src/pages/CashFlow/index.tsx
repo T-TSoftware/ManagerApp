@@ -27,6 +27,14 @@ const CashFlow: React.FC = () => {
       </div>
     </div>
   );
+                /> */}
+              <CashFlowGrid />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CashFlow;

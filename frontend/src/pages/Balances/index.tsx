@@ -4,6 +4,7 @@ import BalanceGrid from "./grid";
 import Alert from "../../components/ui/Alert";
 
 const Balances: React.FC = () => {
+  
   return (
     <div className="grow p-3 lg:rounded-lg lg:shadow-xs h-full border-gray-100">
       <div className="mx-auto max-w-6xl">

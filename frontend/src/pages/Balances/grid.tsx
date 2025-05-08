@@ -81,23 +81,23 @@ const BalanceGrid = () => {
     <>
       {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
       <BaseGrid<BalanceRows>
-        ref={baseGridRef}
-        rowData={localData}
-        columnDefs={colDefs}
-        getRowId={getRowId}
-        onAddRow={addRow}
-        onDeleteRow={deleteRows}
-        onSaveChanges={saveChanges}
-        onCellValueChanged={handleCellChange}
-        isLoading={loading}
-        showButtons={{
-          refresh: true,
-          add: true,
-          delete: true,
-          save: true,
-          bar: true,
-        }}
-      />
+          ref={baseGridRef}
+          rowData={localData}
+          columnDefs={colDefs}
+          getRowId={getRowId}
+          onAddRow={addRow}
+          onDeleteRow={deleteRows}
+          onSaveChanges={saveChanges}
+          onCellValueChanged={handleCellChange}
+          isLoading={loading}
+          showButtons={{
+            refresh: true,
+            add: true,
+            delete: true,
+            save: true,
+            bar: true,
+          }}
+        />
     </>
   );
 };
