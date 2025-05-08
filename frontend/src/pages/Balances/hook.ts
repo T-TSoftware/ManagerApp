@@ -3,16 +3,18 @@ import { BalanceRows } from "./types";
 import { useParams } from "react-router-dom";
 import {
   getAllBalance,
-  addSupply,
-  updateSupply,
-  deleteSupply,
+  addBalance,
+  updateBalance,
+  deleteBalance,
 } from "./service";
 import { getToken } from "../../utils/token";
+import { AlertProps } from "../../components/ui/Alert";
 
 export const useBalance = () => {
   const [originalData, setOriginalData] = useState<BalanceRows[]>([]);
   const [localData, setLocalData] = useState<BalanceRows[]>([]);
   const [deletedRows, setDeletedRows] = useState<BalanceRows[]>([]);
+  const [alert, setAlert] = useState<AlertProps | null>(null);
   const [loading, setLoading] = useState(true);
   const token = getToken();
 
@@ -40,11 +42,11 @@ export const useBalance = () => {
     const newRow: BalanceRows = {
       code: "",
       name: "",
-      amount: 0,
-      currency: "TL",
+      amount: 0.0,
+      currency: "TRY",
       isNew: true,
     };
-    setLocalData((prev) => [newRow, ...prev ]);
+    setLocalData((prev) => [newRow, ...prev]);
   };
 
   const updateRow = (row: BalanceRows) => {
@@ -75,26 +77,41 @@ export const useBalance = () => {
       if (deletedRows.length > 0) {
         if (!token) return;
         await Promise.all(
-          deletedRows.map((item) => deleteSupply(item.id || ""))
+          deletedRows.map((item) => deleteBalance(item.id || ""))
         );
       }
       if (added.length > 0) {
         if (!token) return;
         await Promise.all(
           added.map(({ isNew, ...row }) => {
-            return addSupply(token, row);
+            return addBalance(token, row);
           })
         );
       }
       if (updated.length > 0) {
         if (!token) return;
-        await Promise.all(updated.map((row) => updateSupply(token, row)));
+        await Promise.all(updated.map((row) => updateBalance(token, row)));
       }
       await fetchData();
     } catch (err) {
+      setAlert({
+        title: "Hata!",
+        message: "Yetkisiz Erişim!",
+        type: "error",
+        autoClose: true,
+      });
       console.error("Save error:", err);
     }
   };
 
-  return { localData, loading, addRow, updateRow, deleteRows, saveChanges };
+  return {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+    alert,
+    setAlert,
+  };
 };

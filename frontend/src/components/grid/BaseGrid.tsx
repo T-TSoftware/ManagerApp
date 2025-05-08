@@ -69,11 +69,6 @@ const BaseGridInner = <T,>(
 ) => {
   const gridApi = useRef<GridApi | null>(null);
 
-  const rowSelection: RowSelectionOptions = {
-    mode: "multiRow",
-    headerCheckbox: true,
-  };
-
   const onGridReady = (params: { api: GridApi }) => {
     gridApi.current = params.api;
   };
@@ -158,11 +153,12 @@ const { agGridThemeClass, agGridThemeObject } = useTheme();
           defaultColDef={{ editable: true, flex: 1, filter: true }}
           theme={agGridThemeObject}
           pagination={true}
-          rowSelection={rowSelection}
+          rowSelection="multiple" 
           cellSelection={true}
           getRowId={getRowId}
           onGridReady={onGridReady}
           onCellValueChanged={onCellValueChanged}
+          rowMultiSelectWithClick={true}
         />
       </div>
     </div>

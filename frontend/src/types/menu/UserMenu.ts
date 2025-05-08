@@ -4,4 +4,5 @@ export type UserMenuItemType = {
   icon?: React.ElementType;
   separatorBefore?: boolean;
   element?: React.ReactNode;
+  onClick?: () => void;
 };

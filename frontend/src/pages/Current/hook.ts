@@ -37,23 +37,23 @@ export const useCurrent = () => {
   };
   //CRUD
 
-  const addRow = () => {
-    const newRow: CurrentRows = {
-      id: "",
-      balance: 0,
-      type: "",
-      amount: "",
-      currency: "TL",
-      description: "",
-      transactionDate: new Date(),
-      createdBy: "",
-      updatedBy: "",
-      createdatetime: new Date(),
-      updatedatetime: new Date(),
-      isNew: true,
-    };
-    setLocalData((prev) => [newRow, ...prev]);
+const addRow = () => {
+  const newRow: CurrentRows = {
+    id: "",
+    balanceCode: "",
+    type: "",
+    amount: "",
+    currency: "TRY",
+    description: "",
+    transactionDate: new Date(),
+    createdBy: "",
+    updatedBy: "",
+    createdatetime: new Date(),
+    updatedatetime: new Date(),
+    isNew: true,
   };
+  setLocalData((prev) => [newRow, ...prev]);
+};
 
   const updateRow = (row: CurrentRows) => {
     setLocalData((prev) =>

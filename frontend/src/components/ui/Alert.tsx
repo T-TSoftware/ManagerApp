@@ -1,9 +1,12 @@
+import { useEffect } from "react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 
-type AlertProps = {
+export type AlertProps = {
   title: string;
   message: string;
   type?: "warning" | "info" | "success" | "error";
+  autoClose?: boolean;
+  onClose?: () => void;
 };
 
 const typeClasses = {
@@ -29,23 +32,30 @@ const typeClasses = {
   },
 };
 
-const Alert = ({ title, message, type = "warning" }: AlertProps) => {
+const Alert = ({
+  title,
+  message,
+  type = "warning",
+  autoClose = false,
+  onClose,
+}: AlertProps) => {
   const classes = typeClasses[type];
+
+  useEffect(() => {
+    if (!autoClose || !onClose) return;
+    const timer = setTimeout(() => onClose(), 10000);
+    return () => clearTimeout(timer);
+  }, [autoClose, onClose]);
 
   return (
     <div className={`rounded-md p-4 flex mb-4 shadow-md ${classes.bg}`}>
-      <div className="flex ">
+      <div className="flex">
         <div className="flex-shrink-0">
-          <ExclamationTriangleIcon
-            className={`h-5 w-5 ${classes.icon}`}
-            aria-hidden="true"
-          />
+          <ExclamationTriangleIcon className={`h-5 w-5 ${classes.icon}`} />
         </div>
         <div className="ml-3">
           <h3 className={`text-sm font-medium ${classes.text}`}>{title}</h3>
-          <div className={`mt-2 text-sm text-wrap ${classes.text}`}>
-            <p>{message}</p>
-          </div>
+          <p className={`mt-2 text-sm ${classes.text}`}>{message}</p>
         </div>
       </div>
     </div>

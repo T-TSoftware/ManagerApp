@@ -14,8 +14,8 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
 
   return [
     {
-      label: "Dashboard",
-      href: projectId ? `${basePath}/dashboard` : "adminDashboard",
+      label: "Genel Bakış",
+      href: projectId ? `${basePath}/dashboard` : "admin-dashboard",
       icon: Square2StackIcon,
       adminYN: !projectId,
     },
@@ -45,13 +45,13 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Cari",
-      href: "/current",
+      href: `${basePath}/current`,
       icon: BanknotesIcon,
-      adminYN: true,
+      adminYN: false,
     },
     {
       label: "Nakit Akış",
-      href: "/cashFlow",
+      href: "/cash-flow",
       icon: CreditCardIcon,
       adminYN: true,
     },
@@ -69,13 +69,13 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Maliyet Özeti",
-      href: `${basePath}/costSummary`,
+      href: `${basePath}/cost-summary`,
       icon: CreditCardIcon,
       adminYN: false,
     },
     {
-      label: "Admin Dashboard",
-      href: "/adminDashboard",
+      label: "Admin Genel Bakış",
+      href: "/admin-dashboard",
       icon: CreditCardIcon,
       adminYN: false,
     },

@@ -14,7 +14,7 @@ export const useAuth = () => {
     try {
       const token = await loginRequest(email, password);
       setToken(token);
-      navigate("/adminDashboard");
+      navigate("/admin-dashboard");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

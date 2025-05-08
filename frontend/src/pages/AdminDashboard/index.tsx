@@ -1,20 +1,14 @@
 import React from "react";
 import DashboardGrid from "../Dashboard/grid";
 
-import { useApp } from "../../hooks/useApp";
-
 const AdminDashboard: React.FC = () => {
-
-const { companyId } = useApp();
-
-console.log(companyId)
   
   return (
     <div className="grow p-3 lg:rounded-lg lg:shadow-xs h-full border-gray-100">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between gap-4">
           <p className="text-3xl font-semibold sm:text-3xl text-black dark:text-white">
-            Admin Dashboard
+            Admin Genel Bakış
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 py-2">

@@ -16,7 +16,7 @@ const Dashboard: React.FC = () => {
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between gap-4">
           <p className="text-3xl font-semibold sm:text-3xl dark:text-white">
-            {selectedProject?.name ?? "Dashboard"}
+            {selectedProject?.name ?? "Genel Bakış"}
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 py-2">

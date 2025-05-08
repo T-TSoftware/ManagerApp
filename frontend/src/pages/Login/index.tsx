@@ -13,7 +13,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
-        <h2 className="text-xl font-bold mb-4">Admin Giriş</h2>
+        <h2 className="text-xl font-bold mb-4">Giriş</h2>
         <input
           type="text"
           placeholder="Kullanıcı Adı"

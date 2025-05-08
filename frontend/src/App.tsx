@@ -13,6 +13,7 @@ import ProtectedRoute from "./components/layout/ProtectedRoute"; // 🔒
 import Balances from "./pages/Balances";
 import Quantity from "./pages/Quantity";
 import CostSummary from "./pages/CostSummary";
+import ProjectForm from "./pages/ProjectForm";
 
 function App() {
   return (
@@ -23,24 +24,25 @@ function App() {
         <Route
           path="/"
           element={
-            //<ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout />
-           // </ProtectedRoute>
+            </ProtectedRoute>
           }
         >
-          <Route path="adminDashboard" element={<AdminDashboard />} />
+          <Route path="admin-dashboard" element={<AdminDashboard />} />
           <Route path="stock" element={<Stock />} />
           <Route path="current" element={<Current />} />
-          <Route path="cashFlow" element={<CashFlow />} />
+          <Route path="cash-flow" element={<CashFlow />} />
           <Route path="balances" element={<Balances />} />
+          <Route path="create-project" element={<ProjectForm />}></Route>
         </Route>
 
         <Route
           path="/project/:projectId"
           element={
-            //<ProtectedRoute>
+            <ProtectedRoute>
               <MainLayout />
-            //</ProtectedRoute>
+            </ProtectedRoute>
           }
         >
           <Route path="dashboard" element={<Dashboard />} />
@@ -48,7 +50,8 @@ function App() {
           <Route path="sales" element={<Sales />} />
           <Route path="subcontractor" element={<Subcontractor />} />
           <Route path="quantity" element={<Quantity />} />
-          <Route path="costSummary" element={<CostSummary />} />
+          <Route path="cost-summary" element={<CostSummary />} />
+          <Route path="edit" element={<ProjectForm />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
