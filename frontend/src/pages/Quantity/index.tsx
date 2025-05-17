@@ -1,6 +1,5 @@
 import React from "react";
 import QuantityGrid from "./grid";
-import Alert from "../../components/ui/Alert";
 
 const Supply: React.FC = () => {
   return (
@@ -8,17 +7,12 @@ const Supply: React.FC = () => {
       <div className="mx-auto max-w-6xl">
         <div className="flex items-end justify-between gap-4">
           <p className="text-3xl font-semibold sm:text-3xl text-black dark:text-white">
-            Tedarik
+            Metraj
           </p>
         </div>
         <div className="flow-root">
           <div className="mt-8 overflow-x-auto whitespace-nowrap ">
             <div className="flex flex-col min-w-full p-3 rounded-md shadow-xl h-[34rem] max-h-[60rem] 2xl:h-[60rem] bg-white dark:bg-tertiary">
-              <Alert
-                title="Successfully  added."
-                message="Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquid pariatur, ipsum similique veniam quo totam eius aperiam dolorum."
-                type="success"
-              />
               <QuantityGrid />
             </div>
           </div>

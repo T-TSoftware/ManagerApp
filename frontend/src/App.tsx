@@ -13,7 +13,8 @@ import ProtectedRoute from "./components/layout/ProtectedRoute"; // 🔒
 import Balances from "./pages/Balances";
 import Quantity from "./pages/Quantity";
 import CostSummary from "./pages/CostSummary";
-import ProjectForm from "./pages/ProjectForm";
+import Projects from "./pages/Projects";
+import Company from "./pages/Company";
 
 function App() {
   return (
@@ -34,7 +35,8 @@ function App() {
           <Route path="current" element={<Current />} />
           <Route path="cash-flow" element={<CashFlow />} />
           <Route path="balances" element={<Balances />} />
-          <Route path="create-project" element={<ProjectForm />}></Route>
+          <Route path="projects" element={<Projects />}></Route>
+          <Route path="companies" element={<Company />}></Route>
         </Route>
 
         <Route
@@ -48,10 +50,10 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="supply" element={<Supply />} />
           <Route path="sales" element={<Sales />} />
+          <Route path="current" element={<Current />} />
           <Route path="subcontractor" element={<Subcontractor />} />
           <Route path="quantity" element={<Quantity />} />
           <Route path="cost-summary" element={<CostSummary />} />
-          <Route path="edit" element={<ProjectForm />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>

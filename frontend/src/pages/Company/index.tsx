@@ -1,16 +1,16 @@
 import React from "react";
-import { useProjectForm } from "./hook";
+import { useCompanyForm } from "./hook";
 import { useForm } from "react-hook-form";
-import { ProjectFormValues } from "./types";
+import { CompanyFormValues } from "./types";
 
-const ProjectForm: React.FC = () => {
-  const { defaultValues, loading, onSubmit, isEdit } = useProjectForm();
+const CompanyForm: React.FC = () => {
+  const { defaultValues, loading, onSubmit, isEdit } = useCompanyForm();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ProjectFormValues>({
+  } = useForm<CompanyFormValues>({
     defaultValues,
     mode: "onChange",
   });
@@ -117,4 +117,4 @@ const ProjectForm: React.FC = () => {
   );
 };
 
-export default ProjectForm;
+export default CompanyForm;

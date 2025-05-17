@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProjectById, createProject, updateProject } from "./service";
-import { ProjectFormValues } from "./types";
+import { getCompanyById, createCompany, updateCompany } from "./service";
+import { CompanyFormValues } from "./types";
 import { getToken } from "../../utils/token";
 
-export const useProjectForm = () => {
-  const { projectId } = useParams();
+export const useCompanyForm = () => {
+  const { companyId } = useParams();
   const navigate = useNavigate();
-  const isEdit = Boolean(projectId);
+  const isEdit = Boolean(companyId);
   const token = getToken();
 
-  const [defaultValues, setDefaultValues] = useState<ProjectFormValues>({
+  const [defaultValues, setDefaultValues] = useState<CompanyFormValues>({
     name: "",
     site: "",
     status: "planned",
@@ -23,21 +23,21 @@ export const useProjectForm = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isEdit && projectId ) {
-      getProjectById(projectId)
+    if (isEdit && companyId ) {
+      getCompanyById(companyId)
         .then(setDefaultValues)
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, [isEdit, projectId]);
+  }, [isEdit, companyId]);
 
-  const onSubmit = async (data: ProjectFormValues) => {
+  const onSubmit = async (data: CompanyFormValues) => {
     if (!token) return;
-    if (isEdit && projectId) {
-      await updateProject(projectId, data);
+    if (isEdit && companyId) {
+      await updateCompany(companyId, data);
     } else  {
-      await createProject(data, token);
+      await createCompany(data, token);
     }
     navigate("/admin-dashboard");
   };

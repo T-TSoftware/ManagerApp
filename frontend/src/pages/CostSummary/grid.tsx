@@ -13,18 +13,57 @@ const CostSummaryGrid = () => {
 
   // Kolonlar
   const colDefs: ColDef<CostSummaryRows>[] = [
-    { field: "projectid", editable: false, minWidth: 150 },
-    { field: "projectcode", editable: false, minWidth: 150 },
-    { field: "quantityitemcode", editable: false, minWidth: 150 },
-    { field: "quantityitemname", editable: false, minWidth: 150 },
-    { field: "expectedquantity", editable: false, minWidth: 150 },
-    { field: "unit", editable: false, minWidth: 150 },
-    { field: "suppliedquantity", editable: false, minWidth: 150 },
-    { field: "expectedpayment", editable: false, minWidth: 150 },
-    { field: "totalpayment", editable: false, minWidth: 150 },
-    { field: "remainingpayment", editable: false, minWidth: 150 },
-    { field: "remainingquantity", editable: false, minWidth: 150 },
-    { field: "overlimit", editable: false, minWidth: 150 },
+    {
+      field: "projectcode",
+      headerName: "Proje Kodu",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "quantityitemcode",
+      headerName: "Metraj Kodu",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "quantityitemname",
+      headerName: "Metraj Adı",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "expectedquantity",
+      headerName: "Beklenen Metraj",
+      editable: false,
+      minWidth: 200,
+    },
+    { field: "unit", headerName: "Miktar", editable: false, minWidth: 200 },
+    {
+      field: "suppliedquantity",
+      headerName: "Tedarik Edilen Metraj",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "expectedpayment",
+      headerName: "Tahmini Ödeme",
+      editable: false,
+      minWidth: 200,
+    },
+    { field: "totalpayment", headerName: "Toplam Ödeme", editable: false, minWidth: 200 },
+    {
+      field: "remainingpayment",
+      headerName: "Kalan Ödeme",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "remainingquantity",
+      headerName: "Kalan Metraj",
+      editable: false,
+      minWidth: 200,
+    },
+    { field: "overlimit", headerName: "Üst Limit", editable: false, minWidth: 200 },
   ];
   const getRowId = (params: GetRowIdParams<CostSummaryRows>) =>
     String(params.data.quantityitemcode);

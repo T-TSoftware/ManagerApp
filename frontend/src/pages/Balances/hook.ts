@@ -1,28 +1,25 @@
 import { useEffect, useState } from "react";
 import { BalanceRows } from "./types";
-import { useParams } from "react-router-dom";
 import {
   getAllBalance,
-  addBalance,
-  updateBalance,
-  deleteBalance,
+  addBalances,
+  updateBalances,
+  deleteBalances,
 } from "./service";
 import { getToken } from "../../utils/token";
-import { AlertProps } from "../../components/ui/Alert";
+import { v4 as uuid } from "uuid";
 
 export const useBalance = () => {
   const [originalData, setOriginalData] = useState<BalanceRows[]>([]);
   const [localData, setLocalData] = useState<BalanceRows[]>([]);
   const [deletedRows, setDeletedRows] = useState<BalanceRows[]>([]);
-  const [alert, setAlert] = useState<AlertProps | null>(null);
   const [loading, setLoading] = useState(true);
+  const [alert, setAlert] = useState<any>(null);
   const token = getToken();
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  //Get Data's
 
   const fetchData = async () => {
     setLoading(true);
@@ -36,14 +33,14 @@ export const useBalance = () => {
       setLoading(false);
     }
   };
-  //CRUD
 
   const addRow = () => {
     const newRow: BalanceRows = {
+      id: uuid(),
       code: "",
       name: "",
-      amount: 0.0,
-      currency: "TRY",
+      amount: 0,
+      currency: "",
       isNew: true,
     };
     setLocalData((prev) => [newRow, ...prev]);
@@ -51,56 +48,46 @@ export const useBalance = () => {
 
   const updateRow = (row: BalanceRows) => {
     setLocalData((prev) =>
-      prev.map((item) => (item.code === row.code ? { ...item, ...row } : item))
+      prev.map((item) => (item.id === row.id ? { ...item, ...row } : item))
     );
   };
 
   const deleteRows = (selected: BalanceRows[]) => {
     setLocalData((prev) =>
-      prev.filter((item) => !selected.find((s) => s.code === item.code))
+      prev.filter((item) => !selected.find((s) => s.id === item.id))
     );
     setDeletedRows((prev) => [...prev, ...selected]);
   };
 
   const saveChanges = async () => {
-    const added = localData.filter((item) => item.isNew);
-    const updated = localData.filter(
-      (item) =>
-        !item.isNew &&
-        originalData.some(
-          (orig) =>
-            orig.id === item.id && JSON.stringify(orig) !== JSON.stringify(item)
-        )
-    );
-    console.log("Gönderilecek veri:", updated);
     try {
-      if (deletedRows.length > 0) {
-        if (!token) return;
-        await Promise.all(
-          deletedRows.map((item) => deleteBalance(item.id || ""))
+      const added = localData.filter((i) => i.isNew);
+      const updated = localData.filter(
+        (i) =>
+          !i.isNew &&
+          originalData.some(
+            (o) => o.id === i.id && JSON.stringify(o) !== JSON.stringify(i)
+          )
+      );
+      const deletedIds = deletedRows
+        .filter((r) => r.id)
+        .map((r) => r.id as string);
+
+      if (added.length > 0)
+        await addBalances(
+          token!,
+          added.map(({ isNew, ...r }) => r)
         );
-      }
-      if (added.length > 0) {
-        if (!token) return;
-        await Promise.all(
-          added.map(({ isNew, ...row }) => {
-            return addBalance(token, row);
-          })
-        );
-      }
-      if (updated.length > 0) {
-        if (!token) return;
-        await Promise.all(updated.map((row) => updateBalance(token, row)));
-      }
+      if (updated.length > 0) await updateBalances(token!, updated);
+      if (deletedIds.length > 0) await deleteBalances(token!, deletedIds);
+
       await fetchData();
     } catch (err) {
       setAlert({
-        title: "Hata!",
-        message: "Yetkisiz Erişim!",
+        title: "Hata",
+        message: "Kayıt işlemi sırasında bir hata oluştu",
         type: "error",
-        autoClose: true,
       });
-      console.error("Save error:", err);
     }
   };
 

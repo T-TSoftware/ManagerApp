@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import { useRef } from "react";
 import { useCashFlow } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
@@ -12,10 +12,8 @@ import type { CashFlowRows } from "./types";
 const CashFlowGrid = () => {
   const { cashFlow, loading } = useCashFlow();
 
-  // BaseGrid ref tanımı
   const baseGridRef = useRef<BaseGridHandle<CashFlowRows>>(null);
 
-  // Kolonlar
   const colDefs: ColDef<CashFlowRows>[] = [
     { field: "currentNo" },
     { field: "currentName" },
@@ -32,11 +30,9 @@ const CashFlowGrid = () => {
     { field: "currency" },
   ];
 
-  // Benzersiz ID'yi string olarak döndür
   const getRowId = (params: GetRowIdParams<CashFlowRows>) =>
     String(params.data.currentNo);
 
-  // Satır ekleme işlemi
   const handleAddRow = () => {
     const newItem: CashFlowRows = {
       currentNo: Math.floor(Math.random() * 100000),
@@ -48,14 +44,12 @@ const CashFlowGrid = () => {
     baseGridRef.current?.addRow(newItem);
   };
 
-  // Seçilen satırları silme
   const handleDeleteRow = (selected: CashFlowRows[]) => {
     baseGridRef.current?.deleteSelectedRows();
     console.log("Silinecek satırlar:", selected);
     // İstersen burada bir API ile silme işlemi yapabilirsin
   };
 
-  // Tüm verileri kaydet
   const handleSaveChanges = (allRows: CashFlowRows[]) => {
     console.log("Kaydedilecek tüm satırlar:", allRows);
     // API gönderimi buraya yapılabilir

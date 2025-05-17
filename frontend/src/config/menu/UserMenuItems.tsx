@@ -8,17 +8,13 @@ import ThemeToggle from "../../components/layout/ThemeToggle";
 
 export const userMenuItems: UserMenuItemType[] = [
   {
+    element: <ThemeToggle />,
+  },
+  {
     label: "Ayarlar",
     href: "#",
     icon: Cog8ToothIcon,
-  },
-  {
-    label: "Proje Yarat",
-    href: "/create-project",
-    icon: HomeModernIcon,
-  },
-  {
-    element: <ThemeToggle />,
+    separatorBefore: true,
   },
   {
     label: "Çıkış",

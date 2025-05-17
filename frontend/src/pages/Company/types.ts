@@ -1,4 +1,4 @@
-export type ProjectFormValues = {
+export type CompanyFormValues = {
   id?: string;
   name: string;
   site: string;

@@ -1,5 +1,4 @@
 export interface BalanceRows {
-  checkbox: boolean;
   id?: string;
   code: string;
   name: string;

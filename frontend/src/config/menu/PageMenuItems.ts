@@ -62,6 +62,18 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       adminYN: true,
     },
     {
+      label: "Şirketler",
+      href: "/companies",
+      icon: CreditCardIcon,
+      adminYN: true,
+    },
+    {
+      label: "Projeler",
+      href: "/projects",
+      icon: CreditCardIcon,
+      adminYN: true,
+    },
+    {
       label: "Metraj",
       href: `${basePath}/quantity`,
       icon: CreditCardIcon,

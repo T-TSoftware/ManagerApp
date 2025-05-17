@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
-
+import { useRef } from "react";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
   CellValueChangedEvent,
@@ -27,22 +26,14 @@ const BalanceGrid = () => {
 
   const colDefs: ColDef<BalanceRows>[] = [
     {
-      headerName: "",
-      field: "checkbox",
-      checkboxSelection: true,
-      headerCheckboxSelection: true,
-      width: 50,
-      pinned: "left",
-      resizable:false,
-      filter:false,
-    },
-    {
       field: "code",
+      headerName: "Kod",
       editable: false,
       minWidth: 150,
     },
     {
       field: "name",
+      headerName: "Ad",
       editable: true,
       minWidth: 150,
       cellClassRules: {
@@ -51,14 +42,20 @@ const BalanceGrid = () => {
     },
     {
       field: "amount",
+      headerName: "Miktar",
       editable: true,
       minWidth: 150,
+      valueParser: (params) => {
+        const val = params.newValue?.toString().replace(",", ".");
+        return parseFloat(val);
+      },
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "currency",
+      headerName: "Döviz Birimi",
       editable: true,
       minWidth: 150,
       cellClassRules: {
@@ -68,9 +65,8 @@ const BalanceGrid = () => {
   ];
 
   const getRowId = (params: GetRowIdParams<BalanceRows>) => {
-    return params.data.id || params.data.code;
+    return params.data.id!;
   };
-
   const handleCellChange = (e: CellValueChangedEvent<BalanceRows>) => {
     updateRow({
       ...e.data,

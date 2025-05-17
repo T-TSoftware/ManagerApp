@@ -16,45 +16,74 @@ const QuantityGrid = () => {
   const baseGridRef = useRef<BaseGridHandle<QuantityRows>>(null);
 
   const colDefs: ColDef<QuantityRows>[] = [
-    { field: "id", editable: false, minWidth: 150, hide: true },
-    { field: "code", editable: false, minWidth: 150 },
+    { field: "id", hide: true },
+    { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
       field: "category",
+      headerName: "Kategori",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "quantityItemCode",
+      headerName: "Metraj Kodu",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "unit",
+      headerName: "Birim",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "quantity",
+      headerName: "Metraj",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
     },
-    { field: "description", editable: true, minWidth: 150 },
-    { field: "createdBy", editable: false, minWidth: 150 },
-    { field: "updatedBy", editable: false, minWidth: 150 },
-    { field: "createdatetime", editable: false, minWidth: 150 },
-    { field: "updatedatetime", editable: false, minWidth: 150 },
+    {
+      field: "description",
+      headerName: "Açıklama",
+      editable: true,
+      minWidth: 200,
+    },
+    {
+      field: "createdBy",
+      headerName: "Oluşturan Kişi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy",
+      headerName: "Güncelleyen Kişi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdatetime",
+      headerName: "Oluşturulma Tarihi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedatetime",
+      headerName: "Güncelleme Tarihi",
+      editable: false,
+      minWidth: 200,
+    },
   ];
 
   const getRowId = (params: GetRowIdParams<QuantityRows>) =>

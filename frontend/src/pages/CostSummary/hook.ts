@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { data, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getAllCostSummaries } from "./service";
 import { getToken } from "../../utils/token";
 import { CostSummaryRows } from "./costSum.types";
@@ -17,6 +17,5 @@ export const useCostSummaries = () => {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
-
   return { costSummaries, loading };
 };

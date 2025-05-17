@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import { useRef } from "react";
 import { useCurrent } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
@@ -16,9 +16,10 @@ const CurrentGrid = () => {
   const baseGridRef = useRef<BaseGridHandle<CurrentRows>>(null);
 
   const colDefs: ColDef<CurrentRows>[] = [
-    { field: "id", editable: false, minWidth: 150, hide: true },
+    { field: "id", hide: true },
     {
       field: "type",
+      headerName: "Cari Tipi",
       editable: true,
       minWidth: 150,
       cellClassRules: {
@@ -27,6 +28,7 @@ const CurrentGrid = () => {
     },
     {
       field: "balanceCode",
+      headerName: "Hesap Kodu",
       editable: true,
       minWidth: 150,
       cellClassRules: {
@@ -35,6 +37,8 @@ const CurrentGrid = () => {
     },
     {
       field: "amount",
+      headerName: "Tutar",
+      type: "numberColumn",
       editable: true,
       minWidth: 150,
       cellClassRules: {
@@ -43,25 +47,55 @@ const CurrentGrid = () => {
     },
     {
       field: "currency",
+      headerName: "Döviz Tipi",
       editable: true,
       minWidth: 150,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
-    { field: "description", editable: true, minWidth: 150 },
+    {
+      field: "description",
+      headerName: "Açıklama",
+      editable: true,
+      minWidth: 150,
+    },
     {
       field: "transactionDate",
+      headerName: "İşlem Tarihi",
+      type: "dateTimeColumn",
       editable: true,
       minWidth: 150,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
-    { field: "createdBy", editable: false, minWidth: 150 },
-    { field: "updatedBy", editable: false, minWidth: 150 },
-    { field: "createdatetime", editable: false, minWidth: 150 },
-    { field: "updatedatetime", editable: false, minWidth: 150 },
+    {
+      field: "createdBy",
+      headerName: "Oluşturan Kişi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy",
+      headerName: "Güncelleyen Kişi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdatetime",
+      headerName: "Oluşturulma Tarihi",
+      type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedatetime",
+      headerName: "Güncelleme Tarihi",
+      type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
   ];
 
   const getRowId = (params: GetRowIdParams<CurrentRows>) =>

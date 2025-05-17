@@ -8,7 +8,9 @@ import {
   ColDef,
   GetRowIdParams,
   RowSelectionOptions,
-  CellValueChangedEvent
+  CellValueChangedEvent,
+  SelectionColumnDef,
+  ColumnAdvancedFilterModel
 } from "ag-grid-community";
 import ActionButton from "./ActionButton";
 import {
@@ -18,17 +20,17 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { useTheme } from "../../themes/appThemes/ThemeContext";
+import { AgGridLocaleTR } from "../../utils/AgGridLocaleTR";
+import { ColumnTypes } from "../../types/grid/ColumnTypes";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-// Ref tipi
 export type BaseGridHandle<T> = {
   addRow: (row: T) => void;
   deleteSelectedRows: () => void;
   onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
 };
 
-// Props tipi
 type BaseGridProps<T> = {
   rowData: T[];
   columnDefs: ColDef<T>[];
@@ -49,7 +51,9 @@ type BaseGridProps<T> = {
     delete?: boolean;
     save?: boolean;
   };
+  RowSelectionOptions?: (e: RowSelectionOptions<T>) => void;
   onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
+  onOpenCreateModal?: () => void;
 };
 
 const BaseGridInner = <T,>(
@@ -64,10 +68,19 @@ const BaseGridInner = <T,>(
     topLeftButton,
     showButtons = { refresh: true, add: true, delete: true, save: true },
     onCellValueChanged,
+    RowSelectionOptions,
+    onOpenCreateModal,
   }: BaseGridProps<T>,
   ref: Ref<BaseGridHandle<T>>
 ) => {
   const gridApi = useRef<GridApi | null>(null);
+
+  const rowSelection: RowSelectionOptions = {
+    mode: "multiRow",
+    copySelectedRows: true,
+    enableClickSelection: true,
+    enableSelectionWithoutKeys: true,
+  };
 
   const onGridReady = (params: { api: GridApi }) => {
     gridApi.current = params.api;
@@ -97,7 +110,7 @@ const BaseGridInner = <T,>(
       }
     },
   }));
-const { agGridThemeClass, agGridThemeObject } = useTheme();
+  const { agGridThemeClass, agGridThemeObject } = useTheme();
   return (
     <div className="flex flex-col gap-2 w-full h-full">
       {showButtons.bar && (
@@ -121,11 +134,17 @@ const { agGridThemeClass, agGridThemeObject } = useTheme();
                 onClick={() => location.reload()}
               />
             )}
-            {showButtons.add && onAddRow && (
+            {showButtons.add && (
               <ActionButton
                 icon={<PlusIcon />}
                 label="Kayıt Ekle"
-                onClick={onAddRow}
+                onClick={() => {
+                  if (onAddRow) {
+                    onAddRow();
+                  } else if (onOpenCreateModal) {
+                    onOpenCreateModal();
+                  }
+                }}
               />
             )}
             {showButtons.delete && onDeleteRow && (
@@ -150,15 +169,16 @@ const { agGridThemeClass, agGridThemeObject } = useTheme();
         <AgGridReact
           rowData={rowData}
           columnDefs={columnDefs}
+          columnTypes={ColumnTypes}
           defaultColDef={{ editable: true, flex: 1, filter: true }}
           theme={agGridThemeObject}
           pagination={true}
-          rowSelection="multiple" 
-          cellSelection={true}
+          paginationAutoPageSize={true}
+          rowSelection={rowSelection}
           getRowId={getRowId}
           onGridReady={onGridReady}
           onCellValueChanged={onCellValueChanged}
-          rowMultiSelectWithClick={true}
+          localeText={AgGridLocaleTR}
         />
       </div>
     </div>

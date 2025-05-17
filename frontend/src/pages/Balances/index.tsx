@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-
+import React from "react";
 import BalanceGrid from "./grid";
-import Alert from "../../components/ui/Alert";
 
 const Balances: React.FC = () => {
   

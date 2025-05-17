@@ -16,57 +16,117 @@ const SupplyGrid = () => {
   const baseGridRef = useRef<BaseGridHandle<SupplyRows>>(null);
 
   const colDefs: ColDef<SupplyRows>[] = [
-    { field: "code", editable: false, minWidth: 150 },
+    {
+      field: "code",
+      headerName: "Kod",
+      editable: false,
+      minWidth: 200,
+    },
     {
       field: "category",
+      headerName: "Kategori",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "quantityItem",
+      headerName: "Metraj",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "companyName",
+      headerName: "Şirket",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
     {
       field: "unit",
+      headerName: "Birim",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
-    { field: "unitPrice", editable: true, minWidth: 150 },
-    { field: "quantity", editable: true, minWidth: 150 },
-    { field: "contractAmount", editable: true, minWidth: 150 },
-    { field: "paidAmount", editable: true, minWidth: 150 },
-    { field: "remainingAmount", editable: false, minWidth: 150 },
+    {
+      field: "unitPrice",
+      headerName: "Birim Fiyatı",
+      editable: true,
+      minWidth: 200,
+    },
+    {
+      field: "quantity",
+      headerName: "Metraj",
+      editable: true,
+      minWidth: 200,
+    },
+    {
+      field: "contractAmount",
+      headerName: "Sözleşme Tutarı",
+      editable: true,
+      minWidth: 200,
+    },
+    {
+      field: "paidAmount",
+      headerName: "Ödenen Tutar",
+      editable: true,
+      minWidth: 200,
+    },
+    {
+      field: "remainingAmount",
+      headerName: "Kalan Tutar",
+      editable: false,
+      minWidth: 200,
+    },
     {
       field: "status",
+      headerName: "Durum",
       editable: true,
-      minWidth: 150,
+      minWidth: 200,
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
     },
-    { field: "description", editable: true, minWidth: 150 },
-    { field: "createdBy", editable: false, minWidth: 150 },
-    { field: "updatedBy", editable: false, minWidth: 150 },
-    { field: "createdatetime", editable: false, minWidth: 150 },
-    { field: "updatedatetime", editable: false, minWidth: 150 },
+    {
+      field: "description",
+      headerName: "Açıklama",
+      editable: true,
+      minWidth: 200,
+    },
+    {
+      field: "createdBy",
+      headerName: "Oluşturan Kişi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy",
+      headerName: "Güncelleyen Kişi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdatetime",
+      headerName: "Oluşturulma Tarihi",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedatetime",
+      headerName: "Güncelleme Tarihi",
+      editable: false,
+      minWidth: 200,
+    },
   ];
 
   const getRowId = (params: GetRowIdParams<SupplyRows>) =>

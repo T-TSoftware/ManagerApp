@@ -12,7 +12,7 @@ const UserMenuItemsList = ({ items }: Props) => {
         <div key={item.label ?? index}>
           {item.separatorBefore && (
             <div
-              className="col-span-full mx-3.5 my-1 h-px border-0 sm:mx-3 bg-white/10 dark:bg-zinc-950/5 dark:forced-colors:bg-[CanvasText]"
+              className="col-span-full mx-3.5 my-1 h-px border-0 sm:mx-3 bg-zinc-950/5 dark:bg-white/10 dark:forced-colors:bg-[CanvasText]"
               role="separator"
             />
           )}
@@ -35,7 +35,7 @@ const UserMenuItemsList = ({ items }: Props) => {
                     {item.icon && (
                       <item.icon className="size-4 dark:text-white" />
                     )}
-                    <p>{item.label}</p>
+                    <p className="dark:text-white">{item.label}</p>
                   </button>
                 )}
               </MenuItem>
