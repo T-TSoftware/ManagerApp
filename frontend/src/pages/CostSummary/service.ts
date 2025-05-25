@@ -1,15 +1,15 @@
-import { API_BASE_URL } from "../../config/api";
+import axios from "../../utils/axios"; 
 import { CostSummaryRows } from "./costSum.types";
 
 export const getAllCostSummaries = async (
   token: string,
   projectId: string
 ): Promise<CostSummaryRows[]> => {
-  const res = await fetch(`${API_BASE_URL}projects/${projectId}/costsummary`, {
+  const res = await axios.get(`projects/${projectId}/costsummary`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  if (!res.ok) throw new Error("Fetch Error");
-  return res.json();
+
+  return res.data;
 };

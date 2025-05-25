@@ -1,5 +1,5 @@
-export type ProjectRows = {
-  edit:string;
+export type SupplierListRows = {
+  edit: string;
   id?: string;
   code: string;
   name: string;

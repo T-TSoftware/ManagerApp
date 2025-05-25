@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import { useRef } from "react";
 import { useSupply } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
@@ -32,7 +32,7 @@ const SupplyGrid = () => {
       },
     },
     {
-      field: "quantityItem",
+      field: "quantityItemCode",
       headerName: "Metraj",
       editable: true,
       minWidth: 200,
@@ -129,13 +129,13 @@ const SupplyGrid = () => {
     },
   ];
 
-  const getRowId = (params: GetRowIdParams<SupplyRows>) =>
-    String(params.data.code);
+  const getRowId = (params: GetRowIdParams<SupplyRows>) => {
+    return params.data.id! ?? `${params.data.companyName}-${Math.random()}`;
+  };
 
   const handleCellChange = (e: CellValueChangedEvent<SupplyRows>) => {
     updateRow({
-      ...e.data,
-      updatedatetime: new Date(),
+      ...e.data
     });
   };
 

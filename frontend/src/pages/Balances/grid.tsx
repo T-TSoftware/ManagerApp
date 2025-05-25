@@ -8,7 +8,6 @@ import type {
 } from "ag-grid-community";
 import type { BalanceRows } from "./types";
 import { useBalance } from "./hook";
-import Alert from "../../components/ui/Alert";
 
 const BalanceGrid = () => {
   const {
@@ -18,8 +17,6 @@ const BalanceGrid = () => {
     updateRow,
     deleteRows,
     saveChanges,
-    alert,
-    setAlert,
   } = useBalance();
 
   const baseGridRef = useRef<BaseGridHandle<BalanceRows>>(null);
@@ -75,7 +72,6 @@ const BalanceGrid = () => {
 
   return (
     <>
-      {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
       <BaseGrid<BalanceRows>
           ref={baseGridRef}
           rowData={localData}

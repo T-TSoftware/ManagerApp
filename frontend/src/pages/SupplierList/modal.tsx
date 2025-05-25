@@ -3,10 +3,10 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ProjectRows } from "./types";
+import type { SupplierListRows } from "./types";
 
 const schema = z.object({
-  name: z.string().min(1, "Proje adı zorunludur"),
+  name: z.string().min(1, "Tedarikçi adı zorunludur"),
   site: z.string().optional(),
   status: z.string().optional(),
   estimatedStartDate: z.string().optional(),
@@ -15,18 +15,18 @@ const schema = z.object({
   actualEndDate: z.string().optional(),
 });
 
-type ProjectFormSchema = z.infer<typeof schema>;
+type SuppliersFormSchema = z.infer<typeof schema>;
 
 type Props = {
   open: boolean;
   mode: "create" | "edit";
-  defaultValues?: Partial<ProjectRows>;
+  defaultValues?: Partial<SupplierListRows>;
   onClose: () => void;
-  onSubmit: (data: Partial<ProjectRows>) => Promise<void>;
+  onSubmit: (data: Partial<SupplierListRows>) => Promise<void>;
   onSuccess: () => void;
 };
 
-const ProjectModal = ({
+const SupplierListModal = ({
   open,
   mode,
   defaultValues,
@@ -39,7 +39,7 @@ const ProjectModal = ({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ProjectFormSchema>({
+  } = useForm<SuppliersFormSchema>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -63,9 +63,9 @@ const ProjectModal = ({
     }
   }, [defaultValues, reset]);
 
-const onFormSubmit = async (data: ProjectFormSchema) => {
+const onFormSubmit = async (data: SuppliersFormSchema) => {
   try {
-    const transformed: Partial<ProjectRows> = {
+    const transformed: Partial<SupplierListRows> = {
       ...data,
       estimatedStartDate: data.estimatedStartDate
         ? new Date(data.estimatedStartDate)
@@ -211,4 +211,4 @@ const onFormSubmit = async (data: ProjectFormSchema) => {
   );
 };
 
-export default ProjectModal;
+export default SupplierListModal;

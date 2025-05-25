@@ -7,7 +7,9 @@ import {
   updateSupply,
   deleteSupply,
 } from "./service";
+import { useNotifier } from "../../hooks/useNotifier";
 import { getToken } from "../../utils/token";
+import { v4 as uuid } from "uuid";
 
 export const useSupply = () => {
   const [originalData, setOriginalData] = useState<SupplyRows[]>([]);
@@ -16,12 +18,11 @@ export const useSupply = () => {
   const [loading, setLoading] = useState(true);
   const { projectId } = useParams();
   const token = getToken();
+  const notify = useNotifier();
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  //Get Data's
 
   const fetchData = async () => {
     setLoading(true);
@@ -35,13 +36,13 @@ export const useSupply = () => {
       setLoading(false);
     }
   };
-  //CRUD
 
   const addRow = () => {
     const newRow: SupplyRows = {
+      id: uuid(),
       code: "",
       category: "",
-      quantityItem: "",
+      quantityItemCode: "",
       companyName: "",
       unit: "",
       unitPrice: 0,
@@ -62,54 +63,76 @@ export const useSupply = () => {
 
   const updateRow = (row: SupplyRows) => {
     setLocalData((prev) =>
-      prev.map((item) => (item.code === row.code ? row : item))
+      prev.map((item) => (item.id === row.id ? { ...item, ...row } : item))
     );
   };
 
   const deleteRows = (selected: SupplyRows[]) => {
     setLocalData((prev) =>
-      prev.filter((item) => !selected.find((s) => s.code === item.code))
+      prev.filter((item) => !selected.find((s) => s.id === item.id))
     );
     setDeletedRows((prev) => [...prev, ...selected]);
   };
 
   const saveChanges = async () => {
-    const added = localData.filter((item) => item.isNew);
-    const updated = localData.filter(
-      (item) =>
-        !item.isNew &&
-        originalData.some(
-          (orig) =>
-            orig.code === item.code &&
-            JSON.stringify(orig) !== JSON.stringify(item)
-        )
-    );
     try {
-      if (deletedRows.length > 0) {
-        if (!projectId || !token) return;
-        await Promise.all(
-          deletedRows.map((item) => deleteSupply(projectId, item.code))
-        );
+      const added = localData.filter((i) => i.isNew);
+      const updated = localData.filter(
+        (i) =>
+          !i.isNew &&
+          originalData.some(
+            (o) => o.id === i.id && JSON.stringify(o) !== JSON.stringify(i)
+          )
+      );
+      const deletedIds = deletedRows
+        .filter((r) => r.id)
+        .map((r) => r.id as string);
+
+      const requiredFields = {
+        category: "Kategori",
+        quantityItemCode: "Metraj",
+        companyName: "Şirket",
+        unit: "Birim",
+        status: "Durum",
+      };
+
+      let hasError = false;
+
+      for (const row of added) {
+        for (const [key, label] of Object.entries(requiredFields)) {
+          const value = row[key as keyof SupplyRows];
+          if (value === undefined || value === null || value === "") {
+            notify.alert({
+              id: `missing-${key}-${row.id}`,
+              message: `${label} zorunludur.`,
+              type: "error",
+            });
+            hasError = true;
+          } else {
+            notify.dismissAlert(`missing-${key}-${row.id}`);
+          }
+        }
       }
+      if (hasError) return;
+
       if (added.length > 0) {
-        if (!projectId || !token) return;
-        await Promise.all(
-          added.map(({ isNew, ...row }) => {
-            return addSupply(token, projectId, row);
-          })
-        );
+        console.log("added 1");
+        const payload = added.map(({ id, isNew, ...rest }) => rest);
+        await addSupply(token!, projectId!, payload);
+        console.log("added 0");
       }
-      if (updated.length > 0) {
-        if (!projectId || !token) return;
-        await Promise.all(
-          updated.map((row) => updateSupply(token, projectId, row))
-        );
-      }
+      console.log("updated:", updated);
+      if (updated.length > 0) await updateSupply(token!, projectId!, updated);
+      console.log("deleted:", deletedIds);
+      if (deletedIds.length > 0) await deleteSupply(token!, projectId!, projectId!);
+console.log("need to be fetch");
       await fetchData();
+      console.log("need to be notify");
+      notify.success("Kayıt başarılı.");
     } catch (err) {
-      console.error("Save error:", err);
+      console.log("err");
+      notify.handleError(err);
     }
   };
-
   return { localData, loading, addRow, updateRow, deleteRows, saveChanges };
 };

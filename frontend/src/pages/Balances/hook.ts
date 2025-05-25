@@ -6,6 +6,7 @@ import {
   updateBalances,
   deleteBalances,
 } from "./service";
+import { useNotifier } from "../../hooks/useNotifier";
 import { getToken } from "../../utils/token";
 import { v4 as uuid } from "uuid";
 
@@ -14,8 +15,8 @@ export const useBalance = () => {
   const [localData, setLocalData] = useState<BalanceRows[]>([]);
   const [deletedRows, setDeletedRows] = useState<BalanceRows[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alert, setAlert] = useState<any>(null);
   const token = getToken();
+  const notify = useNotifier();
 
   useEffect(() => {
     fetchData();
@@ -59,37 +60,61 @@ export const useBalance = () => {
     setDeletedRows((prev) => [...prev, ...selected]);
   };
 
-  const saveChanges = async () => {
-    try {
-      const added = localData.filter((i) => i.isNew);
-      const updated = localData.filter(
-        (i) =>
-          !i.isNew &&
-          originalData.some(
-            (o) => o.id === i.id && JSON.stringify(o) !== JSON.stringify(i)
-          )
-      );
-      const deletedIds = deletedRows
-        .filter((r) => r.id)
-        .map((r) => r.id as string);
+const saveChanges = async () => {
 
-      if (added.length > 0)
-        await addBalances(
-          token!,
-          added.map(({ isNew, ...r }) => r)
-        );
-      if (updated.length > 0) await updateBalances(token!, updated);
-      if (deletedIds.length > 0) await deleteBalances(token!, deletedIds);
+  try {
+    const added = localData.filter((i) => i.isNew);
+    const updated = localData.filter(
+      (i) =>
+        !i.isNew &&
+        originalData.some(
+          (o) => o.id === i.id && JSON.stringify(o) !== JSON.stringify(i)
+        )
+    );
+    const deletedIds = deletedRows
+      .filter((r) => r.id)
+      .map((r) => r.id as string);
+      
+    const requiredFields = {
+      name: "Ad",
+      amount: "Miktar",
+      currency: "Döviz Birimi",
+    };
 
-      await fetchData();
-    } catch (err) {
-      setAlert({
-        title: "Hata",
-        message: "Kayıt işlemi sırasında bir hata oluştu",
-        type: "error",
-      });
+    let hasError = false;
+
+    for (const row of added) {
+      for (const [key, label] of Object.entries(requiredFields)) {
+        const value = row[key as keyof BalanceRows];
+        if (value === undefined || value === null || value === "") {
+          notify.alert({
+            id: `missing-${key}-${row.id}`,
+            message: `${label} zorunludur.`,
+            type: "error",
+          });
+          hasError = true;
+        } else {
+          notify.dismissAlert(`missing-${key}-${row.id}`);
+        }
+      }
     }
-  };
+
+    if (hasError) return;
+
+    if (added.length > 0){
+      const payload = added.map(({ code, id, isNew, ...rest }) => rest);
+      await addBalances(token!, payload);
+    }
+    if (updated.length > 0) await updateBalances(token!, updated);
+    if (deletedIds.length > 0) await deleteBalances(token!, deletedIds);
+
+    await fetchData();
+    notify.success("Kayıt başarılı.");
+  } catch (err) {
+    notify.handleError(err);
+  }
+};
+
 
   return {
     localData,
@@ -98,7 +123,5 @@ export const useBalance = () => {
     updateRow,
     deleteRows,
     saveChanges,
-    alert,
-    setAlert,
   };
 };

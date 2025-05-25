@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.0.1",
     "ag-grid-community": "^33.2.1",
     "ag-grid-react": "^33.2.1",
+    "axios": "^1.9.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.56.3",

@@ -54,6 +54,7 @@ type BaseGridProps<T> = {
   RowSelectionOptions?: (e: RowSelectionOptions<T>) => void;
   onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
   onOpenCreateModal?: () => void;
+  enableSelection?: boolean;
 };
 
 const BaseGridInner = <T,>(
@@ -70,6 +71,7 @@ const BaseGridInner = <T,>(
     onCellValueChanged,
     RowSelectionOptions,
     onOpenCreateModal,
+    enableSelection = true,
   }: BaseGridProps<T>,
   ref: Ref<BaseGridHandle<T>>
 ) => {
@@ -77,9 +79,11 @@ const BaseGridInner = <T,>(
 
   const rowSelection: RowSelectionOptions = {
     mode: "multiRow",
+    checkboxes: enableSelection ?? true,
+    headerCheckbox: enableSelection ?? true,
     copySelectedRows: true,
-    enableClickSelection: true,
-    enableSelectionWithoutKeys: true,
+    enableClickSelection: enableSelection ?? true,
+    enableSelectionWithoutKeys: enableSelection ?? true,
   };
 
   const onGridReady = (params: { api: GridApi }) => {

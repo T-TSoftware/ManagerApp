@@ -7,13 +7,13 @@ import type {
   GetRowIdParams,
   ICellRendererParams,
 } from "ag-grid-community";
-import type { ProjectRows } from "./types";
+import type { SupplierListRows } from "./types";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
-import { useProject } from "./hook";
-import ProjectModal from "./modal";
+import { useSupplierList } from "./hook";
+import SupplierListModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 
-const ProjectGrid = () => {
+const SupplierListGrid = () => {
   const {
     localData,
     loading,
@@ -26,14 +26,16 @@ const ProjectGrid = () => {
     getById,
     create,
     update,
-  } = useProject();
+  } = useSupplierList();
 
-  const baseGridRef = useRef<BaseGridHandle<ProjectRows>>(null);
+  const baseGridRef = useRef<BaseGridHandle<SupplierListRows>>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [editData, setEditData] = useState<Partial<ProjectRows> | undefined>();
+  const [editData, setEditData] = useState<
+    Partial<SupplierListRows> | undefined
+  >();
 
-  const colDefs: ColDef<ProjectRows>[] = [
+  const colDefs: ColDef<SupplierListRows>[] = [
     {
       headerName: "",
       field: "edit",
@@ -42,7 +44,7 @@ const ProjectGrid = () => {
       editable: false,
       suppressMovable: true,
       filter: false,
-      cellRenderer: (params: ICellRendererParams<ProjectRows>) => {
+      cellRenderer: (params: ICellRendererParams<SupplierListRows>) => {
         return (
           <button
             className="text-black hover:underline text-sm"
@@ -125,30 +127,33 @@ const ProjectGrid = () => {
     },
   ];
 
-  const getRowId = (params: GetRowIdParams<ProjectRows>) => {
+  const getRowId = (params: GetRowIdParams<SupplierListRows>) => {
     return params.data.id!;
   };
 
-  const handleCellChange = (e: CellValueChangedEvent<ProjectRows>) => {
+  const handleCellChange = (
+    e: CellValueChangedEvent<SupplierListRows>
+  ) => {
     updateRow({ ...e.data });
   };
 
-const handleModalSubmit = async (formData: Partial<ProjectRows>) => {
-  if (modalMode === "create") {
-    const newItem = await create(formData);
-    addRow(newItem);
-  } else {
-    const updatedItem = await update(formData); 
-    updateRow(updatedItem); 
-  }
-};
-
+  const handleModalSubmit = async (
+    formData: Partial<SupplierListRows>
+  ) => {
+    if (modalMode === "create") {
+      const newItem = await create(formData);
+      addRow(newItem);
+    } else {
+      const updatedItem = await update(formData);
+      updateRow(updatedItem);
+    }
+  };
 
   return (
     <>
       {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
 
-      <ProjectModal
+      <SupplierListModal
         open={modalOpen}
         mode={modalMode}
         defaultValues={editData}
@@ -157,7 +162,7 @@ const handleModalSubmit = async (formData: Partial<ProjectRows>) => {
         onSubmit={handleModalSubmit}
       />
 
-      <BaseGrid<ProjectRows>
+      <BaseGrid<SupplierListRows>
         ref={baseGridRef}
         rowData={localData}
         columnDefs={colDefs}
@@ -183,4 +188,4 @@ const handleModalSubmit = async (formData: Partial<ProjectRows>) => {
   );
 };
 
-export default ProjectGrid;
+export default SupplierListGrid;

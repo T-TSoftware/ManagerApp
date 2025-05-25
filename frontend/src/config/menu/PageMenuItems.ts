@@ -3,6 +3,7 @@ import {
   CircleStackIcon,
   BanknotesIcon,
   CreditCardIcon,
+  ArrowUturnLeftIcon,
   Square2StackIcon,
   UsersIcon,
   ReceiptPercentIcon,
@@ -62,14 +63,20 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       adminYN: true,
     },
     {
-      label: "Şirketler",
-      href: "/companies",
+      label: "Projeler",
+      href: "/projects",
       icon: CreditCardIcon,
       adminYN: true,
     },
     {
-      label: "Projeler",
-      href: "/projects",
+      label: "Taşeron Listesi",
+      href: "/subcontractor-list",
+      icon: CreditCardIcon,
+      adminYN: true,
+    },
+    {
+      label: "Tedarikçi Listesi",
+      href: "/supplier-list",
       icon: CreditCardIcon,
       adminYN: true,
     },
@@ -88,7 +95,7 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     {
       label: "Admin Genel Bakış",
       href: "/admin-dashboard",
-      icon: CreditCardIcon,
+      icon: ArrowUturnLeftIcon,
       adminYN: false,
     },
   ];

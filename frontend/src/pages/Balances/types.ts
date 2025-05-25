@@ -1,6 +1,6 @@
 export interface BalanceRows {
   id?: string;
-  code: string;
+  code?: string;
   name: string;
   amount: number;
   currency: string;

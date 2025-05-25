@@ -1,7 +1,9 @@
-export interface SupplyRows {
-  code: string;
+import { BaseGridRow } from "../../components/grid/BaseGridRows";
+export interface SupplyRows extends BaseGridRow {
+  id?: string;
+  code?: string;
   category: string;
-  quantityItem: string;
+  quantityItemCode: string;
   companyName: string;
   unit: string;
   unitPrice: number;

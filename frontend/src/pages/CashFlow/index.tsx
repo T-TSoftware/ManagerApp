@@ -1,5 +1,5 @@
 import React from "react";
-import Alert from "../../components/ui/Alert";
+import Alert from "../../components/feedback/Alert";
 import CashFlowGrid from "./grid";
 
 const CashFlow: React.FC = () => {

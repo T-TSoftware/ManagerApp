@@ -1,29 +1,28 @@
 import { useState, useEffect } from "react";
 import {
-  getAllProjects,
-  getProjectById,
-  createProject,
-  updateProject,
-  deleteProject,
+  getAllSubcontractorList,
+  getSubcontractorById,
+  createSubcontractor,
+  updateSubcontractor,
+  deleteSubcontractor,
 } from "./service";
 import { getToken } from "../../utils/token";
-import type { ProjectRows } from "./types";
+import type { SubcontractorListRows } from "./types";
 
-
-export const useProject = () => {
-  const [localData, setLocalData] = useState<ProjectRows[]>([]);
+export const SubcontractorList = () => {
+  const [localData, setLocalData] = useState<SubcontractorListRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
-  const token = getToken();   
+  const token = getToken();
 
-    useEffect(() => {
-      fetchData();
-    }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const result = await getAllProjects(token!);
+      const result = await getAllSubcontractorList(token!);
       setLocalData(result);
     } catch (err) {
       setAlert({ message: "Veriler yüklenemedi", type: "error" });
@@ -34,27 +33,27 @@ export const useProject = () => {
 
   const getById = async (id: string) => {
     try {
-      return await getProjectById(token!, id);
+      return await getSubcontractorById(token!, id);
     } catch (err) {
       setAlert({ message: "Kayıt alınamadı", type: "error" });
       return undefined;
     }
   };
 
-  const create = async (data: Partial<ProjectRows>) => {
-    const newItem = await createProject(token!, data);
+  const create = async (data: Partial<SubcontractorListRows>) => {
+    const newItem = await createSubcontractor(token!, data);
     return newItem;
   };
 
-  const update = async (data: Partial<ProjectRows>) => {
-    const updatedItem = await updateProject(token!, data);
+  const update = async (data: Partial<SubcontractorListRows>) => {
+    const updatedItem = await updateSubcontractor(token!, data);
     return updatedItem;
   };
 
-  const deleteRows = async (selected: ProjectRows[]) => {
+  const deleteRows = async (selected: SubcontractorListRows[]) => {
     try {
       const record = selected[0];
-      await deleteProject(token!, record.id!);
+      await deleteSubcontractor(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
       setAlert({ message: "Silme işlemi başarılı", type: "success" });
     } catch (err) {
@@ -62,17 +61,17 @@ export const useProject = () => {
     }
   };
 
-  const addRow = (item: ProjectRows) => {
+  const addRow = (item: SubcontractorListRows) => {
     setLocalData((prev) => [item, ...prev]);
   };
 
-  const updateRow = (item: ProjectRows) => {
+  const updateRow = (item: SubcontractorListRows) => {
     setLocalData((prev) =>
       prev.map((row) => (row.id === item.id ? item : row))
     );
   };
 
-  const saveChanges = async (allRows: ProjectRows[]) => {
+  const saveChanges = async (allRows: SubcontractorListRows[]) => {
     console.log("Tüm kayıtlar kaydedildi:", allRows);
     setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
   };
