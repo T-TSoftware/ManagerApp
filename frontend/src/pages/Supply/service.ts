@@ -1,64 +1,47 @@
+import { SupplyRows, NewSupplyPayload, UpdateSupplyPayload } from "./types";
 import axios from "../../utils/axios";
-import { SupplyRows } from "./supply.types";
 
 export const getAllSupplies = async (
   projectId: string,
   token: string
 ): Promise<SupplyRows[]> => {
-  const res = await axios.get(`projects/${projectId}/suppliers`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  const response = await axios.get(`/projects/${projectId}/suppliers`, {
+    headers: { Authorization: `Bearer ${token}` }
   });
-  return res.data;
+  return response.data;
 };
 
 export const addSupply = async (
   token: string,
   projectId: string,
-  item: Omit<SupplyRows, "isNew">[]
-) => {
-  const res = await axios.post(
+  payload: NewSupplyPayload[]
+): Promise<void> => {
+  await axios.post(
     `projects/${projectId}/suppliers`,
-    item,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    payload,
+    { headers: { Authorization: `Bearer ${token}` } }
   );
-  return res.data;
 };
 
 export const updateSupply = async (
   token: string,
   projectId: string,
-  item: Omit<SupplyRows, "isNew">[]
-) => {
-  const res = await axios.patch(
+  payload: UpdateSupplyPayload[]
+): Promise<void> => {
+  await axios.patch(
     `projects/${projectId}/suppliers`,
-    item,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    payload,
+    { headers: { Authorization: `Bearer ${token}` } }
   );
-  return res.data;
 };
 
 export const deleteSupply = async (
   token: string,
   projectId: string,
-  code: string
-) => {
-  const res = await axios.delete(
-    `projects/${projectId}/suppliers/${encodeURIComponent(code)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  supplyId: string
+): Promise<void> => {
+  await axios.delete(
+    `projects/${projectId}/suppliers/${supplyId}`,
+    { headers: { Authorization: `Bearer ${token}` } }
   );
-  return res.data;
 };

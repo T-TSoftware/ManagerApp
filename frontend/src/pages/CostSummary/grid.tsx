@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { useCostSummaries } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type { ColDef, GetRowIdParams } from "ag-grid-community";
-import type { CostSummaryRows } from "./costSum.types";
+import type { CostSummaryRows } from "./types";
 
 const CostSummaryGrid = () => {
   const { costSummaries, loading } = useCostSummaries();

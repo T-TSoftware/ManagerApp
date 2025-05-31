@@ -28,9 +28,9 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Stok Durumu",
-      href: "/stock",
+      href: projectId ? `${basePath}/stock` : "stock",
       icon: CircleStackIcon,
-      adminYN: true,
+      adminYN: false,
     },
     {
       label: "Tedarik",

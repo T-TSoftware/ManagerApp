@@ -1,5 +1,5 @@
 import axios from "../../utils/axios"; 
-import { CostSummaryRows } from "./costSum.types";
+import { CostSummaryRows } from "./types";
 
 export const getAllCostSummaries = async (
   token: string,

@@ -1,73 +1,62 @@
-import { API_BASE_URL } from "../../config/api";
-import { QuantityRows } from "./quantity.types";
+import axios from "../../utils/axios";
+import { QuantityRows, NewQuantityPayload, UpdateQuantityPayload } from "./quantity.types";
 
-export const getAllQuantities = async (
+export const getAllQuantityByProject = async (
   projectId: string,
   token: string
 ): Promise<QuantityRows[]> => {
-  const res = await fetch(`${API_BASE_URL}projects/${projectId}/quantities`, {
+  const res = await axios.get(`/projects/${projectId}/quantities`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  if (!res.ok) throw new Error("Fetch Error");
-  return res.json();
+  return res.data;
 };
 
 export const addQuantity = async (
   token: string,
   projectId: string,
-  item: Omit<QuantityRows, "isNew">
-) => {
-  const res = await fetch(`${API_BASE_URL}projects/${projectId}/quantities`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(item),
-  });
-  if (!res.ok) {
-    const errMsg = await res.text();
-    console.error("Add error →", errMsg);
-    throw new Error("Add error");
-  }
-
-  return res.json();
+  payload: NewQuantityPayload[]
+): Promise<void> => {
+  const res = await axios.post(
+    `/projects/${projectId}/quantities`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
 };
 
 export const updateQuantity = async (
   token: string,
   projectId: string,
-  item: QuantityRows
-) => {
-  const res = await fetch(
-    `${API_BASE_URL}projects/${projectId}/suppliers/${encodeURIComponent(
-      item.code
-    )}`,
+  payload: UpdateQuantityPayload[]
+): Promise<void> => {
+  const res = await axios.put(
+    `/projects/${projectId}/quantities`,
+    payload,
     {
-      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify(item),
     }
   );
-  console.log("result put:", JSON.stringify(item));
-  const result = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    console.error("Update error →", result || res.statusText);
-    throw new Error("Update error");
-  }
-  if (!res.ok) throw new Error("Update error");
-  return result;
+  return res.data;
 };
 
-export const deleteQuantity = async (companyId: string, code: string) => {
-  const res = await fetch(`${API_BASE_URL}/${code}`, {
-    method: "DELETE",
+export const deleteQuantity = async (
+  token: string,
+  projectId: string,
+  codes: string[]
+): Promise<void> => {
+  const res = await axios.delete(`/projects/${projectId}/quantities`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: codes,
   });
-  if (!res.ok) throw new Error("Delete error");
+  return res.data;
 };

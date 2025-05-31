@@ -3,20 +3,21 @@ import { useRef } from "react";
 import { useCurrent } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
-  CellValueChangedEvent,
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { CurrentRows } from "./current.types";
 
 const CurrentGrid = () => {
-  const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
+  const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
     useCurrent();
 
-  const baseGridRef = useRef<BaseGridHandle<CurrentRows>>(null);
-
   const colDefs: ColDef<CurrentRows>[] = [
-    { field: "id", hide: true },
+    {
+      field: "id",
+      headerName: "ID",
+      hide: true,
+    },
     {
       field: "type",
       headerName: "Cari Tipi",
@@ -59,6 +60,9 @@ const CurrentGrid = () => {
       headerName: "Açıklama",
       editable: true,
       minWidth: 150,
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
     },
     {
       field: "transactionDate",
@@ -98,26 +102,21 @@ const CurrentGrid = () => {
     },
   ];
 
-  const getRowId = (params: GetRowIdParams<CurrentRows>) =>
-    String(params.data.id);
-
-  const handleCellChange = (e: CellValueChangedEvent<CurrentRows>) => {
-    updateRow({
-      ...e.data,
-      updatedatetime: new Date(),
-    });
+  const getRowId = (params: GetRowIdParams<CurrentRows>) => {
+    if (!params.data) return '';
+    return String(params.data.id);
   };
 
   return (
     <BaseGrid<CurrentRows>
-      ref={baseGridRef}
+      ref={gridRef}
       rowData={localData}
       columnDefs={colDefs}
       getRowId={getRowId}
       onAddRow={addRow}
       onDeleteRow={deleteRows}
       onSaveChanges={saveChanges}
-      onCellValueChanged={handleCellChange}
+      onCellValueChanged={updateRow}
       isLoading={loading}
       showButtons={{
         refresh: true,

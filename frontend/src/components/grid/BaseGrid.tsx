@@ -8,9 +8,7 @@ import {
   ColDef,
   GetRowIdParams,
   RowSelectionOptions,
-  CellValueChangedEvent,
-  SelectionColumnDef,
-  ColumnAdvancedFilterModel
+  CellValueChangedEvent
 } from "ag-grid-community";
 import ActionButton from "./ActionButton";
 import {
@@ -29,6 +27,7 @@ export type BaseGridHandle<T> = {
   addRow: (row: T) => void;
   deleteSelectedRows: () => void;
   onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
+  getGridApi: () => GridApi | null;
 };
 
 type BaseGridProps<T> = {
@@ -113,6 +112,7 @@ const BaseGridInner = <T,>(
         gridApi.current?.applyTransaction({ remove: selected });
       }
     },
+    getGridApi: () => gridApi.current
   }));
   const { agGridThemeClass, agGridThemeObject } = useTheme();
   return (
@@ -178,6 +178,7 @@ const BaseGridInner = <T,>(
           theme={agGridThemeObject}
           pagination={true}
           paginationAutoPageSize={true}
+          paginationPageSize={100}
           rowSelection={rowSelection}
           getRowId={getRowId}
           onGridReady={onGridReady}

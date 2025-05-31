@@ -1,79 +1,62 @@
-import { API_BASE_URL } from "../../config/api";
-import { SubcontractorRows } from "./subcontractor.types";
+import axios from "../../utils/axios";
+import { SubcontractorRows, NewSubcontractorPayload, UpdateSubcontractorPayload } from "./subcontractor.types";
 
 export const getAllSubcontractorByProject = async (
   projectId: string,
   token: string
 ): Promise<SubcontractorRows[]> => {
-  const res = await fetch(
-    `${API_BASE_URL}projects/${projectId}/subcontractors`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  if (!res.ok) throw new Error("Fetch Error");
-  return res.json();
-};
-
-export const addSupply = async (
-  token: string,
-  projectId: string,
-  item: Omit<SubcontractorRows, "isNew">
-) => {
-  const res = await fetch(
-    `${API_BASE_URL}projects/${projectId}/subcontractors`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(item),
-    }
-  );
-  if (!res.ok) {
-    const errMsg = await res.text();
-    console.error("Add error →", errMsg);
-    throw new Error("Add error");
-  }
-
-  return res.json();
-};
-
-export const updateSupply = async (
-  token: string,
-  projectId: string,
-  item: SubcontractorRows
-) => {
-  const res = await fetch(
-    `${API_BASE_URL}projects/${projectId}/subcontractors/${encodeURIComponent(
-      item.code
-    )}`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(item),
-    }
-  );
-  console.log("result put:", JSON.stringify(item));
-  const result = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    console.error("Update error →", result || res.statusText);
-    throw new Error("Update error");
-  }
-  if (!res.ok) throw new Error("Update error");
-  return result;
-};
-
-export const deleteSupply = async (companyId: string, code: string) => {
-  const res = await fetch(`${API_BASE_URL}/${code}`, {
-    method: "DELETE",
+  const res = await axios.get(`/projects/${projectId}/subcontractors`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
-  if (!res.ok) throw new Error("Delete error");
+  return res.data;
+};
+
+export const addSubcontractor = async (
+  token: string,
+  projectId: string,
+  payload: NewSubcontractorPayload[]
+): Promise<void> => {
+  const res = await axios.post(
+    `/projects/${projectId}/subcontractors`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};
+
+export const updateSubcontractor = async (
+  token: string,
+  projectId: string,
+  payload: UpdateSubcontractorPayload[]
+): Promise<void> => {
+  const res = await axios.put(
+    `/projects/${projectId}/subcontractors`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return res.data;
+};
+
+export const deleteSubcontractor = async (
+  token: string,
+  projectId: string,
+  codes: string[]
+): Promise<void> => {
+  const res = await axios.delete(`/projects/${projectId}/subcontractors`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    data: codes,
+  });
+  return res.data;
 };

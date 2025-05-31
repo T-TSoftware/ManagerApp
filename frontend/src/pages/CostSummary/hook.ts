@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getAllCostSummaries } from "./service";
 import { getToken } from "../../utils/token";
-import { CostSummaryRows } from "./costSum.types";
+import { CostSummaryRows } from "./types";
 
 export const useCostSummaries = () => {
   const { projectId } = useParams();

@@ -1,44 +1,68 @@
-import { useEffect, useState } from "react";
-import { SubcontractorRows } from "./subcontractor.types";
+import { useEffect, useState, useRef } from "react";
+import { SubcontractorRows, validateSubcontractorRow, UpdateSubcontractorPayload } from "./subcontractor.types";
 import { useParams } from "react-router-dom";
 import {
   getAllSubcontractorByProject,
-  addSupply,
-  updateSupply,
-  deleteSupply,
+  addSubcontractor,
+  updateSubcontractor,
+  deleteSubcontractor,
 } from "./service";
+import { useNotifier } from "../../hooks/useNotifier";
 import { getToken } from "../../utils/token";
+import { v4 as uuid } from "uuid";
+import { CellValueChangedEvent } from "ag-grid-community";
+import { isRowModified } from "../../types/grid/commonTypes";
+import { BaseGridHandle } from "../../components/grid/BaseGrid";
 
 export const useSubcontractor = () => {
   const [originalData, setOriginalData] = useState<SubcontractorRows[]>([]);
   const [localData, setLocalData] = useState<SubcontractorRows[]>([]);
-  const [deletedRows, setDeletedRows] = useState<SubcontractorRows[]>([]);
   const [loading, setLoading] = useState(true);
+  const gridRef = useRef<BaseGridHandle<SubcontractorRows>>(null);
+
   const { projectId } = useParams();
   const token = getToken();
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  //Get Data's
+  const notify = useNotifier();
 
   const fetchData = async () => {
     setLoading(true);
     try {
       if (!projectId || !token) return;
       const data = await getAllSubcontractorByProject(projectId, token);
-      setOriginalData(data);
-      setLocalData(data);
-      setDeletedRows([]);
+      
+      const dataWithTracking = data.map(row => {
+        const ensuredId = row.id || uuid();
+        const rowWithId = {
+          ...row,
+          id: ensuredId,
+          code: row.code
+        };
+        
+        return {
+          ...rowWithId,
+          _originalData: { ...rowWithId }
+        };
+      });
+      
+      setOriginalData(dataWithTracking);
+      setLocalData(dataWithTracking);
+    } catch (error) {
+      notify.handleError(error);
     } finally {
       setLoading(false);
     }
   };
-  //CRUD
+
+  useEffect(() => {
+    fetchData();
+  }, [projectId, token]);
 
   const addRow = () => {
+    const currentDate = new Date();
+    const rowId = uuid();
+    
     const newRow: SubcontractorRows = {
+      id: rowId,
       code: "",
       category: "",
       companyName: "",
@@ -50,66 +74,179 @@ export const useSubcontractor = () => {
       remainingAmount: 0,
       status: "Pending",
       description: "",
+      contactPerson: "",
+      phone: "",
+      email: "",
       createdBy: "",
       updatedBy: "",
-      createdatetime: new Date(),
-      updatedatetime: new Date(),
-      isNew: true,
+      createdatetime: currentDate,
+      updatedatetime: currentDate,
+      isNew: true
     };
-    setLocalData((prev) => [newRow, ...prev]);
+    
+    const originalData = { ...newRow };
+    delete (originalData as any).isNew;
+    newRow._originalData = originalData;
+    
+    setLocalData(prev => [newRow, ...prev]);
   };
 
-  const updateRow = (row: SubcontractorRows) => {
-    setLocalData((prev) =>
-      prev.map((item) => (item.code === row.code ? row : item))
+  const updateRow = (event: CellValueChangedEvent<SubcontractorRows>) => {
+    const { data, colDef } = event;
+    
+    if (!data?.id || !colDef?.field) {
+      notify.error("Geçersiz güncelleme: Satır kodu veya alan eksik");
+      return;
+    }
+
+    const field = colDef.field as keyof SubcontractorRows;
+    
+    setLocalData(prev => 
+      prev.map(item => {
+        if (!item.id || item.id !== data.id) return item;
+        
+        let value: any = data[field];
+        if ([
+          'unitPrice',
+          'quantity',
+          'contractAmount',
+          'paidAmount',
+          'remainingAmount'
+        ].includes(field)) {
+          const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
+          value = isNaN(numValue) ? 0 : numValue;
+        }
+
+        if (['createdatetime', 'updatedatetime'].includes(field)) {
+          value = value ? new Date(value) : new Date();
+        }
+
+        const updatedItem = {
+          ...item,
+          [field]: value,
+          updatedatetime: new Date()
+        };
+
+        return updatedItem;
+      })
     );
   };
 
   const deleteRows = (selected: SubcontractorRows[]) => {
-    setLocalData((prev) =>
-      prev.filter((item) => !selected.find((s) => s.code === item.code))
-    );
-    setDeletedRows((prev) => [...prev, ...selected]);
+    const validSelectedRows = selected.filter(row => row.id);
+    
+    if (validSelectedRows.length !== selected.length) {
+      notify.error("Bazı satırlar ID eksikliği nedeniyle silinemedi");
+    }
+
+    setLocalData(prev => {
+      const deletedIds = new Set(validSelectedRows.map(row => row.id));
+      return prev.filter(row => row.id && !deletedIds.has(row.id));
+    });
+  };
+
+  const getModifiedFields = (current: SubcontractorRows, original: Partial<SubcontractorRows>): UpdateSubcontractorPayload => {
+    const modifiedFields: UpdateSubcontractorPayload = {
+      code: current.code
+    };
+
+    const fieldsToCheck = [
+      'category',
+      'companyName',
+      'unit',
+      'unitPrice',
+      'quantity',
+      'contractAmount',
+      'paidAmount',
+      'remainingAmount',
+      'status',
+      'description',
+      'contactPerson',
+      'phone',
+      'email'
+    ] as const;
+
+    fieldsToCheck.forEach(field => {
+      if (current[field] !== original[field]) {
+        (modifiedFields as any)[field] = current[field];
+      }
+    });
+
+    return modifiedFields;
   };
 
   const saveChanges = async () => {
-    const added = localData.filter((item) => item.isNew);
-    console.log("Gönderilecek veri:", added);
-    const updated = localData.filter(
-      (item) =>
-        !item.isNew &&
-        originalData.some(
-          (orig) =>
-            orig.code === item.code &&
-            JSON.stringify(orig) !== JSON.stringify(item)
-        )
-    );
     try {
-      if (deletedRows.length > 0) {
-        if (!projectId || !token) return;
-        await Promise.all(
-          deletedRows.map((item) => deleteSupply(projectId, item.code))
-        );
+      gridRef.current?.getGridApi()?.stopEditing();
+
+      if (!projectId || !token) {
+        notify.error("Project ID veya token eksik");
+        return;
       }
+
+      const added = localData.filter(row => row.isNew);
+      const modified = localData.filter(row => !row.isNew && isRowModified(row));
+      const deleted = originalData.filter(row => 
+        !localData.some(localRow => localRow.id === row.id)
+      );
+
+      const hasErrors = validateRows([...added, ...modified]);
+      if (hasErrors) return;
+
+      notify.loading("Değişiklikler kaydediliyor...");
+
       if (added.length > 0) {
-        if (!projectId || !token) return;
-        await Promise.all(
-          added.map(({ isNew, ...row }) => {
-            return addSupply(token, projectId, row);
-          })
-        );
+        const addedItems = added.map(({ isNew, _originalData, ...rest }) => rest);
+        await addSubcontractor(token, projectId, addedItems);
       }
-      if (updated.length > 0) {
-        if (!projectId || !token) return;
-        await Promise.all(
-          updated.map((row) => updateSupply(token, projectId, row))
-        );
+
+      if (modified.length > 0) {
+        const payload = modified.map(row => {
+          const originalRow = row._originalData;
+          if (!originalRow) {
+            return { code: row.code } as UpdateSubcontractorPayload;
+          }
+          return getModifiedFields(row, originalRow);
+        });
+        
+        await updateSubcontractor(token, projectId, payload);
       }
+
+      if (deleted.length > 0) {
+        const codes = deleted.map(row => row.code);
+        await deleteSubcontractor(token, projectId, codes);
+      }
+
       await fetchData();
+      notify.dismiss();
+      notify.success("Kayıt başarılı");
     } catch (err) {
       console.error("Save error:", err);
+      notify.handleError(err);
     }
   };
 
-  return { localData, loading, addRow, updateRow, deleteRows, saveChanges };
+  const validateRows = (rows: SubcontractorRows[]): boolean => {
+    let hasError = false;
+
+    rows.forEach((row) => {
+      const errors = validateSubcontractorRow(row);
+      if (errors.length > 0) {
+        errors.forEach((error) => notify.error(error));
+        hasError = true;
+      }
+    });
+
+    return hasError;
+  };
+
+  return {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+    gridRef
+  };
 };

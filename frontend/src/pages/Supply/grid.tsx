@@ -3,11 +3,10 @@ import { useRef } from "react";
 import { useSupply } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
-  CellValueChangedEvent,
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
-import type { SupplyRows } from "./supply.types";
+import type { SupplyRows } from "./types";
 
 const SupplyGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
@@ -16,6 +15,11 @@ const SupplyGrid = () => {
   const baseGridRef = useRef<BaseGridHandle<SupplyRows>>(null);
 
   const colDefs: ColDef<SupplyRows>[] = [
+    {
+      field: "id",
+      headerName: "ID",
+      hide: true,
+    },
     {
       field: "code",
       headerName: "Kod",
@@ -63,30 +67,40 @@ const SupplyGrid = () => {
       headerName: "Birim Fiyatı",
       editable: true,
       minWidth: 200,
+      type: "numberColumn",
     },
     {
       field: "quantity",
       headerName: "Metraj",
       editable: true,
       minWidth: 200,
+      type: "numberColumn",
     },
     {
       field: "contractAmount",
       headerName: "Sözleşme Tutarı",
       editable: true,
       minWidth: 200,
+      type: "numberColumn",
     },
     {
       field: "paidAmount",
       headerName: "Ödenen Tutar",
       editable: true,
       minWidth: 200,
+      type: "numberColumn",
     },
     {
       field: "remainingAmount",
       headerName: "Kalan Tutar",
       editable: false,
       minWidth: 200,
+      type: "numberColumn",
+      valueGetter: (params) => {
+        const contractAmount = params.data?.contractAmount ?? 0;
+        const paidAmount = params.data?.paidAmount ?? 0;
+        return contractAmount - paidAmount;
+      },
     },
     {
       field: "status",
@@ -120,23 +134,24 @@ const SupplyGrid = () => {
       headerName: "Oluşturulma Tarihi",
       editable: false,
       minWidth: 200,
+      valueFormatter: (params) => {
+        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
+      }
     },
     {
       field: "updatedatetime",
       headerName: "Güncelleme Tarihi",
       editable: false,
       minWidth: 200,
+      valueFormatter: (params) => {
+        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
+      }
     },
   ];
 
   const getRowId = (params: GetRowIdParams<SupplyRows>) => {
-    return params.data.id! ?? `${params.data.companyName}-${Math.random()}`;
-  };
-
-  const handleCellChange = (e: CellValueChangedEvent<SupplyRows>) => {
-    updateRow({
-      ...e.data
-    });
+    if (!params.data) return '';
+    return String(params.data.id || params.data.code);
   };
 
   return (
@@ -148,7 +163,7 @@ const SupplyGrid = () => {
       onAddRow={addRow}
       onDeleteRow={deleteRows}
       onSaveChanges={saveChanges}
-      onCellValueChanged={handleCellChange}
+      onCellValueChanged={updateRow}
       isLoading={loading}
       showButtons={{
         refresh: true,
