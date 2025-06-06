@@ -1,19 +1,7 @@
 import axios from "../utils/axios";
 import { API_BASE_URL } from "../config/api";
 
-interface LoginResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-}
-
-export const login = async (
-  email: string,
-  password: string
-): Promise<LoginResponse> => {
+export const login = async (email: string, password: string) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}auth/login`,
@@ -31,4 +19,4 @@ export const login = async (
       error?.response?.data?.message || "Giriş işlemi başarısız oldu";
     throw new Error(message);
   }
-};
+}; 

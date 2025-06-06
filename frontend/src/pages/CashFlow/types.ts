@@ -1,7 +1,9 @@
 export interface CashFlowRows {
-  currentNo: number;
-  currentName: string;
-  receivableBalance: number;
-  debtBalance: number;
-  currency: string;
+  id?:string;
+  transactiondate: Date;
+  method: string;
+  description:string;
+  income: number;
+  expense: number;
+  companyid: string;
 }

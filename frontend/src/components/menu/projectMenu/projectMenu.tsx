@@ -8,9 +8,10 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 type ProjectMenuProps = {
   items: ProjectMenuItemType[];
+  inHeader?: boolean;
 };
 
-const ProjectMenu = ({ items }: ProjectMenuProps) => {
+const ProjectMenu = ({ items, inHeader = false }: ProjectMenuProps) => {
   const { projects } = useProjects();
   const { projectId } = useParams();
   const selectedProject = projects.find((p) => p.id === projectId);
@@ -24,25 +25,30 @@ const ProjectMenu = ({ items }: ProjectMenuProps) => {
   );
 
   return (
-    <Menu as="div" className="relative text-left">
-      <div>
-        <MenuButton className="inline-flex w-full justify-between rounded-md  px-2 py-2 gap-0 text-sm font-semibold shadow-xs text-black hover:bg-light_primary dark:text-white dark:hover:bg-secondary">
-          <div className="flex gap-3">
-            <span className="flex">Artı Concept</span>
-            <span className="flex mt-3 font-handwriting italic">
-              {selectedProject?.name ?? ""}
+    <Menu as="div" className="relative h-full">
+      <MenuButton 
+        className={`h-full flex items-center gap-2 px-2 text-sm font-semibold text-black hover:bg-gray-50/50 dark:text-white dark:hover:bg-white/5 rounded-md ${
+          inHeader ? "py-1.5" : "w-full py-2"
+        }`}
+      >
+        <span className="flex items-center gap-2">
+          <span>Artı Concept</span>
+          {selectedProject?.name && (
+            <span className="text-xs font-handwriting italic">
+              {selectedProject.name}
             </span>
-          </div>
+          )}
+        </span>
+        <ChevronDownIcon
+          className="h-4 w-4 text-black dark:text-white"
+          aria-hidden="true"
+        />
+      </MenuButton>
 
-          <ChevronDownIcon
-            aria-hidden="true"
-            className="-mr-1 size-5 text-black dark:text-white"
-          />
-        </MenuButton>
-      </div>
       <MenuItems
-        transition
-        className="absolute z-10 mt-2 min-w-64 origin-top-right shadow-lg rounded-lg text-black bg-white dark:text-white  dark:bg-tertiary"
+        className={`absolute z-10 mt-1 w-64 rounded-lg bg-white shadow-lg dark:bg-tertiary dark:text-white ring-1 ring-black/5 dark:ring-white/10 focus:outline-none ${
+          inHeader ? "left-0" : "right-0"
+        }`}
       >
         <MenuItemsList items={items} />
         <div className="max-h-[50vh] overflow-y-auto">

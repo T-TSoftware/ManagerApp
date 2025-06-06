@@ -1,79 +1,71 @@
 "use client";
-import { useRef } from "react";
 import { useCashFlow } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
-import type {
-  ColDef,
-  ValueFormatterParams,
-  GetRowIdParams,
-} from "ag-grid-community";
+import type { ColDef, GetRowIdParams } from "ag-grid-community";
 import type { CashFlowRows } from "./types";
+import { v4 as uuid } from "uuid";
 
-const CashFlowGrid = () => {
-  const { cashFlow, loading } = useCashFlow();
-
-  const baseGridRef = useRef<BaseGridHandle<CashFlowRows>>(null);
+const BankMovementGrid = () => {
+  const { localData, loading, gridRef } = useCashFlow();
 
   const colDefs: ColDef<CashFlowRows>[] = [
-    { field: "currentNo" },
-    { field: "currentName" },
     {
-      field: "receivableBalance",
-      valueFormatter: (params: ValueFormatterParams) =>
-        `£${params.value.toLocaleString()}`,
+      field: "transactiondate",
+      headerName: "İşlem Tarihi",
+      type: "dateTimeColumn",
+      editable: false,
+      minWidth: 150,
     },
     {
-      field: "debtBalance",
-      valueFormatter: (params: ValueFormatterParams) =>
-        `£${params.value.toLocaleString()}`,
+      field: "method",
+      headerName: "Yöntem",
+      editable: false,
+      minWidth: 200,
     },
-    { field: "currency" },
+    {
+      field: "description",
+      headerName: "Açıklama",
+      editable: false,
+      minWidth: 150,
+    },
+    {
+      field: "income",
+      headerName: "Gelen Ödeme",
+      editable: false,
+      minWidth: 150,
+    },
+    {
+      field: "expense",
+      headerName: "Giden Ödeme",
+      editable: false,
+      minWidth: 150,
+    },
+    {
+      field: "companyid",
+      hide: true,
+    },
   ];
 
-  const getRowId = (params: GetRowIdParams<CashFlowRows>) =>
-    String(params.data.currentNo);
-
-  const handleAddRow = () => {
-    const newItem: CashFlowRows = {
-      currentNo: Math.floor(Math.random() * 100000),
-      currentName: "",
-      receivableBalance: 0,
-      debtBalance: 0,
-      currency: "",
-    };
-    baseGridRef.current?.addRow(newItem);
-  };
-
-  const handleDeleteRow = (selected: CashFlowRows[]) => {
-    baseGridRef.current?.deleteSelectedRows();
-    console.log("Silinecek satırlar:", selected);
-    // İstersen burada bir API ile silme işlemi yapabilirsin
-  };
-
-  const handleSaveChanges = (allRows: CashFlowRows[]) => {
-    console.log("Kaydedilecek tüm satırlar:", allRows);
-    // API gönderimi buraya yapılabilir
+  const getRowId = (params: GetRowIdParams<CashFlowRows>) => {
+    return uuid();
   };
 
   return (
     <BaseGrid<CashFlowRows>
-      ref={baseGridRef}
-      rowData={cashFlow}
+      ref={gridRef}
+      rowData={localData}
       columnDefs={colDefs}
       getRowId={getRowId}
-      onAddRow={handleAddRow}
-      onDeleteRow={handleDeleteRow}
-      onSaveChanges={handleSaveChanges}
       isLoading={loading}
       showButtons={{
         refresh: true,
-        add: true,
-        delete: true,
-        save: true,
+        add: false,
+        delete: false,
+        save: false,
         bar: true,
       }}
     />
   );
 };
 
-export default CashFlowGrid;
+export default BankMovementGrid;

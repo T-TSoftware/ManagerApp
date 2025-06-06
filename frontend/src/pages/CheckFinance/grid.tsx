@@ -6,13 +6,13 @@ import type {
   GetRowIdParams,
   ICellRendererParams,
 } from "ag-grid-community";
-import type { ProjectRows } from "./types";
-import { PencilSquareIcon } from "@heroicons/react/20/solid";
-import { useProject } from "./hook";
-import ProjectModal from "./modal";
+import type { CheckFinanceRows } from "./types";
+import { useCheckFinance } from "./hook";
+import CheckFinanceModal from "./modal";
 import Alert from "../../components/feedback/Alert";
+import { PencilSquareIcon } from "@heroicons/react/24/solid";
 
-const ProjectGrid = () => {
+const CheckGrid = () => {
   const {
     localData,
     loading,
@@ -25,14 +25,16 @@ const ProjectGrid = () => {
     getById,
     create,
     update,
-  } = useProject();
+  } = useCheckFinance();
 
-  const baseGridRef = useRef<BaseGridHandle<ProjectRows>>(null);
+  const baseGridRef = useRef<BaseGridHandle<CheckFinanceRows>>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [editData, setEditData] = useState<Partial<ProjectRows> | undefined>();
+  const [editData, setEditData] = useState<
+    Partial<CheckFinanceRows> | undefined
+  >();
 
-  const colDefs: ColDef<ProjectRows>[] = [
+  const colDefs: ColDef<CheckFinanceRows>[] = [
     {
       headerName: "",
       field: "edit",
@@ -41,7 +43,7 @@ const ProjectGrid = () => {
       editable: false,
       suppressMovable: true,
       filter: false,
-      cellRenderer: (params: ICellRendererParams<ProjectRows>) => {
+      cellRenderer: (params: ICellRendererParams<CheckFinanceRows>) => {
         return (
           <button
             className="text-black hover:underline text-sm"
@@ -65,48 +67,69 @@ const ProjectGrid = () => {
     },
     { field: "id", hide: true },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
-    { field: "name", headerName: "Ad", editable: false, minWidth: 200 },
-    { field: "site", headerName: "Adres", editable: false, minWidth: 200 },
-    { field: "status", headerName: "Durum", editable: false, minWidth: 200 },
     {
-      field: "estimatedStartDate",
-      headerName: "Beklenen Başlama Tarihi",
+      field: "checkDate",
+      headerName: "Çek Tarihi",
       type: "dateTimeColumn",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "actualStartDate",
-      headerName: "Gerçek Başlama Tarihi",
+      field: "transactionDate",
+      headerName: "İşlem Tarihi",
       type: "dateTimeColumn",
       editable: false,
       minWidth: 200,
     },
+
+    { field: "firm", headerName: "Tür", editable: false, minWidth: 200 },
     {
-      field: "estimatedEndDate",
-      headerName: "Beklenen Bitiş Tarihi",
-      type: "dateTimeColumn",
+      field: "amount",
+      headerName: "Proje",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "actualEndDate",
-      headerName: "Gerçek Bitiş Tarihi",
-      type: "dateTimeColumn",
+      field: "checkNo",
+      headerName: "Çek Numarası",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "createdBy",
-      headerName: "Oluşturan Kişi",
+      field: "description",
+      headerName: "Açıklama",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "updatedBy",
-      headerName: "Güncelleyen Kişi",
+      field: "status",
+      headerName: "Durum",
       editable: false,
       minWidth: 200,
+    },
+    {
+      field: "type",
+      headerName: "Tür",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "bankCode",
+      headerName: "Bank Code",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "transactionid",
+      hide: true,
+    },
+    {
+      field: "projectid",
+      hide: true,
+    },
+    {
+      field: "companyid",
+      hide: true,
     },
     {
       field: "createdatetime",
@@ -117,33 +140,46 @@ const ProjectGrid = () => {
     },
     {
       field: "updatedatetime",
-      headerName: "Güncelleme Tarihi",
+      headerName: "Güncellenme Tarihi",
       type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdby",
+      headerName: "Oluşturan",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedby",
+      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
   ];
 
-  const getRowId = (params: GetRowIdParams<ProjectRows>) => {
+  const getRowId = (params: GetRowIdParams<CheckFinanceRows>) => {
     return params.data.id!;
   };
 
-const handleModalSubmit = async (formData: Partial<ProjectRows>) => {
-  if (modalMode === "create") {
-    const newItem = await create(formData);
-    addRow(newItem);
-  } else {
-    const updatedItem = await update(formData); 
-    updateRow(updatedItem); 
-  }
-};
-
+  const handleModalSubmit = async (
+    formData: Partial<CheckFinanceRows>
+  ) => {
+    if (modalMode === "create") {
+      const newItem = await create(formData);
+      addRow(newItem);
+    } else {
+      const updatedItem = await update(formData);
+      updateRow(updatedItem);
+    }
+  };
 
   return (
     <>
       {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
 
-      <ProjectModal
+      <CheckFinanceModal
         open={modalOpen}
         mode={modalMode}
         defaultValues={editData}
@@ -152,7 +188,7 @@ const handleModalSubmit = async (formData: Partial<ProjectRows>) => {
         onSubmit={handleModalSubmit}
       />
 
-      <BaseGrid<ProjectRows>
+      <BaseGrid<CheckFinanceRows>
         ref={baseGridRef}
         rowData={localData}
         columnDefs={colDefs}
@@ -178,4 +214,4 @@ const handleModalSubmit = async (formData: Partial<ProjectRows>) => {
   );
 };
 
-export default ProjectGrid;
+export default CheckGrid;

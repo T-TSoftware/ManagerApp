@@ -46,9 +46,21 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Cari",
-      href: `${basePath}/current`,
+      href: `/current`,
       icon: BanknotesIcon,
-      adminYN: false,
+      adminYN: true,
+    },
+    {
+      label: "Ödeme Ekle",
+      href: "/company-finance",
+      icon: CreditCardIcon,
+      adminYN: true,
+    },
+    {
+      label: "Çek Ekle",
+      href: "/check-finance",
+      icon: CreditCardIcon,
+      adminYN: true,
     },
     {
       label: "Nakit Akış",
@@ -59,6 +71,12 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     {
       label: "Hesap Bakiyeleri",
       href: "/balances",
+      icon: CreditCardIcon,
+      adminYN: true,
+    },
+    {
+      label: "Banka Hareketleri",
+      href: "/bank-movement",
       icon: CreditCardIcon,
       adminYN: true,
     },

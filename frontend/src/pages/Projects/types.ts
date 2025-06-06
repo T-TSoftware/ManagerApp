@@ -13,5 +13,4 @@ export type ProjectRows = {
   updatedBy: string;
   createdatetime: Date;
   updatedatetime: Date;
-  isNew?: boolean;
 };

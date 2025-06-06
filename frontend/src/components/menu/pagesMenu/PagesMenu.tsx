@@ -2,10 +2,12 @@ import { useParams } from "react-router-dom";
 import { PageMenuItems } from "../../../config/menu/PageMenuItems";
 import PageMenuItemList from "./PagesMenuItemList";
 
-const PagesMenu = () => {
+type PagesMenuProps = {
+  isExpanded?: boolean;
+};
 
+const PagesMenu = ({ isExpanded = false }: PagesMenuProps) => {
   const { projectId } = useParams<{ projectId: string }>();
-
   const menuItems = PageMenuItems(projectId);
   
   const filteredItems = menuItems.filter((item) =>
@@ -13,15 +15,13 @@ const PagesMenu = () => {
   );
 
   return (
-    <aside className=" h-full">
-      <nav className="flex flex-col gap-2">
+    <nav className="py-3">
+      <div className="space-y-1 px-3">
         {filteredItems.map((item) => (
-          <span key={item.label} className="relative">
-            <PageMenuItemList item={item} />
-          </span>
+          <PageMenuItemList key={item.label} item={item} isExpanded={isExpanded} />
         ))}
-      </nav>
-    </aside>
+      </div>
+    </nav>
   );
 };
 

@@ -1,19 +1,19 @@
 import React from "react";
-import CurrentGrid from "./grid";
+import BankMovementGrid from "./grid";
 
-const Current: React.FC = () => {
+const BankMovement: React.FC = () => {
   return (
     <div className="grow p-3 lg:rounded-lg lg:shadow-xs h-full border-gray-100">
       <div className="mx-auto max-w-7xl">
         <div className="flex items-end justify-between gap-4">
           <p className="text-3xl font-semibold sm:text-3xl text-black dark:text-white">
-            Cari
+            Banka Hareketleri
           </p>
         </div>
         <div className="flow-root">
           <div className="mt-8 overflow-x-auto whitespace-nowrap ">
             <div className="flex flex-col min-w-full p-3 rounded-md shadow-xl h-[34rem] max-h-[60rem] 2xl:h-[60rem] bg-white dark:bg-tertiary">
-              <CurrentGrid />
+              <BankMovementGrid />
             </div>
           </div>
         </div>
@@ -22,4 +22,4 @@ const Current: React.FC = () => {
   );
 };
 
-export default Current;
+export default BankMovement;

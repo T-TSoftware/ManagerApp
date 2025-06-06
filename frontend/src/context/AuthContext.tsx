@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getToken, setToken, removeToken } from '../utils/token';
-import { login as loginRequest } from '../services/authService';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getToken, setToken, removeToken } from "../utils/token";
+import { login as loginRequest } from "../services/authService";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (token) {
       setIsAuthenticated(true);
       // TODO: Burada token'ı kullanarak kullanıcı bilgilerini çekebiliriz
-      setUser({ email: 'user@example.com' }); // Örnek kullanıcı
+      setUser({ email: "user@example.com" }); // Örnek kullanıcı
     }
     setLoading(false);
   }, []);
@@ -39,9 +39,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(response.token);
       setUser(response.user);
       setIsAuthenticated(true);
-      navigate('/admin-dashboard');
+      navigate("/admin-dashboard");
     } catch (err: any) {
-      setError(err.message || 'Giriş başarısız');
+      setError(err.message || "Giriş başarısız");
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     removeToken();
     setUser(null);
     setIsAuthenticated(false);
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         logout,
         loading,
-        error
+        error,
       }}
     >
       {!loading && children}
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}; 
+};

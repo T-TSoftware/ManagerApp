@@ -5,14 +5,14 @@ import type {
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
-import type { CurrentRows } from "./types";
+import type { BankMovementRows } from "./types";
 import { financeCategory } from "../../constants/financeCategory";
+import { currencyList } from "../../constants/currencyList";
 
-const CurrentGrid = () => {
-  const { localData, loading, gridRef } =
-    useCurrent();
+const BankMovementGrid = () => {
+  const { localData, loading, gridRef } = useCurrent();
 
-  const colDefs: ColDef<CurrentRows>[] = [
+  const colDefs: ColDef<BankMovementRows>[] = [
     {
       field: "id",
       hide: true,
@@ -22,36 +22,49 @@ const CurrentGrid = () => {
       hide: true,
     },
     {
-      field: "project",
+      field: "projectid",
       hide: true,
     },
     {
-      field: "firm",
-      headerName: "Firma",
+      field: "code",
+      headerName: "Kod",
       editable: false,
       minWidth: 150,
     },
     {
-      field: "income",
-      headerName: "Gelen Ödeme",
+      field: "from_account",
+      headerName: "Kaynak Hesap",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "expense",
-      headerName: "Giden Ödeme",
+      field: "to_account",
+      headerName: "Hedef Hesap",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "invoiceyn",
-      headerName: "Faturalı mı",
+      field: "description",
+      headerName: "Açıklama",
       editable: false,
       minWidth: 150,
     },
     {
-      field: "invoicecode",
-      headerName: "Fatura Kodu",
+      field: "currency",
+      headerName: "Para Birimi",
+      editable: false,
+      minWidth: 200,
+      cellEditorParams: {
+        values: currencyList.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = financeCategory.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+    },
+    {
+      field: "method",
+      headerName: "Yöntem",
       editable: false,
       minWidth: 200,
     },
@@ -69,14 +82,14 @@ const CurrentGrid = () => {
       },
     },
     {
-      field: "checkcode",
-      headerName: "Çek Kodu",
+      field: "income",
+      headerName: "Gelen Ödeme",
       editable: false,
-      minWidth: 200,
+      minWidth: 150,
     },
     {
-      field: "description",
-      headerName: "Açıklama",
+      field: "expense",
+      headerName: "Giden Ödeme",
       editable: false,
       minWidth: 150,
     },
@@ -89,13 +102,13 @@ const CurrentGrid = () => {
     },
   ];
 
-  const getRowId = (params: GetRowIdParams<CurrentRows>) => {
-    if (!params.data) return '';
+  const getRowId = (params: GetRowIdParams<BankMovementRows>) => {
+    if (!params.data) return "";
     return String(params.data.id);
   };
 
   return (
-    <BaseGrid<CurrentRows>
+    <BaseGrid<BankMovementRows>
       ref={gridRef}
       rowData={localData}
       columnDefs={colDefs}
@@ -112,4 +125,4 @@ const CurrentGrid = () => {
   );
 };
 
-export default CurrentGrid;
+export default BankMovementGrid;

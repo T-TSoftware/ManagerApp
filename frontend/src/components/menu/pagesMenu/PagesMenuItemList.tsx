@@ -3,34 +3,39 @@ import { PagesMenuItemType } from "../../../types/menu/PagesMenu";
 
 type Props = {
   item: PagesMenuItemType;
+  isExpanded: boolean;
 };
 
-const PagesMenuItemList = ({ item }: Props) => {
+const PagesMenuItemList = ({ item, isExpanded }: Props) => {
   const location = useLocation();
   const isActive = location.pathname === item.href;
   
   return (
-    <>
-      {isActive && (
-        <span className="absolute inset-y-2 -left-4 top-1/2 -translate-y-1/2 h-6 w-0.5 rounded-r transition-all duration-300 ease-in-out bg-black dark:bg-white" />
+    <NavLink
+      to={item.href}
+      className={({ isActive }) =>
+        `group relative flex items-center gap-x-3 rounded-md p-2 text-sm leading-6 hover:bg-gray-50/50 dark:hover:bg-white/5 ${
+          !isExpanded ? "justify-center" : ""
+        } ${
+          isActive 
+            ? "bg-gray-50/70 text-black dark:bg-white/10 dark:text-white" 
+            : "text-gray-700 dark:text-gray-400"
+        }`
+      }
+      title={item.label}
+    >
+      <item.icon
+        className={`h-5 w-5 shrink-0 ${
+          isActive 
+            ? "text-black dark:text-white" 
+            : "text-gray-400 group-hover:text-black dark:text-gray-400 dark:group-hover:text-white"
+        }`}
+        aria-hidden="true"
+      />
+      {isExpanded && (
+        <span className="truncate">{item.label}</span>
       )}
-
-      <NavLink
-        to={item.href}
-        className={({ isActive }) =>
-          `flex items-center gap-3 py-2 px-2 rounded-lg transition-colors duration-150 text-black hover:bg-light_primary dark:text-white dark:hover:bg-white/10  ${
-            isActive ? "font-medium" : "text-black/60 dark:text-white/60"
-          }`
-        }
-      >
-        <item.icon
-          className={`size-5 transition-colors ${
-            isActive ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"
-          }`}
-        />
-        <span className="text-sm">{item.label}</span>
-      </NavLink>
-    </>
+    </NavLink>
   );
 };
 
