@@ -13,7 +13,7 @@ const schema = z.object({
   firm: z.string().min(1, "Firma adı zorunludur"),
   amount: z.coerce.number().positive("Tutar pozitif olmalı"),
   checkNo: z.string().min(1, "Çek numarası zorunludur"),
-  status: z.string().min(1, "Durum zorunludur"),
+  status: z.string().optional(),
   type: z.string().min(1, "Tür zorunludur"),
   description: z.string().optional(),
 });
@@ -182,9 +182,6 @@ const CheckFinanceModal = ({
                 </option>
               ))}
             </select>
-            {errors.status && (
-              <p className="text-red-500 text-sm">{errors.status.message}</p>
-            )}
           </div>
 
           <div>
