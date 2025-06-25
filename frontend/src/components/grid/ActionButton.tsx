@@ -27,7 +27,7 @@ const ActionButton = ({
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   return (
-    <div className="relative inline-block text-left z-50">
+    <div className="relative inline-block text-left z-10">
       <button
         onClick={isDropdown ? toggleDropdown : onClick}
         className="flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-3xl transition-all duration-200 ease-in-out shadow-lg text-white bg-light_fourth dark:bg-fourth dark:text-white"

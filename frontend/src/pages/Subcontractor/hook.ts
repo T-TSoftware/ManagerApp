@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { SubcontractorRows, validateSubcontractorRow, UpdateSubcontractorPayload } from "./subcontractor.types";
+import { SubcontractorRows, validateSubcontractorRow, UpdateSubcontractorPayload } from "./types";
 import { useParams } from "react-router-dom";
 import {
   getAllSubcontractorByProject,

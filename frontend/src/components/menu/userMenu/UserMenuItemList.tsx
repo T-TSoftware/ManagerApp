@@ -1,6 +1,5 @@
 import { MenuItem } from "@headlessui/react";
 import { UserMenuItemType } from "../../../types/menu/UserMenu";
-
 type Props = {
   items: UserMenuItemType[];
 };
@@ -8,36 +7,29 @@ type Props = {
 const UserMenuItemsList = ({ items }: Props) => {
   return (
     <>
-      {items.map((item, index) => (
-        <div key={item.label ?? index}>
+      {items.map((item) => (
+        <div key={item.label}>
           {item.separatorBefore && (
             <div
-              className="col-span-full mx-3.5 my-1 h-px border-0 sm:mx-3 bg-zinc-950/5 dark:bg-white/10 dark:forced-colors:bg-[CanvasText]"
+              className="col-span-full mx-3.5 my-1 h-px border-0 bg-zinc-950/5 sm:mx-3 dark:bg-white/10 forced-colors:bg-[CanvasText]"
               role="separator"
             />
           )}
 
           <div className="py-1 px-3">
             {item.element ? (
-              <>{item.element}</>
+              item.element
             ) : (
               <MenuItem>
-                {({ active }) => (
-                  <button
-                    type="button"
-                    onClick={item.onClick}
-                    className={`grid w-full text-left grid-cols-[auto_1fr] gap-x-2 items-center px-4 py-2 text-sm rounded-md ${
-                      active
-                        ? "bg-light_primary dark:bg-secondary"
-                        : "text-black dark:text-white"
-                    }`}
-                  >
-                    {item.icon && (
-                      <item.icon className="size-4 dark:text-white" />
-                    )}
-                    <p className="dark:text-white">{item.label}</p>
-                  </button>
-                )}
+                <a
+                  href={item.href}
+                  className="grid grid-cols-[auto_1fr] gap-x-2 items-center px-4 py-2 text-sm dark:text-white dark:data-focus:bg-gray-100 dark:data-focus:text-gray-900 data-focus:outline-hidden"
+                >
+                  {item.icon && (
+                    <item.icon className="size-4 dark:text-white" />
+                  )}
+                  <p>{item.label}</p>
+                </a>
               </MenuItem>
             )}
           </div>

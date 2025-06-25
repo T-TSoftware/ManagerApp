@@ -7,7 +7,7 @@ import type {
   ValueFormatterParams,
   GetRowIdParams,
 } from "ag-grid-community";
-import type { DashboardRows } from "./dashboard.types";
+import type { DashboardRows } from "./types";
 
 const DashboardGrid = () => {
   const { dashboard, loading } = useDashboard();

@@ -93,19 +93,19 @@ const onFormSubmit = async (data: ProjectFormSchema) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-2xl">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-2xl dark:bg-primary dark:text-white">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Proje Yarat" : "Projeyi Güncelle"}
         </h2>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
               Proje Adı
             </label>
             <input
               {...register("name")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               placeholder="Proje adı girin"
             />
             {errors.name && (
@@ -114,71 +114,71 @@ const onFormSubmit = async (data: ProjectFormSchema) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
               Şantiye
             </label>
             <input
               {...register("site")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               placeholder="Şantiye girin"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
               Durum
             </label>
             <input
               {...register("status")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               placeholder="Durum girin (ör: Planned)"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
                 Tahmini Başlangıç
               </label>
               <input
                 type="datetime-local"
                 {...register("estimatedStartDate")}
                 defaultValue={new Date().toISOString().slice(0, 16)}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
                 Gerçek Başlangıç
               </label>
               <input
                 type="datetime-local"
                 {...register("actualStartDate")}
                 defaultValue={new Date().toISOString().slice(0, 16)}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
                 Tahmini Bitiş
               </label>
               <input
                 type="datetime-local"
                 {...register("estimatedEndDate")}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
                 Gerçek Bitiş
               </label>
               <input
                 type="datetime-local"
                 {...register("actualEndDate")}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
               />
             </div>
           </div>
@@ -187,14 +187,14 @@ const onFormSubmit = async (data: ProjectFormSchema) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border bg-gray-200 text-gray-700 hover:bg-gray-300"
+              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500  hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
             >
               İptal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth  dark:bg-fourth transition"
             >
               {isSubmitting
                 ? mode === "create"

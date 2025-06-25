@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { QuantityRows, validateQuantityRow, UpdateQuantityPayload } from "./quantity.types";
+import { QuantityRows, validateQuantityRow, UpdateQuantityPayload } from "./types";
 import { useParams } from "react-router-dom";
 import {
   getAllQuantityByProject,

@@ -217,7 +217,8 @@ const CheckFinanceModal = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+              
+              className="px-5 py-2 rounded-lg bg-primary text-white hover:bg-blue-700 transition"
             >
               {isSubmitting ? "Güncelleniyor..." : "Kaydet"}
             </button>

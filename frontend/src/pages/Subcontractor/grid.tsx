@@ -6,7 +6,7 @@ import type {
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
-import type { SubcontractorRows } from "./subcontractor.types";
+import type { SubcontractorRows } from "./types";
 
 const SubcontractorGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =

@@ -1,5 +1,4 @@
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/20/solid";
 import UserMenuItemsList from "./UserMenuItemList";
 import { UserMenuItemType } from "../../../types/menu/UserMenu";
 import Avatar from "../../../assets/Images/avatar.png";
@@ -11,35 +10,23 @@ type UserMenuProps = {
 const UserMenu = ({ items }: UserMenuProps) => {
   return (
     <Menu as="div" className="relative text-left">
-      <MenuButton className="cursor-default flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left text-base/6 font-medium sm:py-2 sm:text-sm/5 text-black hover:bg-light_primary dark:text-zinc-950 dark:hover:bg-secondary">
+      <MenuButton
+        className="cursor-default relative flex min-w-0 items-center rounded-lg text-left"
+        aria-label="Open User Menu"
+      >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="relative size-10 inline-grid shrink-0 align-middle  *:col-start-1 *:row-start-1">
+          <span className="absolute top-1/2 left-[calc(-16px+1px)] size-[max(100%,2.25rem)] -translate-x-1/2 -translate-y-1/2">
             <img
-              className="absolute size-full rounded-full"
+              className="size-full rounded-full"
               src={Avatar}
               alt="user"
             ></img>
           </span>
-          <span className="min-w-0">
-            <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
-              Şükrü
-            </span>
-            <span className="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
-              sükrü@articoncept.com
-            </span>
-          </span>
-        </span>
-        <span className="flex min-w-0 items-center gap-3">
-          <ChevronUpIcon
-            aria-hidden="true"
-            className="-mr-1 size-5 text-black dark:text-white cursor-pointer"
-          />
         </span>
       </MenuButton>
-
       <MenuItems
         transition
-        className="absolute bottom-full mb-2 w-64 origin-bottom-right rounded-lg shadow-lg transition  bg-white dark:bg-tertiary focus:outline-none z-50"
+        className="absolute right-0 mt-6 min-w-64  rounded-lg  shadow-lg translate-x-[-1px] bg-white ring-grey-100 dark:bg-tertiary dark:ring-white/10 dark:text-white"
       >
         <UserMenuItemsList items={items} />
       </MenuItems>

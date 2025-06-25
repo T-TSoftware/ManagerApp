@@ -1,5 +1,5 @@
 import axios from "../../utils/axios";
-import { QuantityRows, NewQuantityPayload, UpdateQuantityPayload } from "./quantity.types";
+import { QuantityRows, NewQuantityPayload, UpdateQuantityPayload } from "./types";
 
 export const getAllQuantityByProject = async (
   projectId: string,

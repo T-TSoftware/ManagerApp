@@ -6,7 +6,7 @@ import type {
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
-import type { QuantityRows } from "./quantity.types";
+import type { QuantityRows } from "./types";
 
 const QuantityGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =

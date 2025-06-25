@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { DashboardRows } from "./dashboard.types";
+import { DashboardRows } from "./types";
 
 const mockCurrents: DashboardRows[] = [
   {

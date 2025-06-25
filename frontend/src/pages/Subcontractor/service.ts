@@ -1,5 +1,5 @@
 import axios from "../../utils/axios";
-import { SubcontractorRows, NewSubcontractorPayload, UpdateSubcontractorPayload } from "./subcontractor.types";
+import { SubcontractorRows, NewSubcontractorPayload, UpdateSubcontractorPayload } from "./types";
 
 export const getAllSubcontractorByProject = async (
   projectId: string,

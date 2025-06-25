@@ -1,4 +1,5 @@
 export type UserMenuItemType = {
+  id:string;
   label?: string;
   href?: string;
   icon?: React.ElementType;

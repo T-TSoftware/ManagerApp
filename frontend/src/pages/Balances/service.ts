@@ -12,6 +12,7 @@ export const addBalances = async (
   token: string,
   data: Omit<BalanceRows, "isNew">[]
 ) => {
+  console.log("d:",data);
   const res = await axios.post("balances", data, {
     headers: { Authorization: `Bearer ${token}` },
   });
