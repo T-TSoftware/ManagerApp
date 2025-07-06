@@ -74,6 +74,12 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       adminYN: true,
     },
     {
+      label: "Satışlar",
+      href: "/sales",
+      icon: BanknotesIcon,
+      adminYN: true,
+    },
+    {
       label: "Hesap Bakiyeleri",
       href: "/balances",
       icon: BuildingLibraryIcon,

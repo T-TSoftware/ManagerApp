@@ -1,27 +1,30 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "../src/layouts/MainLayout";
-import Dashboard from "./pages/Dashboard/index";
-import Stock from "./pages/Stock/index";
-import Current from "./pages/Current/index";
-import Supply from "./pages/Supply/index";
-import Sales from "./pages/Sales/index";
-import Subcontractor from "./pages/Subcontractor/index";
-import AdminDashboard from "./pages/AdminDashboard/index";
-import LoginPage from "./pages/Login";
-import CashFlow from "./pages/CashFlow";
-import Balances from "./pages/Balances";
-import Quantity from "./pages/Quantity";
-import CostSummary from "./pages/CostSummary";
-import Projects from "./pages/Projects";
-import SubcontractorList from "./pages/SubcontractorList";
-import SupplierList from "./pages/SupplierList";
 import { Toaster } from "react-hot-toast";
-
-import { AlertProvider } from "./context/AlertContext"; 
+import { AlertProvider } from "./context/AlertContext";
 import Alert from "./components/feedback/Alert";
-import CompanyFinance from "./pages/CompanyFinance";
-import CheckFinance from "./pages/CheckFinance";
-import BankMovement from "./pages/BankMovement";
+
+import MainLayout from "../src/layouts/MainLayout";
+
+import AdminBalances from "./pages/AdminBalances/index";
+import AdminBankMovement from "./pages/AdminBankMovement";
+import AdminCashFlow from "./pages/AdminCashFlow/index";
+import AdminCheckFinance from "./pages/AdminCheckFinance";
+import AdminCompanyFinance from "./pages/AdminCompanyFinance";
+import AdminCurrent from "./pages/AdminCurrent/index";
+import AdminDashboard from "./pages/AdminDashboard/index";
+import AdminSales from "./pages/AdminSales";
+import AdminSubcontractor from "./pages/AdminSubcontractor/index";
+import AdminSupplier from "./pages/AdminSupplier/index";
+import LoginPage from "./pages/Login/index";
+import ProjectCostSummary from "./pages/ProjectCostSummary/index";
+import ProjectDashboard from "./pages/ProjectDashboard/index";
+import ProjectQuantity from "./pages/ProjectQuantity/index";
+import Projects from "./pages/Projects/index";
+import ProjectSales from "./pages/ProjectSales/index";
+import ProjectStock from "./pages/ProjectStock/index";
+import ProjectSubcontractor from "./pages/ProjectSubcontractor/index";
+import ProjectSupply from "./pages/ProjectSupply/index";
+
 
 function App() {
   return (
@@ -57,26 +60,39 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<MainLayout />}>
             <Route path="admin-dashboard" element={<AdminDashboard />} />
-            <Route path="current" element={<Current />} />
-            <Route path="cash-flow" element={<CashFlow />} />
-            <Route path="company-finance" element={<CompanyFinance />} />
-            <Route path="check-finance" element={<CheckFinance />} />
-            <Route path="bank-movement" element={<BankMovement />} />
-            <Route path="balances" element={<Balances />} />
+            <Route path="current" element={<AdminCurrent />} />
+            <Route path="cash-flow" element={<AdminCashFlow />} />
+            <Route
+              path="company-finance"
+              element={<AdminCompanyFinance />}
+            />
+            <Route path="check-finance" element={<AdminCheckFinance />} />
+            <Route path="bankmovement" element={<AdminBankMovement />} />
+            <Route path="sales" element={<AdminSales />} />
+            <Route path="balances" element={<AdminBalances />} />
             <Route path="projects" element={<Projects />} />
-            <Route path="subcontractor-list" element={<SubcontractorList />} />
-            <Route path="supplier-list" element={<SupplierList />} />
+            <Route
+              path="subcontractor-list"
+              element={<AdminSubcontractor />}
+            />
+            <Route path="supplier-list" element={<AdminSupplier />} />
           </Route>
 
           <Route path="/project/:projectId" element={<MainLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="supply" element={<Supply />} />
-            <Route path="sales" element={<Sales />} />
-            <Route path="current" element={<Current />} />
-            <Route path="subcontractor" element={<Subcontractor />} />
-            <Route path="quantity" element={<Quantity />} />
-            <Route path="stock" element={<Stock />} />
-            <Route path="cost-summary" element={<CostSummary />} />
+            <Route path="dashboard" element={<ProjectDashboard />} />
+            <Route path="supply" element={<ProjectSupply />} />
+            <Route path="sales" element={<ProjectSales />} />
+            <Route path="current" element={<AdminCurrent />} />
+            <Route
+              path="subcontractor"
+              element={<ProjectSubcontractor />}
+            />
+            <Route path="quantity" element={<ProjectQuantity />} />
+            <Route path="stock" element={<ProjectStock />} />
+            <Route
+              path="cost-summary"
+              element={<ProjectCostSummary />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>

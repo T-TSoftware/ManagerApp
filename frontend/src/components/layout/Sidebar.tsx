@@ -1,6 +1,5 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import PagesMenu from "../menu/pagesMenu/PagesMenu";
-import { useState } from "react";
 
 type SidebarProps = {
   className?: string;

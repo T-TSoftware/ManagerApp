@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getToken, setToken, removeToken } from "../utils/token";
+import { getToken, setToken, clearToken } from "../utils/token";
 import { login as loginRequest } from "../services/authService";
 
 interface AuthContextType {
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-    removeToken();
+    clearToken();
     setUser(null);
     setIsAuthenticated(false);
     navigate("/login");
