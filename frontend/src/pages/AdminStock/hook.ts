@@ -1,0 +1,228 @@
+import { useEffect, useState, useRef } from "react";
+import { StockRows, validateStockRow, UpdateStockPayload } from "./types";
+import { getAllStocks, addStock, updateStock, deleteStock } from "./service";
+import { useNotifier } from "../../hooks/useNotifier";
+import { getToken } from "../../utils/token";
+import { v4 as uuid } from "uuid";
+import { CellValueChangedEvent } from "ag-grid-community";
+import { isRowModified } from "../../types/grid/commonTypes";
+import { BaseGridHandle } from "../../components/grid/BaseGrid";
+
+export const useStock = () => {
+  const [originalData, setOriginalData] = useState<StockRows[]>([]);
+  const [localData, setLocalData] = useState<StockRows[]>([]);
+  const [loading, setLoading] = useState(true);
+  const gridRef = useRef<BaseGridHandle<StockRows>>(null);
+
+  const token = getToken();
+  const notify = useNotifier();
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (!token) return;
+      const data = await getAllStocks(token);
+      
+      const dataWithTracking = data.map(row => {
+        const ensuredId = row.id || uuid();
+        const rowWithId = {
+          ...row,
+          id: ensuredId,
+          code: row.code
+        };
+        
+        return {
+          ...rowWithId,
+          _originalData: { ...rowWithId }
+        };
+      });
+      
+      setOriginalData(dataWithTracking);
+      setLocalData(dataWithTracking);
+    } catch (error) {
+      notify.handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [token]);
+
+  const addRow = () => {
+    const currentDate = new Date();
+    const rowId = uuid();
+    
+    const newRow: StockRows = {
+      id: rowId,
+      code: "",
+      name: "",
+      category: "",
+      unit: "",
+      quantity: 0,
+      minimumQuantity: 0,
+      description: "",
+      location: "",
+      stockDate: currentDate,
+      createdBy: "",
+      updatedBy: "",
+      createdatetime: currentDate,
+      updatedatetime: currentDate,
+      isNew: true
+    };
+    
+    const originalData = { ...newRow };
+    delete (originalData as any).isNew;
+    newRow._originalData = originalData;
+    
+    setLocalData(prev => [newRow, ...prev]);
+  };
+
+  const updateRow = (event: CellValueChangedEvent<StockRows>) => {
+    const { data, colDef } = event;
+    
+    if (!data?.id || !colDef?.field) {
+      notify.error("Geçersiz güncelleme: Satır kodu veya alan eksik");
+      return;
+    }
+
+    const field = colDef.field as keyof StockRows;
+    
+    setLocalData(prev => 
+      prev.map(item => {
+        if (!item.id || item.id !== data.id) return item;
+        
+        let value: any = data[field];
+        if ([
+          'quantity',
+          'minimumQuantity'
+        ].includes(field)) {
+          const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
+          value = isNaN(numValue) ? 0 : numValue;
+        }
+
+        if (['stockDate', 'createdatetime', 'updatedatetime'].includes(field)) {
+          value = value ? new Date(value) : new Date();
+        }
+
+        const updatedItem = {
+          ...item,
+          [field]: value,
+          updatedatetime: new Date()
+        };
+
+        return updatedItem;
+      })
+    );
+  };
+
+  const deleteRows = (selected: StockRows[]) => {
+    const validSelectedRows = selected.filter(row => row.id);
+    
+    if (validSelectedRows.length !== selected.length) {
+      notify.error("Bazı satırlar ID eksikliği nedeniyle silinemedi");
+    }
+
+    setLocalData(prev => {
+      const deletedIds = new Set(validSelectedRows.map(row => row.id));
+      return prev.filter(row => row.id && !deletedIds.has(row.id));
+    });
+  };
+
+  const getModifiedFields = (current: StockRows, original: Partial<StockRows>): UpdateStockPayload => {
+    const modifiedFields: UpdateStockPayload = {
+      code: current.code
+    };
+
+    const fieldsToCheck = [
+      'name',
+      'category',
+      'unit',
+      'quantity',
+      'minimumQuantity',
+      'description',
+      'location',
+      'stockDate',
+    ] as const;
+
+    fieldsToCheck.forEach(field => {
+      if (current[field] !== original[field]) {
+        (modifiedFields as any)[field] = current[field];
+      }
+    });
+
+    return modifiedFields;
+  };
+
+  const saveChanges = async () => {
+    try {
+      // Grid düzenlemeyi durdur
+      gridRef.current?.getGridApi()?.stopEditing();
+
+      const added = localData.filter(row => row.isNew);
+      const modified = localData.filter(row => !row.isNew && isRowModified(row));
+      const deleted = originalData.filter(row => 
+        !localData.some(localRow => localRow.id === row.id)
+      );
+
+      const hasErrors = validateRows([...added, ...modified]);
+      if (hasErrors) return;
+
+      notify.loading("Değişiklikler kaydediliyor...");
+
+      if (added.length > 0) {
+        const addedItems = added.map(({ isNew, _originalData, ...rest }) => rest);
+        await addStock(token!, addedItems);
+      }
+
+      if (modified.length > 0) {
+        const payload = modified.map(row => {
+          const originalRow = row._originalData;
+          if (!originalRow) {
+            return { code: row.code } as UpdateStockPayload;
+          }
+          return getModifiedFields(row, originalRow);
+        });
+        
+        await updateStock(token!, payload);
+      }
+
+      if (deleted.length > 0) {
+        const codes = deleted.map(row => row.code);
+        await deleteStock(token!, codes);
+      }
+
+      await fetchData();
+      notify.dismiss();
+      notify.success("Kayıt başarılı");
+    } catch (err) {
+      console.log("Errors:", err);
+      notify.handleError(err);
+    }
+  };
+
+  const validateRows = (rows: StockRows[]): boolean => {
+    let hasError = false;
+
+    rows.forEach((row) => {
+      const errors = validateStockRow(row);
+      if (errors.length > 0) {
+        errors.forEach((error) => notify.error(error));
+        hasError = true;
+      }
+    });
+
+    return hasError;
+  };
+
+  return {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+    gridRef
+  };
+};

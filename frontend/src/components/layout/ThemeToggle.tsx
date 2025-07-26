@@ -1,5 +1,7 @@
 import { useTheme } from "../../themes/appThemes/ThemeContext";
-import { SunIcon, MoonIcon } from "@heroicons/react/20/solid";
+import {
+ SunMedium, Moon
+} from "lucide-react";
 
 const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();
@@ -11,12 +13,12 @@ const ThemeToggle = () => {
     >
       {theme === "light" ? (
         <>
-          <SunIcon className="size-4 text-black" />
+          <SunMedium className="size-4 text-black" />
           <p className="text-black">Light</p>
         </>
       ) : (
         <>
-          <MoonIcon className="size-4 text-white" />
+          <Moon className="size-4 text-white" />
           <p className="text-white">Dark</p>
         </>
       )}

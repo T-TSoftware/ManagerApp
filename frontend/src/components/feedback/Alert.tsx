@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { useAlertContext } from "../../context/AlertContext";
+import { CircleAlert } from "lucide-react";
 
 const typeClasses = {
   warning: {
@@ -38,7 +37,7 @@ const Alert = () => {
     <div className={`rounded-md p-4 flex mb-4 shadow-md ${classes.bg}`}>
       <div className="flex">
         <div className="flex-shrink-0">
-          <ExclamationTriangleIcon className={`h-5 w-5 ${classes.icon}`} />
+          <CircleAlert className={`h-5 w-5 ${classes.icon}`} />
         </div>
         <div className="ml-3">
           <h3 className={`text-sm font-medium ${classes.text}`}>

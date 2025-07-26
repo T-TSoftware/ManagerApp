@@ -7,18 +7,21 @@ import type {
   ICellRendererParams,
 } from "ag-grid-community";
 import type { FinanceTransactionRows } from "./types";
-import { PencilSquareIcon } from "@heroicons/react/20/solid";
 import { useFinance } from "./hook";
 import FinanceTransactionModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { currencyList } from "../../constants/currencyList";
 import { financeTypes } from "../../constants/financeTypes";
 import { financeCategory } from "../../constants/financeCategory";
+import { FilePenLine } from "lucide-react";
+import { paymentMethods } from "../../constants/paymentMethods";
+import { yesNo } from "../../constants/yesNo";
 
 const FinanceGrid = () => {
   const {
     localData,
     loading,
+    accountOptions,
     addRow,
     updateRow,
     deleteRows,
@@ -58,7 +61,7 @@ const FinanceGrid = () => {
               }
             }}
           >
-            <PencilSquareIcon
+            <FilePenLine
               aria-hidden="true"
               className="-mr-1 size-5 text-gray-500 dark:text-white"
             />
@@ -88,16 +91,16 @@ const FinanceGrid = () => {
       minWidth: 200,
     },
     {
-      field: "fromAccount",
+      field: "fromAccount.name",
       headerName: "Kaynak Hesap",
-      valueGetter: ({ data }) => data?.fromAccount?.code ?? "-",
+      valueGetter: ({ data }) => data?.fromAccount?.name ?? "-",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "toAccount",
+      field: "toAccount.name",
       headerName: "Hedef Hesap",
-      valueGetter: ({ data }) => data?.toAccount?.code ?? "-",
+      valueGetter: ({ data }) => data?.toAccount?.name ?? "-",
       editable: false,
       minWidth: 200,
     },
@@ -117,15 +120,15 @@ const FinanceGrid = () => {
     },
     { field: "source", headerName: "Kaynak", editable: false, minWidth: 200 },
     {
-      field: "targettype",
+      field: "targetType",
       hide: true,
     },
     {
-      field: "targetid",
+      field: "targetId",
       hide: true,
     },
     {
-      field: "targetname",
+      field: "targetName",
       headerName: "Hedef Adı",
       editable: false,
       minWidth: 200,
@@ -137,7 +140,19 @@ const FinanceGrid = () => {
       editable: false,
       minWidth: 200,
     },
-    { field: "method", headerName: "Yöntem", editable: false, minWidth: 200 },
+    {
+      field: "method",
+      headerName: "Yöntem",
+      editable: false,
+      minWidth: 200,
+      cellEditorParams: {
+        values: paymentMethods.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = paymentMethods.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+    },
     {
       field: "category",
       headerName: "Kategori",
@@ -152,20 +167,45 @@ const FinanceGrid = () => {
       minWidth: 200,
     },
     {
-      field: "invoiceyn",
-      headerName: "Fatura",
+      field: "invoiceYN",
+      headerName: "Faturalı mı?",
+      cellEditorParams: {
+        values: yesNo.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = yesNo.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
     {
-      field: "invoicecode",
+      field: "invoiceCode",
       headerName: "Fatura Kodu",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "checkcode",
+      field: "checkCode",
       headerName: "Çek Kodu",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "checkstatus",
+      headerName: "Çek Durumu",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "loanCode",
+      headerName: "Kredi Kodu",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "loanStatus",
+      headerName: "Kredi Durumu",
       editable: false,
       minWidth: 200,
     },
@@ -196,7 +236,7 @@ const FinanceGrid = () => {
     //   minWidth: 200,
     // },
     {
-      field: "updatedby",
+      field: "updatedBy.name",
       headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
@@ -226,6 +266,7 @@ const handleModalSubmit = async (formData: Partial<FinanceTransactionRows>) => {
         open={modalOpen}
         mode={modalMode}
         defaultValues={editData}
+        options={accountOptions}
         onClose={() => setModalOpen(false)}
         onSuccess={() => setModalOpen(false)}
         onSubmit={handleModalSubmit}

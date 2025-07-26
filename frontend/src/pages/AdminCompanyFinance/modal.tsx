@@ -1,29 +1,45 @@
 "use client";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { FinanceTransactionRows } from "./types";
+import ModalWrapper from "../../components/layout/ModalWrapper";
+import type { AutocompleteOption, FinanceTransactionRows } from "./types";
 import { financeTypes } from "../../constants/financeTypes";
 import { financeCategory } from "../../constants/financeCategory";
 import { currencyList } from "../../constants/currencyList";
+import { yesNo } from "../../constants/yesNo";
+import { paymentMethods } from "../../constants/paymentMethods";
+import {
+  TextInput,
+  Dropdown,
+  NumberInput,
+  TextAreaInput,
+  DatePicker,
+  AutoComplete,
+} from "../../components/inputs";
 
-const schema = z
-  .object({
-    type: z.string().min(1, "Tür zorunludur."),
-    source: z.string().min(1, "Kaynak zorunludur."),
-    amount: z.coerce.number().positive("Tutar pozitif olmalı."),
-    currency: z.string().min(1, "Para birimi zorunludur."),
-    fromAccountCode: z.string().optional(),
-    toAccountCode: z.string().optional(),
-    transactionDate: z.string().optional(),
-    method: z.string().optional(),
-    category: z.string().optional(),
-    description: z.string().optional(),
-    invoiceyn: z.string().optional(),
-    invoicecode: z.string().optional(),
-    targetname: z.string().optional(),
-  });
+const optionalString = z.string().optional().or(z.literal(""));
+const schema = z.object({
+  type: z.string().min(1, "Tür zorunludur."),
+  source: z.string().min(1, "Kaynak zorunludur."),
+  amount: z.coerce.number().positive("Tutar pozitif olmalı."),
+  currency: z.string().min(1, "Para birimi zorunludur."),
+  code: optionalString,
+  project: optionalString,
+  fromAccountCode: optionalString,
+  toAccountCode: optionalString,
+  transactionDate: z.date({
+    required_error: "İşlem tarihi zorunludur.",
+    invalid_type_error: "Geçerli bir tarih girin.",
+  }),
+  method: optionalString,
+  category: optionalString,
+  description: optionalString,
+  invoiceYN: optionalString,
+  invoiceCode: optionalString,
+  targetName: optionalString,
+});
 
 type FinanceFormSchema = z.infer<typeof schema>;
 
@@ -31,6 +47,7 @@ type Props = {
   open: boolean;
   mode: "create" | "edit";
   defaultValues?: Partial<FinanceTransactionRows>;
+  options: AutocompleteOption[];
   onClose: () => void;
   onSubmit: (data: Partial<FinanceTransactionRows>) => Promise<void>;
   onSuccess: () => void;
@@ -40,6 +57,7 @@ const FinanceTransactionModal = ({
   open,
   mode,
   defaultValues,
+  options,
   onClose,
   onSubmit,
   onSuccess,
@@ -48,23 +66,50 @@ const FinanceTransactionModal = ({
     register,
     handleSubmit,
     reset,
+    watch,
+    control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FinanceFormSchema>({
     resolver: zodResolver(schema),
   });
 
-  useEffect(() => {
-    if (defaultValues) {
-      const format = (date?: string | Date) =>
-        date ? new Date(date).toISOString().slice(0, 16) : "";
+  const memoizedDefaultValues = useMemo(() => {
+    if (mode === "edit" && defaultValues) {
 
-      reset({
+      return {
         ...defaultValues,
-        transactionDate: format(defaultValues.transactionDate),
-        
-      });
+        transactionDate: defaultValues?.transactionDate
+          ? new Date(defaultValues.transactionDate)
+          : undefined,
+        fromAccountCode: defaultValues.fromAccount?.code,
+        toAccountCode: defaultValues.toAccount?.code,
+        project: defaultValues.project ?? undefined,
+      };
     }
-  }, [defaultValues, reset]);
+
+    return {
+      code: "",
+      description: "",
+      amount: 0,
+      transactionDate: new Date(),
+      type: "",
+      source: "",
+      currency: "",
+      project: "",
+      fromAccountCode: "",
+      toAccountCode: "",
+      method: "",
+      category: "",
+      invoiceYN: "",
+      invoiceCode: "",
+      targetName: "",
+    };
+  }, [defaultValues, mode]);
+
+  useEffect(() => {
+    reset(memoizedDefaultValues);
+  }, [reset, memoizedDefaultValues]);
 
   const onFormSubmit = async (data: FinanceFormSchema) => {
     try {
@@ -83,181 +128,120 @@ const FinanceTransactionModal = ({
     }
   };
 
-  if (!open) return null;
-
   return (
- <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-2xl dark:bg-primary dark:text-white">
+    <ModalWrapper open={open} onClose={onClose}>
+      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-6xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Ödeme Ekle" : "Ödeme Düzenle"}
         </h2>
 
         <form
           onSubmit={handleSubmit(onFormSubmit)}
-          className="grid grid-cols-3 gap-4"
+          className="grid grid-cols-4 gap-4"
         >
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Tür</label>
-            <select
-              {...register("type")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-            >
-              {financeTypes.map((option) => (
-                <option key={option.code} value={option.code}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-            {errors.type && (
-              <p className="text-red-500 text-sm">{errors.type.message}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Hedef Adı</label>
-            <input
-              {...register("targetname")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Hedef Adı"
-            />
-          </div>
+          <TextInput
+            name="targetName"
+            label="Hedef Adı"
+            register={register}
+            error={errors.targetName?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Faturalı mı?
-            </label>
-            <select
-              {...register("invoiceyn")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-            >
-              <option value="">Seçiniz</option>
-              <option value="Y">Evet</option>
-              <option value="N">Hayır</option>
-            </select>
-          </div>
+          <TextInput
+            name="invoiceCode"
+            label="Fatura Kodu"
+            register={register}
+            error={errors.invoiceCode?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Fatura Kodu
-            </label>
-            <input
-              {...register("invoicecode")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Fatura kodu girin"
-            />
-          </div>
+          <TextInput
+            name="source"
+            label="Kaynak"
+            register={register}
+            error={errors.source?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Tutar</label>
-            <input
-              type="number"
-              step="0.01"
-              {...register("amount")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="0"
-            />
-            {errors.amount && (
-              <p className="text-red-500 text-sm">{errors.amount.message}</p>
-            )}
-          </div>
+          <TextInput
+            name="project"
+            label="Proje"
+            register={register}
+            error={errors.project?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Para Birimi
-            </label>
-            <select
-              {...register("currency")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-            >
-              {currencyList.map((option) => (
-                <option key={option.code} value={option.code}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-            {errors.currency && (
-              <p className="text-red-500 text-sm">{errors.currency.message}</p>
-            )}
-          </div>
+          <NumberInput
+            name="amount"
+            label="Tutar"
+            register={register}
+            error={errors.amount?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Çıkan Hesap
-            </label>
-            <input
-              {...register("fromAccountCode")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Gönderen Hesap"
-            />
-          </div>
+          <Dropdown
+            name="type"
+            label="Tür"
+            options={financeTypes}
+            register={register}
+            error={errors.type?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Giden Hesap
-            </label>
-            <input
-              {...register("toAccountCode")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Alan Hesap"
-            />
-          </div>
+          <Dropdown
+            name="currency"
+            label="Para Birimi"
+            options={currencyList}
+            register={register}
+            error={errors.currency?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              İşlem Tarihi
-            </label>
-            <input
-              type="datetime-local"
-              {...register("transactionDate")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-            />
-          </div>
+          <Dropdown
+            name="method"
+            label="Yöntem"
+            options={paymentMethods}
+            register={register}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Yöntem</label>
-            <input
-              {...register("method")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Yöntem"
-            />
-          </div>
+          <Dropdown
+            name="category"
+            label="Kategori"
+            options={financeCategory}
+            register={register}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Kategori</label>
-            <select
-              {...register("category")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-            >
-            {financeCategory.map((option) => (
-              <option key={option.code} value={option.code}>
-                {option.name}
-              </option>
-            ))}
-            </select>
-          </div>
+          <Dropdown
+            name="invoiceYN"
+            label="Faturalı mı?"
+            options={yesNo}
+            register={register}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Kaynak</label>
-            <input
-              {...register("source")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Kaynak"
-            />
-            {errors.source && (
-              <p className="text-red-500 text-sm">{errors.source.message}</p>
-            )}
-          </div>
+          <DatePicker
+            label="İşlem Tarihi"
+            value={watch("transactionDate")}
+            onChange={(val) => setValue("transactionDate", val!)}
+            error={errors.transactionDate?.message}
+            required
+          />
 
-          <div className="col-span-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">Açıklama</label>
-            <textarea
-              {...register("description")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              rows={2}
-              placeholder="Açıklama"
-            />
-          </div>
+          <AutoComplete
+            options={options}
+            label="Kaynak Hesap (Giden)"
+            value={watch("fromAccountCode")!}
+            onChange={(val) => setValue("fromAccountCode", val)}
+            placeholder="Kaynak Hesap"
+          />
 
-          <div className="col-span-3 pt-6 flex justify-end gap-3">
+          <AutoComplete
+            options={options}
+            label="Hedef Hesap (Alan)"
+            value={watch("toAccountCode")!}
+            onChange={(val) => setValue("toAccountCode", val)}
+            placeholder="Hedef Hesap"
+          />
+
+          <TextAreaInput
+            classes="col-span-3"
+            name="description"
+            label="Açıklama"
+            register={register}
+          />
+          <div className="col-span-4 pt-6 flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
@@ -275,7 +259,7 @@ const FinanceTransactionModal = ({
           </div>
         </form>
       </div>
-    </div>
+    </ModalWrapper>
   );
 };
 

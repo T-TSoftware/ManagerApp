@@ -12,11 +12,8 @@ import {
 } from "ag-grid-community";
 import ActionButton from "./ActionButton";
 import {
-  PlusIcon,
-  TrashIcon,
-  BookmarkIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
+  BadgePlus, BookMarked, CirclePlus, ListRestart, Trash2
+} from "lucide-react";
 import { useTheme } from "../../themes/appThemes/ThemeContext";
 import { AgGridLocaleTR } from "../../utils/AgGridLocaleTR";
 import { ColumnTypes } from "../../types/grid/ColumnTypes";
@@ -133,14 +130,14 @@ const BaseGridInner = <T,>(
           <div className="flex flex-row flex-auto w-45 align-middle justify-end gap-1 ">
             {showButtons.refresh && (
               <ActionButton
-                icon={<ArrowPathIcon />}
+                icon={<ListRestart size={20} strokeWidth={1.75} />}
                 label="Yenile"
                 onClick={() => location.reload()}
               />
             )}
             {showButtons.add && (
               <ActionButton
-                icon={<PlusIcon />}
+                icon={<CirclePlus size={20} strokeWidth={1.75} />}
                 label="Kayıt Ekle"
                 onClick={() => {
                   if (onAddRow) {
@@ -153,14 +150,14 @@ const BaseGridInner = <T,>(
             )}
             {showButtons.delete && onDeleteRow && (
               <ActionButton
-                icon={<TrashIcon />}
+                icon={<Trash2 size={20} strokeWidth={1.75} />}
                 label="Kayıt Sil"
                 onClick={handleDelete}
               />
             )}
             {showButtons.save && onSaveChanges && (
               <ActionButton
-                icon={<BookmarkIcon />}
+                icon={<BookMarked size={20} strokeWidth={1.75} />}
                 label="Kaydet"
                 onClick={handleSave}
               />

@@ -12,6 +12,11 @@ export const myQuartzDarkTheme = themeQuartz.withParams({
   foregroundColor: "#FFF",
   headerFontSize: 14,
   selectedRowBackgroundColor: "#00ff001a",
+  wrapperBorder: true,
+  headerRowBorder: true,
+  rowBorder: { width: 2 },
+  columnBorder: { width: 2 },
+  headerFontWeight: 700,
 });
 
 export const myQuartzLightTheme = themeQuartz.withParams({
@@ -19,4 +24,9 @@ export const myQuartzLightTheme = themeQuartz.withParams({
   borderColor: "#726F6F26",
   browserColorScheme: "light",
   headerFontSize: 14,
+  wrapperBorder: true,
+  headerRowBorder: true,
+  rowBorder: { width: 2 },
+  columnBorder: { width: 2 },
+  headerFontWeight: 700,
 });

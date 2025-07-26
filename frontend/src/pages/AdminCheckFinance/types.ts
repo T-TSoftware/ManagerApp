@@ -2,7 +2,7 @@ export type CheckFinanceRows = {
   edit: string;
   id?: string;
   code?: string;
-  checkDate: string;
+  checkDate: Date;
   transactionDate: Date;
   firm: string;
   amount: number;

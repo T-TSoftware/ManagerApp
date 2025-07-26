@@ -10,7 +10,7 @@ import type { SalesRows } from "./types";
 import { useSales } from "./hook";
 import SalesModal from "./modal";
 import Alert from "../../components/feedback/Alert";
-import { PencilSquareIcon } from "@heroicons/react/24/solid";
+import { FilePenLine } from "lucide-react";
 
 const SalesGrid = () => {
   const {
@@ -55,7 +55,7 @@ const SalesGrid = () => {
               }
             }}
           >
-            <PencilSquareIcon
+            <FilePenLine
               aria-hidden="true"
               className="-mr-1 size-5 text-gray-500 dark:text-white"
             />

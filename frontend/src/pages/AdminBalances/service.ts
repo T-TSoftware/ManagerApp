@@ -10,7 +10,7 @@ export const getAllBalance = async (token: string): Promise<BalanceRows[]> => {
 
 export const addBalances = async (
   token: string,
-  data: Omit<BalanceRows, "isNew">[]
+  data: Omit<BalanceRows,"isNew">[]
 ) => {
   console.log("d:",data);
   const res = await axios.post("balances", data, {

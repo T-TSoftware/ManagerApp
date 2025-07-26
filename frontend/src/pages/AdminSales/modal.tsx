@@ -1,14 +1,21 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SalesRows } from "./types";
+import ModalWrapper from "../../components/layout/ModalWrapper";
+import { financeTypes } from "../../constants/financeTypes";
+import {
+  Dropdown,
+  NumberInput,
+  TextAreaInput,
+} from "../../components/inputs";
 
 const schema = z.object({
   customerName: z.string().min(1, "Müşteri zorunludur"),
   description: z.string().min(1, "Açıklama zorunludur"),
-  totalamount: z.coerce.number().positive("Toplam Ödeme zorunludur"),
+  totalAmount: z.coerce.number().positive("Toplam Ödeme zorunludur"),
   receivedamount: z.coerce.number().positive("Alınan ödeme  pozitif olmalı."),
   projectid: z.string().min(1, "Proje zorunludur."),
   stocktype: z.string().min(1, "Stok Tipi zorunludur."),
@@ -43,11 +50,27 @@ const SalesModal = ({
     resolver: zodResolver(schema),
   });
 
-  useEffect(() => {
-    if (defaultValues) {
-      reset(defaultValues);
+  const memoizedDefaultValues = useMemo(() => {
+    if (mode === "edit" && defaultValues) {
+      return {
+        ...defaultValues,
+      };
     }
-  }, [defaultValues, reset]);
+
+    return {
+      customerName: "",
+      description: "",
+      totalAmount: 0,
+      receivedamount: 0,
+      projectid: "",
+      stocktype: "",
+      stockid: "",
+    };
+  }, [defaultValues, mode]);
+
+  useEffect(() => {
+    reset(memoizedDefaultValues);
+  }, [reset, memoizedDefaultValues]);
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
@@ -58,10 +81,8 @@ const SalesModal = ({
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <ModalWrapper open={open} onClose={onClose}>
       <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-4xl">
         <h2 className="text-2xl font-bold mb-6 text-gray-900">
           {mode === "create" ? "Satış Ekle" : "Satış Bilgilerini Düzenle"}
@@ -71,104 +92,58 @@ const SalesModal = ({
           onSubmit={handleSubmit(onFormSubmit)}
           className="grid grid-cols-3 gap-4"
         >
-          <div>
-            <label className="block text-sm font-medium mb-1">Müşteri</label>
-            <input
-              {...register("customerName")}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="Müşteri adı"
-            />
-            {errors.customerName && (
-              <p className="text-red-500 text-sm">
-                {errors.customerName.message}
-              </p>
-            )}
-          </div>
+          <Dropdown
+            name="customerName"
+            label="Müşteri"
+            options={financeTypes}
+            register={register}
+            error={errors.customerName?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Proje</label>
-            <input
-              {...register("projectid")}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="Proje ID"
-            />
-            {errors.projectid && (
-              <p className="text-red-500 text-sm">{errors.projectid.message}</p>
-            )}
-          </div>
+          <Dropdown
+            name="projectid"
+            label="Proje"
+            options={financeTypes}
+            register={register}
+            error={errors.projectid?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Stok Tipi</label>
-            <input
-              {...register("stocktype")}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="Stok Tipi"
-            />
-            {errors.stocktype && (
-              <p className="text-red-500 text-sm">{errors.stocktype.message}</p>
-            )}
-          </div>
+          <Dropdown
+            name="stocktype"
+            label="Stok Tipi"
+            options={financeTypes}
+            register={register}
+            error={errors.stocktype?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Stok ID</label>
-            <input
-              {...register("stockid")}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="Stok ID"
-            />
-            {errors.stockid && (
-              <p className="text-red-500 text-sm">{errors.stockid.message}</p>
-            )}
-          </div>
+          <Dropdown
+            name="stockid"
+            label="Stok"
+            options={financeTypes}
+            register={register}
+            error={errors.stockid?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Toplam Tutar
-            </label>
-            <input
-              type="number"
-              {...register("totalamount")}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="Toplam Tutar"
-            />
-            {errors.totalamount && (
-              <p className="text-red-500 text-sm">
-                {errors.totalamount.message}
-              </p>
-            )}
-          </div>
+          <NumberInput
+            name="totalAmount"
+            label=" Toplam Tutar"
+            register={register}
+            error={errors.totalAmount?.message}
+          />
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Alınan Tutar
-            </label>
-            <input
-              type="number"
-              {...register("receivedamount")}
-              className="w-full px-4 py-2 border rounded-lg"
-              placeholder="Alınan Tutar"
-            />
-            {errors.receivedamount && (
-              <p className="text-red-500 text-sm">
-                {errors.receivedamount.message}
-              </p>
-            )}
-          </div>
-
-          <div className="col-span-3">
-            <label className="block text-sm font-medium mb-1">Açıklama</label>
-            <textarea
-              {...register("description")}
-              className="w-full px-4 py-2 border rounded-lg"
-              rows={2}
-              placeholder="Açıklama girin"
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
+          <NumberInput
+            name="receivedamount"
+            label=" Alınan Tutar"
+            register={register}
+            error={errors.receivedamount?.message}
+          />
+          <TextAreaInput
+            classes="col-span-3"
+            name="description"
+            label="Açıklama"
+            register={register}
+            error={errors.description?.message}
+          />
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">
             <button
@@ -188,7 +163,7 @@ const SalesModal = ({
           </div>
         </form>
       </div>
-    </div>
+    </ModalWrapper>
   );
 };
 

@@ -1,9 +1,10 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SubcontractorListRows } from "./types";
+import ModalWrapper from "../../components/layout/ModalWrapper";
 
 const schema = z.object({
   name: z.string().min(1, "Tedarikçi adı zorunludur"),
@@ -48,51 +49,60 @@ const SubcontractorListModal = ({
     },
   });
 
-  useEffect(() => {
-    if (defaultValues) {
+  const memoizedDefaultValues = useMemo(() => {
+    if (mode === "edit" && defaultValues) {
       const format = (date?: string | Date) =>
         date ? new Date(date).toISOString().slice(0, 16) : "";
-
-      reset({
+      return {
         ...defaultValues,
         estimatedStartDate: format(defaultValues.estimatedStartDate),
         actualStartDate: format(defaultValues.actualStartDate),
         estimatedEndDate: format(defaultValues.estimatedEndDate),
         actualEndDate: format(defaultValues.actualEndDate),
-      });
+      };
     }
-  }, [defaultValues, reset]);
-
-const onFormSubmit = async (data: SubcontractorsFormSchema) => {
-  try {
-    const transformed: Partial<SubcontractorListRows> = {
-      ...data,
-      estimatedStartDate: data.estimatedStartDate
-        ? new Date(data.estimatedStartDate)
-        : undefined,
-      actualStartDate: data.actualStartDate
-        ? new Date(data.actualStartDate)
-        : undefined,
-      estimatedEndDate: data.estimatedEndDate
-        ? new Date(data.estimatedEndDate)
-        : undefined,
-      actualEndDate: data.actualEndDate
-        ? new Date(data.actualEndDate)
-        : undefined,
+    return {
+      name: "",
+      site: "",
+      status: "",
+      estimatedStartDate: "",
+      actualStartDate: "",
+      estimatedEndDate: "",
+      actualEndDate: "",
     };
+  }, [defaultValues, mode]);
 
-    await onSubmit(transformed);
-    onSuccess();
-  } catch (err) {
-    alert("Bir hata oluştu.");
-  }
-};
+  useEffect(() => {
+    reset(memoizedDefaultValues);
+  }, [reset, memoizedDefaultValues]);
 
+  const onFormSubmit = async (data: SubcontractorsFormSchema) => {
+    try {
+      const transformed: Partial<SubcontractorListRows> = {
+        ...data,
+        estimatedStartDate: data.estimatedStartDate
+          ? new Date(data.estimatedStartDate)
+          : undefined,
+        actualStartDate: data.actualStartDate
+          ? new Date(data.actualStartDate)
+          : undefined,
+        estimatedEndDate: data.estimatedEndDate
+          ? new Date(data.estimatedEndDate)
+          : undefined,
+        actualEndDate: data.actualEndDate
+          ? new Date(data.actualEndDate)
+          : undefined,
+      };
 
-  if (!open) return null;
+      await onSubmit(transformed);
+      onSuccess();
+    } catch (err) {
+      alert("Bir hata oluştu.");
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+    <ModalWrapper open={open}>
       <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-2xl dark:bg-primary dark:text-white">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Proje Yarat" : "Projeyi Güncelle"}
@@ -207,7 +217,7 @@ const onFormSubmit = async (data: SubcontractorsFormSchema) => {
           </div>
         </form>
       </div>
-    </div>
+    </ModalWrapper>
   );
 };
 

@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import {
-  KeyIcon,
-  EnvelopeIcon,
-} from "@heroicons/react/20/solid";
 import SidePhoto from "../../assets/images/background.png";
+import { KeyRound, Mail } from "lucide-react";
 
 const Login = () => {
   const { login, loading, error } = useAuth();
@@ -29,12 +26,12 @@ const Login = () => {
               Hoşgeldiniz, Lütfen bilgilerinizi giriniz
             </p>
             <div className="flex items-center border rounded-xl px-4 py-2 w-full max-w-md shadow-sm mb-4">
-              <EnvelopeIcon className="w-5 h-5 text-gray-500" />
+              <Mail className="w-5 h-5 text-gray-500" />
 
               <div className="border-l mx-3 h-6 border-gray-300"></div>
 
               <div className="flex flex-col flex-1">
-                <label className="text-xs text-gray-400">Email Address</label>
+                <label className="text-xs text-gray-400">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -45,12 +42,12 @@ const Login = () => {
               </div>
             </div>
             <div className="flex items-center border rounded-xl px-4 py-2 w-full max-w-md shadow-sm mb-4">
-              <KeyIcon className="w-5 h-5 text-gray-500" />
+              <KeyRound className="w-5 h-5 text-gray-500" />
 
               <div className="border-l mx-3 h-6 border-gray-300"></div>
 
               <div className="flex flex-col flex-1">
-                <label className="text-xs text-gray-400">Password</label>
+                <label className="text-xs text-gray-400">Şifre</label>
                 <input
                   type="password"
                   value={password}

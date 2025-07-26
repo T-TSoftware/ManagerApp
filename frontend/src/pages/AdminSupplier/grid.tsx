@@ -8,7 +8,7 @@ import type {
   ICellRendererParams,
 } from "ag-grid-community";
 import type { SupplierListRows } from "./types";
-import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { FilePenLine } from "lucide-react";
 import { useSupplierList } from "./hook";
 import SupplierListModal from "./modal";
 import Alert from "../../components/feedback/Alert";
@@ -58,7 +58,7 @@ const SupplierListGrid = () => {
               }
             }}
           >
-            <PencilSquareIcon
+            <FilePenLine
               aria-hidden="true"
               className="-mr-1 size-5 text-gray-500 dark:text-white"
             />

@@ -5,13 +5,15 @@ import {
   addFinance,
   updateFinance,
   deleteFinance,
+  fetchAccounts,
 } from "./service";
 import { getToken } from "../../utils/token";
-import type { FinanceTransactionRows } from "./types";
+import type { AutocompleteOption, FinanceTransactionRows } from "./types";
 
 
 export const useFinance = () => {
   const [localData, setLocalData] = useState<FinanceTransactionRows[]>([]);
+  const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
   const token = getToken();
@@ -24,7 +26,9 @@ export const useFinance = () => {
     setLoading(true);
     try {
       const result = await getAllFinance(token!);
+      const optionResult = await fetchAccounts(token!);
       setLocalData(result);
+      setAccountOptions(optionResult) ;
     } catch (err) {
       setAlert({ message: "Veriler yüklenemedi", type: "error" });
     } finally {
@@ -47,6 +51,7 @@ export const useFinance = () => {
   };
 
   const update = async (data: Partial<FinanceTransactionRows>) => {
+    console.log("d:",data)
     const updatedItem = await updateFinance(token!, data);
     return updatedItem;
   };
@@ -81,6 +86,7 @@ export const useFinance = () => {
     localData,
     loading,
     alert,
+    accountOptions,
     setAlert,
     fetchData,
     getById,

@@ -1,8 +1,8 @@
-import { Bars3Icon, HomeIcon } from "@heroicons/react/24/outline";
 import UserMenu from "../menu/userMenu/UserMenu";
 import ProjectMenu from "../menu/projectMenu/projectMenu";
 import { projectMenuItems } from "../../config/menu/ProjectMenuItems";
 import { userMenuItems } from "../../config/menu/UserMenuItems";
+import { AlignLeft } from "lucide-react";
 
 type HeaderProps = {
   onToggleSidebar: () => void;
@@ -22,7 +22,7 @@ const Header = ({ onToggleSidebar, isSidebarExpanded }: HeaderProps) => {
           className="hidden lg:flex items-center justify-center text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
           onClick={onToggleSidebar}
         >
-          <HomeIcon className="h-5 w-5" aria-hidden="true" />
+          <AlignLeft className="h-5 w-5" aria-hidden="true" />
         </button>
 
         <button
@@ -31,7 +31,7 @@ const Header = ({ onToggleSidebar, isSidebarExpanded }: HeaderProps) => {
           onClick={onToggleSidebar}
         >
           <span className="sr-only">Open sidebar</span>
-          <Bars3Icon className="h-5 w-5" aria-hidden="true" />
+          <AlignLeft className="h-5 w-5" aria-hidden="true" />
         </button>
 
         <div className="h-8">

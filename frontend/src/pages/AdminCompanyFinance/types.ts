@@ -6,17 +6,19 @@ export type FinanceTransactionRows = {
   type: string;
   amount: number;
   currency: string;
-  targettype: string;
+  targetType: string;
   source: string;
-  targetid: string;
-  targetname: string;
+  targetId: string;
+  targetName: string;
   transactionDate: Date;
   method: string;
   category: string;
-  invoiceyn: string;
-  invoicecode: string;
-  checkcode: string;
+  invoiceYN: string;
+  invoiceCode: string;
+  checkCode: string;
   checkstatus: string;
+  loanCode: string;
+  loanStatus: string;
   description: string;
   createdatetime: string;
   updatedatetime: string;
@@ -51,4 +53,9 @@ export type FinanceTransactionRows = {
     };
   };
 };
+
+export interface AutocompleteOption {
+  code: string;
+  name: string;
+}
 

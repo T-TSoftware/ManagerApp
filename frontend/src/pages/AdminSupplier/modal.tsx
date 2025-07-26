@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,46 +48,58 @@ const SupplierListModal = ({
     },
   });
 
-  useEffect(() => {
-    if (defaultValues) {
+  const memoizedDefaultValues = useMemo(() => {
+    if (mode === "edit" && defaultValues) {
       const format = (date?: string | Date) =>
         date ? new Date(date).toISOString().slice(0, 16) : "";
 
-      reset({
+      return {
         ...defaultValues,
         estimatedStartDate: format(defaultValues.estimatedStartDate),
         actualStartDate: format(defaultValues.actualStartDate),
         estimatedEndDate: format(defaultValues.estimatedEndDate),
         actualEndDate: format(defaultValues.actualEndDate),
-      });
+      };
     }
-  }, [defaultValues, reset]);
-
-const onFormSubmit = async (data: SuppliersFormSchema) => {
-  try {
-    const transformed: Partial<SupplierListRows> = {
-      ...data,
-      estimatedStartDate: data.estimatedStartDate
-        ? new Date(data.estimatedStartDate)
-        : undefined,
-      actualStartDate: data.actualStartDate
-        ? new Date(data.actualStartDate)
-        : undefined,
-      estimatedEndDate: data.estimatedEndDate
-        ? new Date(data.estimatedEndDate)
-        : undefined,
-      actualEndDate: data.actualEndDate
-        ? new Date(data.actualEndDate)
-        : undefined,
+    return {
+      name: "",
+      site: "",
+      status: "",
+      estimatedStartDate: "",
+      actualStartDate: "",
+      estimatedEndDate: "",
+      actualEndDate: "",
     };
+  }, [defaultValues, mode]);
 
-    await onSubmit(transformed);
-    onSuccess();
-  } catch (err) {
-    alert("Bir hata oluştu.");
-  }
-};
+  useEffect(() => {
+    reset(memoizedDefaultValues);
+  }, [reset, memoizedDefaultValues]);
 
+  const onFormSubmit = async (data: SuppliersFormSchema) => {
+    try {
+      const transformed: Partial<SupplierListRows> = {
+        ...data,
+        estimatedStartDate: data.estimatedStartDate
+          ? new Date(data.estimatedStartDate)
+          : undefined,
+        actualStartDate: data.actualStartDate
+          ? new Date(data.actualStartDate)
+          : undefined,
+        estimatedEndDate: data.estimatedEndDate
+          ? new Date(data.estimatedEndDate)
+          : undefined,
+        actualEndDate: data.actualEndDate
+          ? new Date(data.actualEndDate)
+          : undefined,
+      };
+
+      await onSubmit(transformed);
+      onSuccess();
+    } catch (err) {
+      alert("Bir hata oluştu.");
+    }
+  };
 
   if (!open) return null;
 

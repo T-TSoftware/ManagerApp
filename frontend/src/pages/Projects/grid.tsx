@@ -7,7 +7,7 @@ import type {
   ICellRendererParams,
 } from "ag-grid-community";
 import type { ProjectRows } from "./types";
-import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { FilePenLine } from "lucide-react";
 import { useProject } from "./hook";
 import ProjectModal from "./modal";
 import Alert from "../../components/feedback/Alert";
@@ -55,7 +55,7 @@ const ProjectGrid = () => {
               }
             }}
           >
-            <PencilSquareIcon
+            <FilePenLine
               aria-hidden="true"
               className="-mr-1 size-5 text-gray-500 dark:text-white"
             />

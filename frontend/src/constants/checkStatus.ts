@@ -1,4 +1,5 @@
 export const checkStatus = [
+  { code: "", name: "Seçiniz" },
   { code: "PAID", name: "Ödendi" },
   { code: "COLLECTED", name: "Tahsil Edildi" },
   { code: "CANCELLED", name: "İptal Edildi" },

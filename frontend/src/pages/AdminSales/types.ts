@@ -5,7 +5,7 @@ export type SalesRows = {
   customerName: string;
   stocktype: string;
   description: string;
-  totalamount: number;
+  totalAmount: number;
   receivedamount: number;
   remainingamount: number;
   status: string;

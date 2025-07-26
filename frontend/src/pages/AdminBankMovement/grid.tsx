@@ -8,6 +8,7 @@ import type {
 import type { BankMovementRows } from "./types";
 import { financeCategory } from "../../constants/financeCategory";
 import { currencyList } from "../../constants/currencyList";
+import { paymentMethods } from "../../constants/paymentMethods";
 
 const BankMovementGrid = () => {
   const { localData, loading, gridRef } = useCurrent();
@@ -58,7 +59,7 @@ const BankMovementGrid = () => {
         values: currencyList.map((c) => c.code),
       },
       valueFormatter: ({ value }) => {
-        const item = financeCategory.find((c) => c.code === value);
+        const item = currencyList.find((c) => c.code === value);
         return item?.name ?? value;
       },
     },
@@ -66,6 +67,13 @@ const BankMovementGrid = () => {
       field: "method",
       headerName: "Yöntem",
       editable: false,
+      cellEditorParams: {
+        values: paymentMethods.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = paymentMethods.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       minWidth: 200,
     },
     {

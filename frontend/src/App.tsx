@@ -10,11 +10,16 @@ import AdminBankMovement from "./pages/AdminBankMovement";
 import AdminCashFlow from "./pages/AdminCashFlow/index";
 import AdminCheckFinance from "./pages/AdminCheckFinance";
 import AdminCompanyFinance from "./pages/AdminCompanyFinance";
+import AdminLoan from "./pages/AdminLoan";
 import AdminCurrent from "./pages/AdminCurrent/index";
 import AdminDashboard from "./pages/AdminDashboard/index";
 import AdminSales from "./pages/AdminSales";
+import AdminStock from "./pages/AdminStock";
 import AdminSubcontractor from "./pages/AdminSubcontractor/index";
 import AdminSupplier from "./pages/AdminSupplier/index";
+import Employees from "./pages/Employees";
+import EmployeesAnnualLeave from "./pages/EmployeesAnnualLeave";
+import EmployeesDashboard from "./pages/EmployeesDashboard/index";
 import LoginPage from "./pages/Login/index";
 import ProjectCostSummary from "./pages/ProjectCostSummary/index";
 import ProjectDashboard from "./pages/ProjectDashboard/index";
@@ -24,6 +29,7 @@ import ProjectSales from "./pages/ProjectSales/index";
 import ProjectStock from "./pages/ProjectStock/index";
 import ProjectSubcontractor from "./pages/ProjectSubcontractor/index";
 import ProjectSupply from "./pages/ProjectSupply/index";
+import UserSettings from "./pages/UserSetting/index"
 
 
 function App() {
@@ -61,21 +67,18 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route path="admin-dashboard" element={<AdminDashboard />} />
             <Route path="current" element={<AdminCurrent />} />
+            <Route path="stock" element={<AdminStock />} />
+            <Route path="loans" element={<AdminLoan />} />
             <Route path="cash-flow" element={<AdminCashFlow />} />
-            <Route
-              path="company-finance"
-              element={<AdminCompanyFinance />}
-            />
+            <Route path="company-finance" element={<AdminCompanyFinance />} />
             <Route path="check-finance" element={<AdminCheckFinance />} />
-            <Route path="bankmovement" element={<AdminBankMovement />} />
+            <Route path="bank-movement" element={<AdminBankMovement />} />
             <Route path="sales" element={<AdminSales />} />
             <Route path="balances" element={<AdminBalances />} />
             <Route path="projects" element={<Projects />} />
-            <Route
-              path="subcontractor-list"
-              element={<AdminSubcontractor />}
-            />
+            <Route path="subcontractor-list" element={<AdminSubcontractor />} />
             <Route path="supplier-list" element={<AdminSupplier />} />
+            <Route path="user-settings" element={<UserSettings />} />
           </Route>
 
           <Route path="/project/:projectId" element={<MainLayout />}>
@@ -83,16 +86,16 @@ function App() {
             <Route path="supply" element={<ProjectSupply />} />
             <Route path="sales" element={<ProjectSales />} />
             <Route path="current" element={<AdminCurrent />} />
-            <Route
-              path="subcontractor"
-              element={<ProjectSubcontractor />}
-            />
+            <Route path="subcontractor" element={<ProjectSubcontractor />} />
             <Route path="quantity" element={<ProjectQuantity />} />
             <Route path="stock" element={<ProjectStock />} />
-            <Route
-              path="cost-summary"
-              element={<ProjectCostSummary />}
-            />
+            <Route path="cost-summary" element={<ProjectCostSummary />} />
+          </Route>
+
+          <Route path="/employees-portal/" element={<MainLayout />}>
+            <Route path="dashboard" element={<EmployeesDashboard />} />
+            <Route path="employees" element={<Employees />} />
+            <Route path="annual-leave" element={<EmployeesAnnualLeave />} />
           </Route>
         </Routes>
       </BrowserRouter>

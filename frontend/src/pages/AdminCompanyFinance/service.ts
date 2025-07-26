@@ -1,4 +1,4 @@
-import type { FinanceTransactionRows } from "./types";
+import type { AutocompleteOption, FinanceTransactionRows } from "./types";
 import axios from "../../utils/axios";
 
 export const getAllFinance = async (
@@ -35,7 +35,8 @@ export const updateFinance = async (
   token: string,
   data: Partial<FinanceTransactionRows>
 ): Promise<FinanceTransactionRows> => {
-  const response =  await axios.patch(`finances`, data, {
+  console.log("uuid:" , data)
+  const response =  await axios.patch(`finances/${data.code}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
    return response.data;
@@ -48,3 +49,9 @@ export const deleteFinance = async (token: string, id: string): Promise<void> =>
   });
 };
 
+export const fetchAccounts = async (token: string): Promise<AutocompleteOption[]> => {
+  const response = await axios.get(`balances`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};

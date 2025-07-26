@@ -1,6 +1,6 @@
 import React from "react";
 import { useCurrencyRates } from "./hook";
-import { CurrencyEuroIcon, CurrencyDollarIcon } from "@heroicons/react/20/solid";
+import { DollarSign, Euro } from "lucide-react";
 
 const AdminDashboard: React.FC = () => {
   const { eurRate, usdRate, error } = useCurrencyRates();
@@ -36,7 +36,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="text-2xl font-bold text-black flex items-center justify-between">
                     <span>
                       {" "}
-                      <CurrencyEuroIcon></CurrencyEuroIcon>
+                      <Euro></Euro>
                     </span>
                     <span>₺{eurRate ? eurRate.toFixed(2) : "..."}</span>
                     <span className="text-lg">↗</span>
@@ -47,7 +47,7 @@ const AdminDashboard: React.FC = () => {
                   <p className="text-sm text-gray-500 mb-1">USD/TRY</p>
                   <div className="text-2xl font-bold text-black flex items-center justify-between">
                     <span>
-                      <CurrencyDollarIcon></CurrencyDollarIcon>
+                      <DollarSign></DollarSign>
                     </span>
                     <span>₺{usdRate ? usdRate.toFixed(2) : "..."}</span>
                     <span className="text-lg">↗</span>

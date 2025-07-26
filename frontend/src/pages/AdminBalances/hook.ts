@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { BalanceRows } from "./types";
+import { useEffect, useState, useRef } from "react";
+import { BalanceRows, validateBalanceRow, UpdateBalancePayload } from "./types";
 import {
   getAllBalance,
   addBalances,
@@ -7,114 +7,208 @@ import {
   deleteBalances,
 } from "./service";
 import { useNotifier } from "../../hooks/useNotifier";
+import { CellValueChangedEvent } from "ag-grid-community";
 import { getToken } from "../../utils/token";
 import { v4 as uuid } from "uuid";
+import { BaseGridHandle } from "../../components/grid/BaseGrid";
+import { isRowModified } from "../../types/grid/commonTypes";
 
 export const useBalance = () => {
   const [originalData, setOriginalData] = useState<BalanceRows[]>([]);
   const [localData, setLocalData] = useState<BalanceRows[]>([]);
   const [deletedRows, setDeletedRows] = useState<BalanceRows[]>([]);
   const [loading, setLoading] = useState(true);
+  const gridRef = useRef<BaseGridHandle<BalanceRows>>(null);
+
   const token = getToken();
   const notify = useNotifier();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       if (!token) return;
       const data = await getAllBalance(token);
-      setOriginalData(data);
-      setLocalData(data);
-      setDeletedRows([]);
+
+      const dataWithTracking = data.map((row) => {
+        const ensuredId = row.id || uuid();
+        const rowWithId = {
+          ...row,
+          id: ensuredId,
+          code: row.code,
+        };
+
+        return {
+          ...rowWithId,
+          _originalData: { ...rowWithId },
+        };
+      });
+
+      setOriginalData(dataWithTracking);
+      setLocalData(dataWithTracking);
+    } catch (error) {
+      notify.handleError(error);
     } finally {
       setLoading(false);
     }
   };
 
+    useEffect(() => {
+      fetchData();
+    }, [token]);
+
   const addRow = () => {
+    const currentDate = new Date();
+    const rowId = uuid();
     const newRow: BalanceRows = {
-      id: uuid(),
+      id: rowId,
       code: "",
       name: "",
       amount: 0,
       currency: "",
+      createdBy: "",
+      updatedBy: "",
+      createdatetime: currentDate,
+      updatedatetime: currentDate,
       isNew: true,
     };
+
+    const originalData = { ...newRow };
+    delete (originalData as any).isNew;
+    newRow._originalData = originalData;
+
     setLocalData((prev) => [newRow, ...prev]);
   };
 
-  const updateRow = (row: BalanceRows) => {
-    setLocalData((prev) =>
-      prev.map((item) => (item.id === row.id ? { ...item, ...row } : item))
-    );
-  };
+const updateRow = (event: CellValueChangedEvent<BalanceRows>) => {
+  const { data, colDef } = event;
 
-  const deleteRows = (selected: BalanceRows[]) => {
-    setLocalData((prev) =>
-      prev.filter((item) => !selected.find((s) => s.id === item.id))
-    );
-    setDeletedRows((prev) => [...prev, ...selected]);
-  };
-
-const saveChanges = async () => {
-
-  try {
-    const added = localData.filter((i) => i.isNew);
-    const updated = localData.filter(
-      (i) =>
-        !i.isNew &&
-        originalData.some(
-          (o) => o.id === i.id && JSON.stringify(o) !== JSON.stringify(i)
-        )
-    );
-    const deletedIds = deletedRows
-      .filter((r) => r.id)
-      .map((r) => r.id as string);
-      
-    const requiredFields = {
-      name: "Ad",
-      amount: "Miktar",
-      currency: "Döviz Birimi",
-    };
-
-    let hasError = false;
-
-    for (const row of added) {
-      for (const [key, label] of Object.entries(requiredFields)) {
-        const value = row[key as keyof BalanceRows];
-        if (value === undefined || value === null || value === "") {
-          notify.alert({
-            id: `missing-${key}-${row.id}`,
-            message: `${label} zorunludur.`,
-            type: "error",
-          });
-          hasError = true;
-        } else {
-          notify.dismissAlert(`missing-${key}-${row.id}`);
-        }
-      }
-    }
-
-    if (hasError) return;
-
-    if (added.length > 0){
-      const payload = added.map(({ code, id, isNew, ...rest }) => rest);
-      await addBalances(token!, payldoad);
-    }
-    if (updated.length > 0) await updateBalances(token!, updated);
-    if (deletedIds.length > 0) await deleteBalances(token!, deletedIds);
-
-    await fetchData();
-    notify.success("Kayıt başarılı.");
-  } catch (err) {
-    notify.handleError(err);
+  if (!data?.id || !colDef?.field) {
+    notify.error("Geçersiz güncelleme: Satır kodu veya alan eksik");
+    return;
   }
+
+  const field = colDef.field as keyof BalanceRows;
+
+  setLocalData((prev) =>
+    prev.map((item) => {
+      if (!item.id || item.id !== data.id) return item;
+
+      let value: any = data[field];
+      if (["amount"].includes(field)) {
+        const numValue =
+          typeof value === "string" ? parseFloat(value) : Number(value);
+        value = isNaN(numValue) ? 0 : numValue;
+      }
+
+      const updatedItem = {
+        ...item,
+        [field]: value,
+      };
+
+      return updatedItem;
+    })
+  );
 };
 
+  const deleteRows = (selected: BalanceRows[]) => {
+    const validSelectedRows = selected.filter(row => row.id);
+    
+    if (validSelectedRows.length !== selected.length) {
+      notify.error("Bazı satırlar ID eksikliği nedeniyle silinemedi");
+    }
+
+    setLocalData(prev => {
+      const deletedIds = new Set(validSelectedRows.map(row => row.id));
+      return prev.filter(row => row.id && !deletedIds.has(row.id));
+    });
+  };
+
+  const getModifiedFields = (current: BalanceRows, original: Partial<BalanceRows>): UpdateBalancePayload => {
+    const modifiedFields: UpdateBalancePayload = {
+      code: current.code
+    };
+
+     const fieldsToCheck = [
+      'code',
+      'name',
+      'amount',
+      'currency',
+    ] as const;
+
+    fieldsToCheck.forEach(field => {
+      if (current[field] !== original[field]) {
+        (modifiedFields as any)[field] = current[field];
+      }
+    });
+
+    return modifiedFields;
+  };
+
+
+  const saveChanges = async () => {
+    try {
+      // Grid düzenlemeyi durdur
+      gridRef.current?.getGridApi()?.stopEditing();
+
+      const added = localData.filter((row) => row.isNew);
+      const modified = localData.filter(
+        (row) => !row.isNew && isRowModified(row)
+      );
+      const deleted = originalData.filter(
+        (row) => !localData.some((localRow) => localRow.id === row.id)
+      );
+
+      const hasErrors = validateRows([...added, ...modified]);
+      if (hasErrors) return;
+
+      notify.loading("Değişiklikler kaydediliyor...");
+
+      if (added.length > 0) {
+        const addedItems = added.map(
+          ({ isNew, _originalData, ...rest }) => rest
+        );
+        await addBalances(token!, addedItems);
+      }
+
+      if (modified.length > 0) {
+        const payload = modified.map((row) => {
+          const originalRow = row._originalData;
+          if (!originalRow) {
+            return { code: row.code } as UpdateBalancePayload;
+          }
+          return getModifiedFields(row, originalRow);
+        });
+
+        await updateBalances(token!, payload);
+      }
+
+      if (deleted.length > 0) {
+        const codes = deleted.map((row) => row.code);
+        await deleteBalances(token!, codes);
+      }
+
+      await fetchData();
+      notify.dismiss();
+      notify.success("Kayıt başarılı");
+    } catch (err) {
+      console.log("Errors:", err);
+      notify.handleError(err);
+    }
+  };
+  const validateRows = (rows: BalanceRows[]): boolean => {
+    let hasError = false;
+
+    rows.forEach((row) => {
+      const errors = validateBalanceRow(row);
+      if (errors.length > 0) {
+        errors.forEach((error) => notify.error(error));
+        hasError = true;
+      }
+    });
+
+    return hasError;
+  };
 
   return {
     localData,
@@ -123,5 +217,6 @@ const saveChanges = async () => {
     updateRow,
     deleteRows,
     saveChanges,
+    gridRef
   };
 };

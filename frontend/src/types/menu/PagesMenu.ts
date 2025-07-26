@@ -5,4 +5,6 @@ export type PagesMenuItemType = {
   href: string;
   icon: ElementType;
   adminYN: boolean;
+  portalYN: boolean;
+  employeeYN: boolean;
 };

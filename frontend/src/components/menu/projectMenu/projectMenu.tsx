@@ -4,7 +4,8 @@ import MenuItemsList from "./projectMenuItemsList";
 import { ProjectMenuItemType } from "../../../types/menu/ProjectMenu";
 import { Project } from "../../../types/project/Project";
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { CircleChevronDown } from "lucide-react";
+
 
 type ProjectMenuProps = {
   items: ProjectMenuItemType[];
@@ -39,7 +40,7 @@ const ProjectMenu = ({ items, inHeader = false }: ProjectMenuProps) => {
             </span>
           )}
         </span>
-        <ChevronDownIcon
+        <CircleChevronDown
           className="h-4 w-4 text-black dark:text-white"
           aria-hidden="true"
         />

@@ -8,7 +8,7 @@ export const getAllSales = async (
   const response = await axios.get(`orders`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data.transactions;
+  return response.data.orders;
 };
 
 export const getSalesById = async (

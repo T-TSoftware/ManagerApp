@@ -23,6 +23,7 @@ const PagesMenuItemList = ({ item, isExpanded }: Props) => {
         }`
       }
       title={item.label}
+      target={item.portalYN ? "_blank" : ""}
     >
       <item.icon
         className={`h-5 w-5 shrink-0 ${

@@ -10,7 +10,7 @@ import type { CheckFinanceRows } from "./types";
 import { useCheckFinance } from "./hook";
 import CheckFinanceModal from "./modal";
 import Alert from "../../components/feedback/Alert";
-import { PencilSquareIcon } from "@heroicons/react/24/solid";
+import { FilePenLine } from "lucide-react";
 
 const CheckGrid = () => {
   const {
@@ -57,7 +57,7 @@ const CheckGrid = () => {
               }
             }}
           >
-            <PencilSquareIcon
+            <FilePenLine
               aria-hidden="true"
               className="-mr-1 size-5 text-gray-500 dark:text-white"
             />
@@ -85,7 +85,7 @@ const CheckGrid = () => {
     { field: "firm", headerName: "Tür", editable: false, minWidth: 200 },
     {
       field: "amount",
-      headerName: "Proje",
+      headerName: "Miktar",
       editable: false,
       minWidth: 200,
     },

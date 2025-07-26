@@ -1,9 +1,7 @@
-import {
-  Cog8ToothIcon,
-  ArrowRightEndOnRectangleIcon,
-} from "@heroicons/react/20/solid";
+
 import { UserMenuItemType } from "../../types/menu/UserMenu";
 import ThemeToggle from "../../components/layout/ThemeToggle";
+import { Settings , LogOut } from "lucide-react";
 
 export const userMenuItems: UserMenuItemType[] = [
   {
@@ -13,14 +11,14 @@ export const userMenuItems: UserMenuItemType[] = [
   {
     id: "settings",
     label: "Ayarlar",
-    href: "#",
-    icon: Cog8ToothIcon,
+    href: "/user-settings",
+    icon: Settings,
     separatorBefore: true,
   },
   {
     id: "logout",
     label: "Çıkış",
-    icon: ArrowRightEndOnRectangleIcon,
+    icon: LogOut,
     onClick: () => {
       localStorage.removeItem("token");
       window.location.href = "/login";

@@ -1,8 +1,8 @@
 export type CurrentRows = {
   id: string;
   companyid: string;
-  project: Date;
-  transactiondate: string;
+  project: string;
+  transactiondate: Date;
   description: string;
   firm: string;
   income: string;
@@ -13,3 +13,4 @@ export type CurrentRows = {
   checkcode: number;
 };
 
+       

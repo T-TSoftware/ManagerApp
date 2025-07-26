@@ -7,6 +7,7 @@ import type {
 } from "ag-grid-community";
 import type { CurrentRows } from "./types";
 import { financeCategory } from "../../constants/financeCategory";
+import { yesNo } from "../../constants/yesNo";
 
 const CurrentGrid = () => {
   const { localData, loading, gridRef } =
@@ -45,9 +46,16 @@ const CurrentGrid = () => {
     },
     {
       field: "invoiceyn",
-      headerName: "Faturalı mı",
+      headerName: "Faturalandı mı?",
       editable: false,
       minWidth: 150,
+      cellEditorParams: {
+        values: yesNo.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = yesNo.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
     },
     {
       field: "invoicecode",
