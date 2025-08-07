@@ -1,7 +1,7 @@
 import { Menu, MenuButton, MenuItems } from "@headlessui/react";
 import UserMenuItemsList from "./UserMenuItemList";
 import { UserMenuItemType } from "../../../types/menu/UserMenu";
-import Avatar from "../../../assets/Images/avatar.png";
+import Avatar from "../../../assets/images/avatar.png";
 
 type UserMenuProps = {
   items: UserMenuItemType[];
