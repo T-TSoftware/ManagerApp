@@ -1,4 +1,4 @@
-"use client";
+/* "use client";
 import { useRef, useState } from "react";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
@@ -189,3 +189,4 @@ const SupplierListGrid = () => {
 };
 
 export default SupplierListGrid;
+ */

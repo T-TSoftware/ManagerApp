@@ -1,4 +1,4 @@
-import React from "react";
+/* import React from "react";
 import SubcontractorListGrid from "./grid";
 
 const AdminSubcontractor: React.FC = () => {
@@ -23,3 +23,4 @@ const AdminSubcontractor: React.FC = () => {
 };
 
 export default AdminSubcontractor;
+ */

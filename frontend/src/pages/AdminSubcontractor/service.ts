@@ -1,4 +1,4 @@
-import type { SubcontractorListRows } from "./types";
+/* import type { SubcontractorListRows } from "./types";
 import { API_BASE_URL } from "../../config/api";
 
 export const getAllSubcontractorList = async (
@@ -57,3 +57,4 @@ export const deleteSubcontractor = async (token: string, id: string) => {
   });
   if (!res.ok) throw new Error("Failed to delete project");
 };
+ */

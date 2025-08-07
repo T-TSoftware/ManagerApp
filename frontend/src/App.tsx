@@ -15,8 +15,8 @@ import AdminCurrent from "./pages/AdminCurrent/index";
 import AdminDashboard from "./pages/AdminDashboard/index";
 import AdminSales from "./pages/AdminSales";
 import AdminStock from "./pages/AdminStock";
-import AdminSubcontractor from "./pages/AdminSubcontractor/index";
-import AdminSupplier from "./pages/AdminSupplier/index";
+//import AdminSubcontractor from "./pages/AdminSubcontractor/index";
+//import AdminSupplier from "./pages/AdminSupplier/index";
 import Barter from "./pages/Barter/index";
 import Employees from "./pages/Employees";
 import EmployeesAnnualLeave from "./pages/EmployeesAnnualLeave";
@@ -76,9 +76,9 @@ function App() {
             <Route path="sales" element={<AdminSales />} />
             <Route path="balances" element={<AdminBalances />} />
             <Route path="projects" element={<Projects />} />
-            <Route path="subcontractor-list" element={<AdminSubcontractor />} />
+           {/*  <Route path="subcontractor-list" element={<AdminSubcontractor />} />
             <Route path="supplier-list" element={<AdminSupplier />} />
-            <Route path="user-settings" element={<UserSettings />} />
+ */}            <Route path="user-settings" element={<UserSettings />} />
             <Route path="barter" element={<Barter />} />
           </Route>
 

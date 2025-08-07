@@ -1,4 +1,4 @@
-import type { SupplierListRows } from "./types";
+/* import type { SupplierListRows } from "./types";
 import { API_BASE_URL } from "../../config/api";
 
 export const getAllSuppliers = async (token: string): Promise<SupplierListRows[]> => {
@@ -56,3 +56,4 @@ export const deleteSupplier = async (token: string, id: string) => {
   });
   if (!res.ok) throw new Error("Failed to delete project");
 };
+ */
