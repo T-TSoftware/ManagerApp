@@ -5,21 +5,27 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SalesRows } from "./types";
 import ModalWrapper from "../../components/layout/ModalWrapper";
-import { financeTypes } from "../../constants/financeTypes";
 import {
   Dropdown,
   NumberInput,
   TextAreaInput,
+  TextInput,
 } from "../../components/inputs";
+import { useProjects } from "../../hooks/useProjects";
+import Button from "../../components/buttons/Button";
+import { stockCategories } from "../../constants/stockCategories";
+import { useStocks } from "../../hooks/useStocks";
+import { useNotifier } from "../../hooks/useNotifier";
+
+const optionalString = z.string().optional().or(z.literal(""));
 
 const schema = z.object({
   customerName: z.string().min(1, "Müşteri zorunludur"),
-  description: z.string().min(1, "Açıklama zorunludur"),
+  description: optionalString,
   totalAmount: z.coerce.number().positive("Toplam Ödeme zorunludur"),
-  receivedamount: z.coerce.number().positive("Alınan ödeme  pozitif olmalı."),
-  projectid: z.string().min(1, "Proje zorunludur."),
-  stocktype: z.string().min(1, "Stok Tipi zorunludur."),
-  stockid: z.string().min(1, "Stok Id zorunludur."),
+  projectId: z.string().min(1, "Proje zorunludur."),
+  stockType: z.string().min(1, "Stok Tipi zorunludur."),
+  stockCode: z.string().min(1, "Stok Kodu zorunludur."),
 });
 
 type FormSchema = z.infer<typeof schema>;
@@ -50,10 +56,13 @@ const SalesModal = ({
     resolver: zodResolver(schema),
   });
 
+  const notify = useNotifier();
+  
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
       return {
         ...defaultValues,
+        projectId: defaultValues.project?.id,
       };
     }
 
@@ -62,29 +71,33 @@ const SalesModal = ({
       description: "",
       totalAmount: 0,
       receivedamount: 0,
-      projectid: "",
-      stocktype: "",
-      stockid: "",
+      projectId: "",
+      stockType: "",
+      stockCode: "",
     };
   }, [defaultValues, mode]);
+
+    const { projectOptionsById } = useProjects();
 
   useEffect(() => {
     reset(memoizedDefaultValues);
   }, [reset, memoizedDefaultValues]);
 
+  const { stockOptions, loading: loadingStocks } = useStocks();
+  
   const onFormSubmit = async (data: FormSchema) => {
     try {
       await onSubmit(data);
       onSuccess();
     } catch {
-      alert("Bir hata oluştu.");
+      notify.error("Bir hata oluştu.");
     }
   };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-4xl">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-6xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Satış Ekle" : "Satış Bilgilerini Düzenle"}
         </h2>
 
@@ -92,36 +105,37 @@ const SalesModal = ({
           onSubmit={handleSubmit(onFormSubmit)}
           className="grid grid-cols-3 gap-4"
         >
-          <Dropdown
+          <TextInput
             name="customerName"
             label="Müşteri"
-            options={financeTypes}
             register={register}
             error={errors.customerName?.message}
+            required
           />
 
           <Dropdown
-            name="projectid"
+            name="projectId"
             label="Proje"
-            options={financeTypes}
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
             register={register}
-            error={errors.projectid?.message}
           />
 
           <Dropdown
-            name="stocktype"
+            name="stockType"
             label="Stok Tipi"
-            options={financeTypes}
+            options={stockCategories}
             register={register}
-            error={errors.stocktype?.message}
+            error={errors.stockType?.message}
+            required
           />
 
           <Dropdown
-            name="stockid"
-            label="Stok"
-            options={financeTypes}
+            name="stockCode"
+            label="Stok Kodu"
+            options={[{ code: "", name: "Seçiniz" }, ...stockOptions]}
             register={register}
-            error={errors.stockid?.message}
+            error={errors.stockCode?.message}
+            required
           />
 
           <NumberInput
@@ -129,37 +143,23 @@ const SalesModal = ({
             label=" Toplam Tutar"
             register={register}
             error={errors.totalAmount?.message}
+            required
           />
 
-          <NumberInput
-            name="receivedamount"
-            label=" Alınan Tutar"
-            register={register}
-            error={errors.receivedamount?.message}
-          />
           <TextAreaInput
             classes="col-span-3"
             name="description"
             label="Açıklama"
             register={register}
-            error={errors.description?.message}
           />
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-lg border bg-gray-200 text-gray-700 hover:bg-gray-300"
-            >
-              İptal
-            </button>
-            <button
+            <Button
               type="submit"
+              label="Kaydet"
+              loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-primary text-white hover:bg-blue-700 transition"
-            >
-              {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
-            </button>
+            />
           </div>
         </form>
       </div>

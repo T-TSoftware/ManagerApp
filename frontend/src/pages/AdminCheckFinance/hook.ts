@@ -5,15 +5,22 @@ import {
   addCheck,
   updateCheck,
   deleteCheck,
+  fetchAccounts,
 } from "./service";
 import { getToken } from "../../utils/token";
 import type { CheckFinanceRows } from "./types";
+import { useNotifier } from "../../hooks/useNotifier";
+import { AutocompleteOption } from "../../types/grid/commonTypes";
 
 
 export const useCheckFinance = () => {
   const [localData, setLocalData] = useState<CheckFinanceRows[]>([]);
   const [loading, setLoading] = useState(false);
+    const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>(
+      []
+    );
   const [alert, setAlert] = useState<any>(null);
+  const notify = useNotifier();
   const token = getToken();
 
   useEffect(() => {
@@ -24,9 +31,11 @@ export const useCheckFinance = () => {
     setLoading(true);
     try {
       const result = await getAllChecks(token!);
+      const optionResult = await fetchAccounts(token!);
       setLocalData(result);
+      setAccountOptions(optionResult);
     } catch (err) {
-      setAlert({ message: "Veriler yüklenemedi", type: "error" });
+       notify.error("Bir sorun oluştu.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +45,7 @@ export const useCheckFinance = () => {
     try {
       return await getCheckById(token!, id);
     } catch (err) {
-      setAlert({ message: "Kayıt alınamadı", type: "error" });
+      notify.error("Bir sorun oluştu.");
       return undefined;
     }
   };
@@ -56,9 +65,8 @@ export const useCheckFinance = () => {
       const record = selected[0];
       await deleteCheck(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
-      setAlert({ message: "Silme işlemi başarılı", type: "success" });
     } catch (err) {
-      setAlert({ message: "Silme işlemi başarısız", type: "error" });
+      notify.error("Bir sorun oluştu.");
     }
   };
 
@@ -73,14 +81,14 @@ export const useCheckFinance = () => {
   };
 
   const saveChanges = async (allRows: CheckFinanceRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
-    setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
+    notify.success("Değişiklikler kaydedildi.");
   };
 
   return {
     localData,
     loading,
     alert,
+    accountOptions,
     setAlert,
     fetchData,
     getById,

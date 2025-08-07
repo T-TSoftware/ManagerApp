@@ -1,12 +1,14 @@
 "use client";
-import { useRef } from "react";
 import { useSubcontractor } from "./hook";
-import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
+import BaseGrid from "../../components/grid/BaseGrid";
 import type {
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { SubcontractorRows } from "./types";
+import { units } from "../../constants/units";
+import { stockCategories } from "../../constants/stockCategories";
+import { checkStatus } from "../../constants/checkStatus";
 
 const SubcontractorGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
@@ -29,6 +31,14 @@ const SubcontractorGrid = () => {
       headerName: "Kategori",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: stockCategories.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockCategories.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -47,6 +57,14 @@ const SubcontractorGrid = () => {
       headerName: "Birim",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: units.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = units.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -60,7 +78,7 @@ const SubcontractorGrid = () => {
     },
     {
       field: "quantity",
-      headerName: "Metraj",
+      headerName: "Miktar",
       editable: true,
       minWidth: 200,
       type: "numberColumn",
@@ -99,39 +117,23 @@ const SubcontractorGrid = () => {
       headerName: "Durum",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: checkStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = checkStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
     },
     {
       field: "description",
       headerName: "Açıklama",
       editable: true,
       minWidth: 200,
-    },
-    {
-      field: "contactPerson",
-      headerName: "İletişim Kişisi",
-      editable: true,
-      minWidth: 200,
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "phone",
-      headerName: "Telefon",
-      editable: true,
-      minWidth: 200,
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "email",
-      headerName: "E-posta",
-      editable: true,
-      minWidth: 200,
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
     },
     {
       field: "createdBy",
@@ -180,7 +182,7 @@ const SubcontractorGrid = () => {
       showButtons={{
         refresh: true,
         add: true,
-        delete: true,
+        delete: false,
         save: true,
         bar: true,
       }}

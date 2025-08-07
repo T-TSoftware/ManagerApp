@@ -1,5 +1,6 @@
-import type { AutocompleteOption, FinanceTransactionRows } from "./types";
+import type { FinanceTransactionRows } from "./types";
 import axios from "../../utils/axios";
+import { AutocompleteOption } from "../../types/grid/commonTypes";
 
 export const getAllFinance = async (
   token: string
@@ -25,10 +26,12 @@ export const addFinance = async (
   token: string,
   data: Partial<FinanceTransactionRows>
 ): Promise<FinanceTransactionRows> => {
+  console.log(data)
   const response = await axios.post(`finances`, [data], {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
+   console.log(response.data);
+  return response.data[0];
 };
 
 export const updateFinance = async (
@@ -36,7 +39,7 @@ export const updateFinance = async (
   data: Partial<FinanceTransactionRows>
 ): Promise<FinanceTransactionRows> => {
   console.log("uuid:" , data)
-  const response =  await axios.patch(`finances/${data.code}`, data, {
+  const response =  await axios.patch(`finances/${data.id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
    return response.data;

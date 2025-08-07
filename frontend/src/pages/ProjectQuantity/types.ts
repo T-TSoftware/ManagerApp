@@ -9,11 +9,7 @@ export interface BaseQuantityRow {
   code: string;
   category: string;
   unit: string;
-  unitPrice: number;
   quantity: number;
-  contractAmount: number;
-  paidAmount: number;
-  remainingAmount: number;
   status: string;
   description: string;
   createdBy: string;
@@ -36,21 +32,53 @@ export type UpdateQuantityPayload = {
   code: string;
 } & Partial<Omit<QuantityRows, 'id' | 'isNew' | '_originalData'>>;
 
-export const QUANTITY_REQUIRED_FIELDS: ValidationFields<QuantityRows> = {
-  code: 'Kod',
-  category: 'Kategori',
-  unit: 'Birim',
-  quantity: 'Metraj',
-  contractAmount: 'Sözleşme Tutarı'
+// Type for row validation
+export interface ValidationError {
+  code: string;
+  field: keyof BaseQuantityRow;
+  message: string;
+}
+
+export interface ValidationRule {
+  label: string;
+  required?: boolean;
+  mustBePositiveNumber?: boolean;
+}
+
+export const QUANTITY_VALIDATION_RULES: Record<
+  keyof BaseQuantityRow,
+  ValidationRule
+> = {
+  id:{label: "Id"},
+  code: { label: "Kod" },
+  status: { label: "Durum" },
+  category: { label: "Kategori", required: true },
+  unit: { label: "Birim", required: true },
+  quantity: { label: "Miktar", required: true, mustBePositiveNumber: true },
+  description: { label: "Açıklama", required: true },
+  createdBy: { label: "Oluşturan" },
+  updatedBy: { label: "Güncelleyen" },
+  createdatetime: { label: "Oluşturulma Tarihi" },
+  updatedatetime: { label: "Güncellenme Tarihi" },
 };
 
 export const validateQuantityRow = (row: QuantityRows): string[] => {
   const errors: string[] = [];
-  Object.entries(QUANTITY_REQUIRED_FIELDS).forEach(([field, label]) => {
+
+  Object.entries(QUANTITY_VALIDATION_RULES).forEach(([field, rule]) => {
     const value = row[field as keyof QuantityRows];
-    if (value === undefined || value === null || value === '') {
-      errors.push(`${label} zorunludur`);
+
+    if (
+      rule.required &&
+      (value === undefined || value === null || value === "")
+    ) {
+      errors.push(`${rule.label} zorunludur`);
+    }
+
+    if (rule.mustBePositiveNumber && typeof value === "number" && value <= 0) {
+      errors.push(`${rule.label} pozitif bir değer olmalıdır`);
     }
   });
+
   return errors;
 };

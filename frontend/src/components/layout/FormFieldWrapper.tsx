@@ -4,6 +4,7 @@ type Props = {
   error?: string;
   children: React.ReactNode;
   classes?: string;
+  hidden? : boolean;
 };
 
 export default function FormFieldWrapper({
@@ -11,10 +12,11 @@ export default function FormFieldWrapper({
   required,
   error,
   children,
+  hidden,
   classes = "",
 }: Props) {
   return (
-    <div className={`${classes}`}>
+    <div className={`${classes}`} hidden={hidden}>
       {label && (
         <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-white">
           {label}

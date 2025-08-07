@@ -5,7 +5,7 @@ export const getAllEmployees = async (token: string): Promise<EmployeesRows[]> =
   const response = await axios.get(`employees`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data.transactions;
+  return response.data.employees;
 };
 
 export const getEmployeeById = async (
@@ -23,7 +23,8 @@ export const addEmployee = async (
   token: string,
   data: Partial<EmployeesRows>
 ): Promise<EmployeesRows> => {
-  const response = await axios.post(`employees`, [data], {
+  console.log("emp:",data)
+  const response = await axios.post(`employees`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
@@ -33,7 +34,7 @@ export const updateEmployee = async (
   token: string,
   data: Partial<EmployeesRows>
 ): Promise<EmployeesRows> => {
-  const response = await axios.patch(`employees`, data, {
+  const response = await axios.patch(`employees/${data.id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;

@@ -1,14 +1,12 @@
-
 export type AnnualLeavesRows = {
   edit: string;
   id?: string;
-  code: string;
   startDate: Date;
   endDate: Date;
+  leaveDayCount: number;
+  type: string;
   description: string;
-  targetname: string;
   createdatetime: string;
   updatedatetime: string;
-  updatedby: string;
 };
 

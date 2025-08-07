@@ -8,7 +8,7 @@ const AnnualLeave: React.FC = () => {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-end justify-between gap-4">
           <p className="text-3xl font-semibold sm:text-3xl text-black dark:text-white">
-            Yıllık İzinler
+            İzinler
           </p>
         </div>
         <div className="flow-root">

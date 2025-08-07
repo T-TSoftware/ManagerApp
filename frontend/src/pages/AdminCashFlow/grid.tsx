@@ -4,6 +4,8 @@ import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type { ColDef, GetRowIdParams } from "ag-grid-community";
 import type { CashFlowRows } from "./types";
 import { v4 as uuid } from "uuid";
+import { checkTypes } from "../../constants/checkTypes";
+import { paymentMethods } from "../../constants/paymentMethods";
 
 const BankMovementGrid = () => {
   const { localData, loading, gridRef } = useCashFlow();
@@ -19,6 +21,13 @@ const BankMovementGrid = () => {
     {
       field: "method",
       headerName: "Yöntem",
+      cellEditorParams: {
+        values: paymentMethods.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = paymentMethods.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },

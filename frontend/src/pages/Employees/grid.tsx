@@ -11,6 +11,7 @@ import { FilePenLine } from "lucide-react";
 import { useEmployees } from "./hook";
 import EmployeesModal from "./modal";
 import Alert from "../../components/feedback/Alert";
+import { useParams } from "react-router-dom";
 
 const EmployeesGrid = () => {
   const {
@@ -66,10 +67,10 @@ const EmployeesGrid = () => {
       },
     },
     { field: "id", hide: true },
-    { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
+    { field: "code", hide: true },
 
     {
-      field: "firstname",
+      field: "firstName",
       headerName: "Ad",
       editable: false,
       minWidth: 200,
@@ -89,6 +90,7 @@ const EmployeesGrid = () => {
     {
       field: "netSalary",
       headerName: "Net Maaş",
+      type: "numberColumn",
       editable: false,
       minWidth: 200,
     },
@@ -96,6 +98,7 @@ const EmployeesGrid = () => {
     {
       field: "grossSalary",
       headerName: "Brüt Maaş",
+      type: "numberColumn",
       editable: false,
       minWidth: 200,
     },
@@ -121,31 +124,37 @@ const EmployeesGrid = () => {
     },
     {
       field: "paidLeaveAmount",
-      headerName: "Fatura",
+      headerName: "Ücretli İzin",
       editable: false,
       minWidth: 200,
     },
     {
       field: "unpaidLeaveAmount",
-      headerName: "Fatura Kodu",
+      headerName: "ücretsiz İzin",
       editable: false,
       minWidth: 200,
     },
     {
       field: "sickLeaveAmount",
-      headerName: "Çek Kodu",
+      headerName: "Hastalık İzni",
       editable: false,
       minWidth: 200,
     },
     {
       field: "roadLeaveAmount",
-      headerName: "Açıklama",
+      headerName: "Yol İzni",
       editable: false,
       minWidth: 200,
     },
     {
       field: "excuseLeaveAmount",
-      headerName: "Açıklama",
+      headerName: "Mazeret İzni",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdBy",
+      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
     },
@@ -157,21 +166,15 @@ const EmployeesGrid = () => {
       minWidth: 200,
     },
     {
+      field: "updatedBy",
+      headerName: "Güncelleyen",
+      editable: false,
+      minWidth: 200,
+    },
+    {
       field: "updatedatetime",
       headerName: "Güncellenme Tarihi",
       type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "createdBy",
-      headerName: "Oluşturan",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "updatedBy",
-      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
@@ -188,7 +191,7 @@ const EmployeesGrid = () => {
       const newItem = await create(formData);
       addRow(newItem);
     } else {
-      const updatedItem = await update(formData);
+      const updatedItem = await update({ ...formData, id: editData!.id });
       updateRow(updatedItem);
     }
   };

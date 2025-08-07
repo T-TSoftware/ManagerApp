@@ -17,6 +17,8 @@ export type LoansRows = {
   loanType: string;
   status: string;
   description: string;
+  projectCode: string;
+  bankCode: string;
   createdatetime: string;
   updatedatetime: string;
   updatedby?: {
@@ -28,6 +30,8 @@ export type LoansRows = {
 
   bank?: {
     id: string;
+    code:string;
+    name:string;
   };
 
   company?: {
@@ -36,8 +40,8 @@ export type LoansRows = {
 
   project?: {
     id: string;
-    code:string;
-    name:string;
+    code: string;
+    name: string;
   };
 };
 

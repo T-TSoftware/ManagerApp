@@ -11,6 +11,10 @@ import { useSales } from "./hook";
 import SalesModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { FilePenLine } from "lucide-react";
+import { useStocks } from "../../hooks/useStocks";
+import { stockCategories } from "../../constants/stockCategories";
+import { checkStatus } from "../../constants/checkStatus";
+import { useNotifier } from "../../hooks/useNotifier";
 
 const SalesGrid = () => {
   const {
@@ -31,9 +35,10 @@ const SalesGrid = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editData, setEditData] = useState<Partial<SalesRows> | undefined>();
-
+  const { stockOptions, loading: loadingStocks } = useStocks();
+   const notify = useNotifier();
   const colDefs: ColDef<SalesRows>[] = [
-    {
+/*     {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -62,11 +67,11 @@ const SalesGrid = () => {
           </button>
         );
       },
-    },
+    }, */
     { field: "id", hide: true },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
-      field: "projectid",
+      field: "project.name",
       headerName: "Proje",
       editable: false,
       minWidth: 200,
@@ -78,14 +83,28 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "stocktype",
+      field: "stockType",
       headerName: "Stok Tipi",
+      cellEditorParams: {
+        values: stockCategories.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockCategories.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
     {
-      field: "stockid",
-      headerName: "Stok Id",
+      field: "stock.name",
+      headerName: "Stok Kodu",
+      cellEditorParams: {
+        values: stockOptions.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockOptions.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
@@ -96,7 +115,7 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "totalamount",
+      field: "totalAmount",
       headerName: "Toplam Ödeme",
       editable: false,
       minWidth: 200,
@@ -116,12 +135,25 @@ const SalesGrid = () => {
     {
       field: "status",
       headerName: "Durum",
+      cellEditorParams: {
+        values: checkStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = checkStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
     {
       field: "companyid",
       hide: true,
+    },
+    {
+      field: "createdby",
+      headerName: "Oluşturan",
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "createdatetime",
@@ -131,21 +163,15 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
+      field: "updatedby",
+      headerName: "Güncelleyen",
+      editable: false,
+      minWidth: 200,
+    },
+    {
       field: "updatedatetime",
       headerName: "Güncellenme Tarihi",
       type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "createdby",
-      headerName: "Oluşturan",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "updatedby",
-      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
@@ -159,9 +185,11 @@ const SalesGrid = () => {
     if (modalMode === "create") {
       const newItem = await create(formData);
       addRow(newItem);
+      notify.success("Kayıt başarıyla oluşturuldu");
     } else {
       const updatedItem = await update(formData);
       updateRow(updatedItem);
+       notify.success("Değişiklikler kaydedildi");
     }
   };
 

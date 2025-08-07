@@ -1,10 +1,10 @@
 export const financeCategory = [
   { code: "", name: "Seçiniz" },
+  { code: "CHECK", name: "Çek" },
+  { code: "SUPPLIER", name: "Tedarik" },
+  { code: "ORDER", name: "Satış" },
+  { code: "BARTER", name: "Barter" },
+  { code: "SUBCONTRACTOR", name: "Taşeron" },
   { code: "INTERNAL_TRANSFER", name: "Hesaplar Arası Transfer" },
-  // { code: "CHECK_PAYMENT", name: "Çek Ödemesi" },
-  { code: "SALARY_PAYMENT", name: "Maaş Ödemesi" },
-  //{ code: "CREDIT_PAYMENT", name: "Kredi Ödemesi" },
-  //{ code: "CHECK_COLLECTION", name: "Çek Tahsilatı" },
-  { code: "CREDIT_COLLECTION", name: "Mevduat Tahsilatı" },
-  { code: "SALES_COLLECTION", name: "Satış Tahsilatı" },
+  { code: "LOAN", name: "Kredi" },
 ];

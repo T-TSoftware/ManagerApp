@@ -1,7 +1,6 @@
 "use client";
-import { useRef } from "react";
 import { useStock } from "./hook";
-import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
+import BaseGrid from "../../components/grid/BaseGrid";
 import type {
   ColDef,
   GetRowIdParams,
@@ -9,11 +8,12 @@ import type {
 import type { StockRows } from "./types";
 import { units } from "../../constants/units";
 import { stockCategories } from "../../constants/stockCategories";
+import { useProjects } from "../../hooks/useProjects";
 
 const StockGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
     useStock();
-
+  const { projectOptionsByCode } = useProjects();
   const colDefs: ColDef<StockRows>[] = [
     {
       field: "id",
@@ -80,11 +80,26 @@ const StockGrid = () => {
       },
     },
     {
-      field: "minimumQuantity",
-      headerName: "Minimum Miktar",
+      field: "projectCode",
+      headerName: "Proje",
       editable: true,
       minWidth: 200,
-      type: "numberColumn",
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: [{ code: "", name: "Seçiniz" }, ...projectOptionsByCode].map(
+          (c) => c.code
+        ),
+      },
+      valueFormatter: ({ value }) => {
+        const item = [
+          { code: "", name: "Seçiniz" },
+          ...projectOptionsByCode,
+        ].find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      cellClassRules: {
+        "border border-red-300": (params) => !!params.data?.isNew,
+      },
     },
     {
       field: "description",
@@ -100,17 +115,6 @@ const StockGrid = () => {
       headerName: "Konum",
       editable: true,
       minWidth: 200,
-    },
-    {
-      field: "stockDate",
-      headerName: "Stok Tarihi",
-      editable: true,
-      minWidth: 200,
-      valueFormatter: (params) => {
-        return params.value
-          ? new Date(params.value).toLocaleString("tr-TR")
-          : "";
-      },
     },
     {
       field: "createdBy",
@@ -167,7 +171,7 @@ const StockGrid = () => {
       showButtons={{
         refresh: true,
         add: true,
-        delete: true,
+        delete: false,
         save: true,
         bar: true,
       }}

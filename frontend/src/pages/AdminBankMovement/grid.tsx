@@ -1,6 +1,6 @@
 "use client";
 import { useCurrent } from "./hook";
-import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
+import BaseGrid from "../../components/grid/BaseGrid";
 import type {
   ColDef,
   GetRowIdParams,
@@ -9,10 +9,11 @@ import type { BankMovementRows } from "./types";
 import { financeCategory } from "../../constants/financeCategory";
 import { currencyList } from "../../constants/currencyList";
 import { paymentMethods } from "../../constants/paymentMethods";
+import { useProjects } from "../../hooks/useProjects";
 
 const BankMovementGrid = () => {
   const { localData, loading, gridRef } = useCurrent();
-
+  const { projectOptionsById } = useProjects();
   const colDefs: ColDef<BankMovementRows>[] = [
     {
       field: "id",
@@ -24,11 +25,20 @@ const BankMovementGrid = () => {
     },
     {
       field: "projectid",
-      hide: true,
+      headerName: "Proje",
+      cellEditorParams: {
+        values: projectOptionsById.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = projectOptionsById.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      editable: false,
+      minWidth: 150,
     },
     {
       field: "code",
-      headerName: "Kod",
+      headerName: "İşlem Kodu",
       editable: false,
       minWidth: 150,
     },

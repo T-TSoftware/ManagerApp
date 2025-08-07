@@ -8,12 +8,13 @@ import {
 } from "./service";
 import { getToken } from "../../utils/token";
 import type { EmployeesRows } from "./types";
-
+import { useNotifier } from "../../hooks/useNotifier";
 
 export const useEmployees = () => {
   const [localData, setLocalData] = useState<EmployeesRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
+  const notify = useNotifier();
   const token = getToken();
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export const useEmployees = () => {
       const result = await getAllEmployees(token!);
       setLocalData(result);
     } catch (err) {
-      setAlert({ message: "Veriler yüklenemedi", type: "error" });
+      notify.error("Bir sorun oluştu.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +37,7 @@ export const useEmployees = () => {
     try {
       return await getEmployeeById(token!, id);
     } catch (err) {
-      setAlert({ message: "Kayıt alınamadı", type: "error" });
+      notify.error("Bir sorun oluştu.");
       return undefined;
     }
   };
@@ -56,9 +57,8 @@ export const useEmployees = () => {
       const record = selected[0];
       await deleteEmployee(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
-      setAlert({ message: "Silme işlemi başarılı", type: "success" });
     } catch (err) {
-      setAlert({ message: "Silme işlemi başarısız", type: "error" });
+      notify.error("Bir sorun oluştu.");
     }
   };
 
@@ -73,8 +73,7 @@ export const useEmployees = () => {
   };
 
   const saveChanges = async (allRows: EmployeesRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
-    setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
+    notify.success("Değişiklikler kaydedildi.");
   };
 
   return {

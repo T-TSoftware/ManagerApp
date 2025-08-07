@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 type Props = {
   children: ReactNode;
   open: boolean;
-  onClose: () => void; 
+  onClose: () => void;
 };
 
 const ModalWrapper = ({ children, open, onClose }: Props) => {
@@ -17,7 +17,7 @@ const ModalWrapper = ({ children, open, onClose }: Props) => {
 
   const [show, setShow] = useState(false);
 
-  // Handle ESC key to close
+  // ESC tuşuyla kapatma
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -37,7 +37,7 @@ const ModalWrapper = ({ children, open, onClose }: Props) => {
 
   useEffect(() => {
     if (!open) {
-      const timeout = setTimeout(() => setShow(false), 300); 
+      const timeout = setTimeout(() => setShow(false), 300);
       return () => clearTimeout(timeout);
     } else {
       setShow(true);
@@ -52,7 +52,16 @@ const ModalWrapper = ({ children, open, onClose }: Props) => {
         open ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
-      {children}
+      <div className="relative">
+        <button
+          onClick={onClose}
+          className="absolute -top-2 -right-2 bg-white text-black rounded-full w-8 h-8 flex items-center justify-center shadow hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition"
+          aria-label="Kapat"
+        >
+          ✕
+        </button>
+        {children}
+      </div>
     </div>,
     modalRoot
   );

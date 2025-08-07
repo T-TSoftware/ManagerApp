@@ -1,5 +1,3 @@
-import { ValidationFields } from '../../types/grid/commonTypes';
-
 // Row state types
 export type RowState = 'unchanged' | 'new' | 'modified' | 'deleted';
 
@@ -58,23 +56,51 @@ export interface ValidationError {
   message: string;
 }
 
-export const STOCK_REQUIRED_FIELDS: ValidationFields<StockRows> = {
-  name: 'İsim',
-  category: 'Kategori',
-  unit: 'Birim',
-  quantity: 'Miktar',
-  minimumQuantity: 'Minimum Miktar',
-  description: 'Açıklama'
+export interface ValidationRule {
+  label: string;
+  required?: boolean;
+  mustBePositiveNumber?: boolean;
+}
+
+export const STOCK_VALIDATION_RULES: Record<
+  keyof BaseStockRow,
+  ValidationRule
+> = {
+  id:{label: "Id"},
+  code: { label: "Kod" },
+  name: { label: "İsim", required: true },
+  category: { label: "Kategori", required: true },
+  unit: { label: "Birim", required: true },
+  quantity: { label: "Miktar", required: true, mustBePositiveNumber: true },
+  minimumQuantity: {label: "Minimum Miktar",},
+  description: { label: "Açıklama", required: true },
+  location: { label: "Konum" },
+  projectCode: {label: "Proje"},
+  stockDate: { label: "Stok Tarihi" },
+  createdBy: { label: "Oluşturan" },
+  updatedBy: { label: "Güncelleyen" },
+  createdatetime: { label: "Oluşturulma Tarihi" },
+  updatedatetime: { label: "Güncellenme Tarihi" },
 };
 
 export const validateStockRow = (row: StockRows): string[] => {
   const errors: string[] = [];
-  Object.entries(STOCK_REQUIRED_FIELDS).forEach(([field, label]) => {
-    const value = row[field as keyof typeof STOCK_REQUIRED_FIELDS];
-    if (value === undefined || value === null || value === '') {
-      errors.push(`${label} zorunludur`);
+
+  Object.entries(STOCK_VALIDATION_RULES).forEach(([field, rule]) => {
+    const value = row[field as keyof StockRows];
+
+    if (
+      rule.required &&
+      (value === undefined || value === null || value === "")
+    ) {
+      errors.push(`${rule.label} zorunludur`);
+    }
+
+    if (rule.mustBePositiveNumber && typeof value === "number" && value <= 0) {
+      errors.push(`${rule.label} pozitif bir değer olmalıdır`);
     }
   });
+
   return errors;
 };
 

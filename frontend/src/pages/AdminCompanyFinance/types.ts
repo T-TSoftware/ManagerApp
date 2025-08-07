@@ -15,11 +15,8 @@ export type FinanceTransactionRows = {
   category: string;
   invoiceYN: string;
   invoiceCode: string;
-  checkCode: string;
-  checkstatus: string;
-  loanCode: string;
-  loanStatus: string;
   description: string;
+  referenceCode: string;
   createdatetime: string;
   updatedatetime: string;
   updatedby: string;
@@ -40,7 +37,11 @@ export type FinanceTransactionRows = {
     currency: string;
   };
 
-  project?: any;
+  project?: {
+    id: string;
+    code: string;
+    name: string;
+  };
   updatedBy?: {
     id: string;
     name: string;
@@ -52,10 +53,10 @@ export type FinanceTransactionRows = {
       code: string;
     };
   };
+  order?: {
+    id: string;
+    description: string;
+    code: string;
+  };
 };
-
-export interface AutocompleteOption {
-  code: string;
-  name: string;
-}
 

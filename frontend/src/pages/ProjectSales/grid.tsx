@@ -67,9 +67,7 @@ const SalesGrid = () => {
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
       field: "projectid",
-      headerName: "Proje",
-      editable: false,
-      minWidth: 200,
+      hide: true,
     },
     {
       field: "customerName",
@@ -96,7 +94,7 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "totalamount",
+      field: "totalAmount",
       headerName: "Toplam Ödeme",
       editable: false,
       minWidth: 200,
@@ -194,7 +192,7 @@ const SalesGrid = () => {
         isLoading={loading}
         showButtons={{
           refresh: true,
-          add: true,
+          add: false,
           delete: false,
           save: false,
           bar: true,

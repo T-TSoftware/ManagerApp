@@ -10,9 +10,12 @@ import {
   DatePicker,
 } from "../../components/inputs";
 import { EmployeesRows } from "./types";
+import { useNotifier } from "../../hooks/useNotifier";
+import Button from "../../components/buttons/Button";
+
 
 const schema = z.object({
-  firstname: z.string().min(1, "Ad zorunludur."),
+  firstName: z.string().min(1, "Ad zorunludur."),
   lastName: z.string().min(1, "Soyad zorunludur."),
   age: z.coerce.number().int().positive("Yaş pozitif olmalı."),
   startDate: z.date({
@@ -23,11 +26,6 @@ const schema = z.object({
   department: z.string().min(1, "Departman zorunludur."),
   netSalary: z.coerce.number().positive("Net maaş pozitif olmalı."),
   grossSalary: z.coerce.number().positive("Brüt maaş pozitif olmalı."),
-  paidLeaveAmount: z.coerce.number(),
-  unpaidLeaveAmount: z.coerce.number(),
-  sickLeaveAmount: z.coerce.number(),
-  roadLeaveAmount: z.coerce.number(),
-  excuseLeaveAmount: z.coerce.number(),
 });
 
 type EmployeeFormSchema = z.infer<typeof schema>;
@@ -67,11 +65,12 @@ const EmployeeModal = ({
         startDate: defaultValues.startDate
           ? new Date(defaultValues.startDate)
           : undefined,
+        employeeId: defaultValues.employee?.id,
       };
     }
     return {
       code: "",
-      firstname: "",
+      firstName: "",
       lastName: "",
       age: 0,
       startDate: new Date(),
@@ -79,17 +78,15 @@ const EmployeeModal = ({
       grossSalary: 0,
       position: "",
       department: "",
-      paidLeaveAmount: 0,
-      unpaidLeaveAmount: 0,
-      sickLeaveAmount: 0,
-      roadLeaveAmount: 0,
-      excuseLeaveAmount: 0,
+      employeeId:""
     };
   }, [defaultValues, mode]);
 
   useEffect(() => {
     reset(memoizedDefaultValues);
   }, [reset, memoizedDefaultValues]);
+
+  const notify = useNotifier();
 
   const onFormSubmit = async (data: EmployeeFormSchema) => {
     try {
@@ -99,15 +96,15 @@ const EmployeeModal = ({
       });
       onSuccess();
     } catch {
-      alert("Bir hata oluştu.");
+      notify.error("Bir sorun oluştu.");
     }
   };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>
-      <div className="bg-white py-6 px-8 rounded-xl shadow-xl w-full max-w-6xl dark:bg-primary dark:text-white">
+      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-6xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-          {mode === "create" ? "Çalışan Ekle" : "Çalışan Güncelle"}
+          {mode === "create" ? "Çalışan Ekle" : "Çalışan Bilgilerini Düzenle"}
         </h2>
 
         <form
@@ -115,10 +112,10 @@ const EmployeeModal = ({
           className="grid grid-cols-3 gap-4"
         >
           <TextInput
-            name="firstname"
+            name="firstName"
             label="Ad"
             register={register}
-            error={errors.firstname?.message}
+            error={errors.firstName?.message}
           />
           <TextInput
             name="lastName"
@@ -163,52 +160,14 @@ const EmployeeModal = ({
             register={register}
             error={errors.grossSalary?.message}
           />
-          <NumberInput
-            name="paidLeaveAmount"
-            label="Ücretli İzin"
-            register={register}
-            error={errors.paidLeaveAmount?.message}
-          />
-          <NumberInput
-            name="unpaidLeaveAmount"
-            label="Ücretsiz İzin"
-            register={register}
-            error={errors.unpaidLeaveAmount?.message}
-          />
-          <NumberInput
-            name="sickLeaveAmount"
-            label="Hastalık İzni"
-            register={register}
-            error={errors.sickLeaveAmount?.message}
-          />
-          <NumberInput
-            name="roadLeaveAmount"
-            label="Yol İzni"
-            register={register}
-            error={errors.roadLeaveAmount?.message}
-          />
-          <NumberInput
-            name="excuseLeaveAmount"
-            label="Mazeret İzni"
-            register={register}
-            error={errors.excuseLeaveAmount?.message}
-          />
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500 hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
-            >
-              İptal
-            </button>
-            <button
+            <Button
               type="submit"
+              label="Kaydet"
+              loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth dark:bg-fourth transition"
-            >
-              {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
-            </button>
+            />
           </div>
         </form>
       </div>

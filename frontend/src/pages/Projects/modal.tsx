@@ -5,15 +5,35 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ProjectRows } from "./types";
 import ModalWrapper from "../../components/layout/ModalWrapper";
+import { useNotifier } from "../../hooks/useNotifier";
+import TextInput from "../../components/inputs/TextInput";
+import Dropdown from "../../components/inputs/Dropdown";
+import { projectStatus } from "../../constants/projectStatus";
+import DatePicker from "../../components/inputs/DatePicker";
+import Button from "../../components/buttons/Button";
+
+const optionalString = z.string().optional().or(z.literal(""));
 
 const schema = z.object({
   name: z.string().min(1, "Proje adı zorunludur"),
-  site: z.string().optional(),
-  status: z.string().optional(),
-  estimatedStartDate: z.string().optional(),
-  actualStartDate: z.string().optional(),
-  estimatedEndDate: z.string().optional(),
-  actualEndDate: z.string().optional(),
+  site: z.string().min(1, "Şantiye zorunludur"),
+  status: z.string().min(1, "Durum zorunludur"),
+  estimatedStartDate: z.date({
+    required_error: "Beklenen Başlama Tarihi zorunludur.",
+    invalid_type_error: "Geçerli bir tarih girin.",
+  }),
+  actualStartDate: z.date({
+    required_error: "Gerçek Başlama Tarihi zorunludur.",
+    invalid_type_error: "Geçerli bir tarih girin.",
+  }),
+  estimatedEndDate: z.date({
+    required_error: "Beklenen Bitiş Tarihi zorunludur.",
+    invalid_type_error: "Geçerli bir tarih girin.",
+  }),
+  actualEndDate: z.date({
+    required_error: "Gerçek Bitiş Tarihi zorunludur.",
+    invalid_type_error: "Geçerli bir tarih girin.",
+  }),
 });
 
 type ProjectFormSchema = z.infer<typeof schema>;
@@ -39,183 +59,155 @@ const ProjectModal = ({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormSchema>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      name: "",
-      site: "",
-      status: "Planned",
-    },
   });
 
-    const memoizedDefaultValues = useMemo(() => {
-      if (mode === "edit" && defaultValues) {
-        const format = (date?: string | Date) =>
-          date ? new Date(date).toISOString().slice(0, 16) : "";
-
-        return {
-          ...defaultValues,
-          estimatedStartDate: format(defaultValues.estimatedStartDate),
-          actualStartDate: format(defaultValues.actualStartDate),
-          estimatedEndDate: format(defaultValues.estimatedEndDate),
-          actualEndDate: format(defaultValues.actualEndDate),
-        };
-      }
-
+  const memoizedDefaultValues = useMemo(() => {
+    if (mode === "edit" && defaultValues) {
       return {
-        name: "",
-        site: "",
-        status: "",
-        estimatedStartDate: "",
-        actualStartDate: "",
-        estimatedEndDate: "",
-        actualEndDate: "",
+        ...defaultValues,
+        estimatedStartDate: defaultValues?.estimatedStartDate
+          ? new Date(defaultValues.estimatedStartDate)
+          : undefined,
+        actualStartDate: defaultValues?.actualStartDate
+          ? new Date(defaultValues.actualStartDate)
+          : undefined,
+        estimatedEndDate: defaultValues?.estimatedEndDate
+          ? new Date(defaultValues.estimatedEndDate)
+          : undefined,
+        actualEndDate: defaultValues?.actualEndDate
+          ? new Date(defaultValues.actualEndDate)
+          : undefined,
       };
-    }, [defaultValues, mode]);
+    }
 
-    useEffect(() => {
-      reset(memoizedDefaultValues);
-    }, [reset, memoizedDefaultValues]);
-
-const onFormSubmit = async (data: ProjectFormSchema) => {
-  try {
-    const transformed: Partial<ProjectRows> = {
-      ...data,
-      estimatedStartDate: data.estimatedStartDate
-        ? new Date(data.estimatedStartDate)
-        : undefined,
-      actualStartDate: data.actualStartDate
-        ? new Date(data.actualStartDate)
-        : undefined,
-      estimatedEndDate: data.estimatedEndDate
-        ? new Date(data.estimatedEndDate)
-        : undefined,
-      actualEndDate: data.actualEndDate
-        ? new Date(data.actualEndDate)
-        : undefined,
+    return {
+      name: "",
+      site: "",
+      status: "",
+      estimatedStartDate: new Date(),
+      actualStartDate: new Date(),
+      estimatedEndDate: new Date(),
+      actualEndDate: new Date(),
     };
+  }, [defaultValues, mode]);
 
-    await onSubmit(transformed);
-    onSuccess();
-  } catch (err) {
-    alert("Bir hata oluştu.");
-  }
-};
+  useEffect(() => {
+    reset(memoizedDefaultValues);
+  }, [reset, memoizedDefaultValues]);
+
+  const notify = useNotifier();
+
+  const onFormSubmit = async (data: ProjectFormSchema) => {
+    try {
+      const transformed: Partial<ProjectRows> = {
+        ...data,
+        estimatedStartDate: data.estimatedStartDate
+          ? new Date(data.estimatedStartDate)
+          : undefined,
+        actualStartDate: data.actualStartDate
+          ? new Date(data.actualStartDate)
+          : undefined,
+        estimatedEndDate: data.estimatedEndDate
+          ? new Date(data.estimatedEndDate)
+          : undefined,
+        actualEndDate: data.actualEndDate
+          ? new Date(data.actualEndDate)
+          : undefined,
+      };
+
+      await onSubmit(transformed);
+      onSuccess();
+    } catch (err) {
+      notify.error("Bir hata oluştu.");
+    }
+  };
 
   return (
-    <ModalWrapper open={open}>
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-2xl dark:bg-primary dark:text-white">
+    <ModalWrapper open={open} onClose={onClose}>
+      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-6xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-          {mode === "create" ? "Proje Yarat" : "Projeyi Güncelle"}
+          {mode === "create" ? "Proje Ekle" : "Proje Düzenle"}
         </h2>
 
-        <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Proje Adı
-            </label>
-            <input
-              {...register("name")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Proje adı girin"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
-          </div>
+        <form
+          onSubmit={handleSubmit(onFormSubmit)}
+          className="grid grid-cols-3 gap-4"
+        >
+          <TextInput
+            name="name"
+            label="Proje Adı"
+            register={register}
+            error={errors.name?.message}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Şantiye
-            </label>
-            <input
-              {...register("site")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Şantiye girin"
-            />
-          </div>
+          <TextInput
+            name="site"
+            label="Şantiye"
+            register={register}
+            error={errors.site?.message}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Durum
-            </label>
-            <input
-              {...register("status")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Durum girin (ör: Planned)"
-            />
-          </div>
+          <Dropdown
+            name="status"
+            label="Durum"
+            options={projectStatus}
+            register={register}
+            error={errors.status?.message}
+            required
+          />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-                Tahmini Başlangıç
-              </label>
-              <input
-                type="datetime-local"
-                {...register("estimatedStartDate")}
-                defaultValue={new Date().toISOString().slice(0, 16)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              />
-            </div>
+          <DatePicker
+            label="Tahmini Başlangıç"
+            value={watch("estimatedStartDate")}
+            onChange={(val) => setValue("estimatedStartDate", val!)}
+            error={errors.estimatedStartDate?.message}
+            required
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-                Gerçek Başlangıç
-              </label>
-              <input
-                type="datetime-local"
-                {...register("actualStartDate")}
-                defaultValue={new Date().toISOString().slice(0, 16)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              />
-            </div>
+          <DatePicker
+            label="Gerçek Başlangıç"
+            value={watch("actualStartDate")}
+            onChange={(val) => setValue("actualStartDate", val!)}
+            error={errors.actualStartDate?.message}
+            required
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-                Tahmini Bitiş
-              </label>
-              <input
-                type="datetime-local"
-                {...register("estimatedEndDate")}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              />
-            </div>
+          <DatePicker
+            label="Tahmini Bitiş"
+            value={watch("estimatedEndDate")}
+            onChange={(val) => setValue("estimatedEndDate", val!)}
+            error={errors.estimatedEndDate?.message}
+            required
+          />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-                Gerçek Bitiş
-              </label>
-              <input
-                type="datetime-local"
-                {...register("actualEndDate")}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              />
-            </div>
-          </div>
+          <DatePicker
+            label="Gerçek Bitiş"
+            value={watch("actualEndDate")}
+            onChange={(val) => setValue("actualEndDate", val!)}
+            error={errors.actualEndDate?.message}
+            required
+          />
 
-          <div className="pt-6 flex justify-end gap-3">
-            <button
+          <div className="col-span-3 pt-6 flex justify-end gap-3">
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500  hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+            />
+            <Button
               type="submit"
+              label="Kaydet"
+              loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth  dark:bg-fourth transition"
-            >
-              {isSubmitting
-                ? mode === "create"
-                  ? "Oluşturuluyor..."
-                  : "Güncelleniyor..."
-                : mode === "create"
-                ? "Proje Oluştur"
-                : "Kaydet"}
-            </button>
+            />
           </div>
         </form>
       </div>

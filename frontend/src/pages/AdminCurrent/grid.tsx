@@ -24,7 +24,9 @@ const CurrentGrid = () => {
     },
     {
       field: "project",
-      hide: true,
+      headerName: "Proje",
+      editable: false,
+      minWidth: 150,
     },
     {
       field: "firm",

@@ -17,6 +17,7 @@ import {
   ArrowBigLeftDash,
   IdCardLanyard,
   FileUser,
+  ArrowLeftRight
 } from "lucide-react";
 import { PagesMenuItemType } from "../../types/menu/PagesMenu";
 
@@ -42,16 +43,16 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Stok Durumu",
-      href: "/stock",
+      href: projectId ? `${basePath}/stock` : "stock",
       icon: Layers,
       portalYN: false,
-      adminYN: false,
+      adminYN: !projectId,
       employeeYN: false,
     },
     {
-      label: "Stok Durumu",
-      href: projectId ? `/stock` : "stock",
-      icon: Layers,
+      label: "Barter Anlaşmaları",
+      href: projectId ? `/barter` : "barter",
+      icon: ArrowLeftRight,
       portalYN: false,
       adminYN: true,
       employeeYN: false,
@@ -144,7 +145,7 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       adminYN: true,
       employeeYN: false,
     },
-    {
+    /*     {
       label: "Taşeron Listesi",
       href: "/subcontractor-list",
       icon: UsersRound,
@@ -159,7 +160,7 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       portalYN: false,
       adminYN: true,
       employeeYN: false,
-    },
+    }, */
     {
       label: "Metraj",
       href: `${basePath}/quantity`,
@@ -178,7 +179,7 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
     },
     {
       label: "Personel Yönetim",
-      href: "/employees-portal/dashboard",
+      href: "/employees-portal/employees",
       icon: UserRoundCog,
       adminYN: true,
       portalYN: true,

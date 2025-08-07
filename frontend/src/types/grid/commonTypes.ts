@@ -25,3 +25,8 @@ export const isRowModified = <T extends BaseGridRow>(row: T): boolean => {
   const original = row._originalData as T;
   return JSON.stringify(original) !== JSON.stringify({ ...row, _originalData: undefined, isNew: undefined });
 }; 
+
+export interface AutocompleteOption {
+  code: string;
+  name: string;
+}

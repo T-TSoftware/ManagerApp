@@ -11,13 +11,16 @@ import { useLoan } from "./hook";
 import LoanTransactionModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { financeCategory } from "../../constants/financeCategory";
-import { FilePenLine, TicketPlus } from "lucide-react";
-import InstallmentModal from "./installment-modal";
+import { TicketPlus } from "lucide-react";
+import LoanPaymentModal from "./LoanPayments/modal";
+import { useNotifier } from "../../hooks/useNotifier";
+import { loanStatus } from "../../constants/loanStatus";
 
 const LoanGrid = () => {
   const {
     localData,
     loading,
+    accountOptions,
     addRow,
     updateRow,
     deleteRows,
@@ -33,8 +36,9 @@ const LoanGrid = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [installmentModalOpen, setInstallmentModalOpen] = useState(false);
+  const [loanId, setLoanId] = useState<string | undefined>();
   const [editData, setEditData] = useState<Partial<LoansRows> | undefined>();
-
+  const notify = useNotifier();
   const resetModalState = () => {
     setModalOpen(false);
      setTimeout(() => {
@@ -44,7 +48,7 @@ const LoanGrid = () => {
   };
 
   const colDefs: ColDef<LoansRows>[] = [
-    {
+    /*     {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -73,7 +77,7 @@ const LoanGrid = () => {
           </button>
         );
       },
-    },
+    }, */
     {
       headerName: "Ekle",
       field: "createPayment",
@@ -89,16 +93,14 @@ const LoanGrid = () => {
         textAlign: "center",
       },
       cellRenderer: (params: ICellRendererParams<LoansRows>) => {
+        const { id } = params.data || {};
         return (
           <button
             className="text-black hover:underline text-sm content-center"
-            onClick={async () => {
-              if (!params.data?.id) return;
-              const record = await getById(params.data.id);
-              if (record) {
-                setEditData(record);
-                setInstallmentModalOpen(true);
-              }
+            onClick={() => {
+              setLoanId(id);
+              setInstallmentModalOpen(true);
+              console.log(loanId);
             }}
           >
             <TicketPlus
@@ -111,7 +113,6 @@ const LoanGrid = () => {
     },
     { field: "bank", hide: true },
     { field: "company", hide: true },
-    { field: "project", hide: true },
     { field: "id", hide: true },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
@@ -158,6 +159,7 @@ const LoanGrid = () => {
     },
     {
       field: "totalInstallmentCount",
+      
       headerName: "Toplam Taksit Sayısı",
       editable: false,
       minWidth: 200,
@@ -191,6 +193,13 @@ const LoanGrid = () => {
     {
       field: "status",
       headerName: "Durum",
+      cellEditorParams: {
+        values: loanStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = loanStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
@@ -201,7 +210,7 @@ const LoanGrid = () => {
       minWidth: 200,
     },
     {
-      field: "project",
+      field: "project.name",
       headerName: "Proje",
       editable: false,
       minWidth: 200,
@@ -240,10 +249,7 @@ const LoanGrid = () => {
 
 const handleSuccess = (message?: string, newData?: LoansRows) => {
   if (message) {
-    setAlert({
-      type: "success",
-      message,
-    });
+   notify.success(message)
   }
 
   if (newData) {
@@ -260,10 +266,10 @@ const handleSuccess = (message?: string, newData?: LoansRows) => {
 const handleModalSubmit = async (formData: Partial<LoansRows>) => {
   if (modalMode === "create") {
     const newItem = await create(formData);
-    handleSuccess("Kredi başarıyla oluşturuldu.", newItem);
+   notify.success("Kayıt başarıyla oluşturuldu");
   } else {
     const updatedItem = await update(formData);
-    handleSuccess("Kredi başarıyla güncellendi.", updatedItem);
+          notify.success("Değişiklikler kaydedildi");
   }
 };
 
@@ -276,18 +282,18 @@ const handleModalSubmit = async (formData: Partial<LoansRows>) => {
         open={modalOpen}
         mode={modalMode}
         defaultValues={editData}
+        options={accountOptions}
         onClose={resetModalState}
         onSuccess={handleSuccess}
         onSubmit={handleModalSubmit}
       />
-      <InstallmentModal
-        open={installmentModalOpen}
-        mode={modalMode}
-        defaultValues={editData}
-        onClose={resetModalState}
-        onSuccess={handleSuccess}
-        onSubmit={handleModalSubmit}
-      />
+      {loanId && (
+        <LoanPaymentModal
+          open={installmentModalOpen}
+          onClose={() => setInstallmentModalOpen(false)}
+          loanId={loanId}
+        />
+      )}
 
       <BaseGrid<LoansRows>
         ref={baseGridRef}

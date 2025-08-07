@@ -1,5 +1,4 @@
 "use client";
-import { useRef } from "react";
 import { useQuantity } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
@@ -7,6 +6,8 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { QuantityRows } from "./types";
+import { units } from "../../constants/units";
+import { stockCategories } from "../../constants/stockCategories";
 
 const QuantityGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
@@ -29,6 +30,14 @@ const QuantityGrid = () => {
       headerName: "Kategori",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: stockCategories.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockCategories.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -38,61 +47,27 @@ const QuantityGrid = () => {
       headerName: "Birim",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: units.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = units.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
-    },
-    {
-      field: "unitPrice",
-      headerName: "Birim Fiyatı",
-      editable: true,
-      minWidth: 200,
-      type: "numberColumn",
     },
     {
       field: "quantity",
-      headerName: "Metraj",
+      headerName: "Miktar",
       editable: true,
       minWidth: 200,
       type: "numberColumn",
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
-    },
-    {
-      field: "contractAmount",
-      headerName: "Sözleşme Tutarı",
-      editable: true,
-      minWidth: 200,
-      type: "numberColumn",
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "paidAmount",
-      headerName: "Ödenen Tutar",
-      editable: true,
-      minWidth: 200,
-      type: "numberColumn",
-    },
-    {
-      field: "remainingAmount",
-      headerName: "Kalan Tutar",
-      editable: false,
-      minWidth: 200,
-      type: "numberColumn",
-      valueGetter: (params) => {
-        const contractAmount = params.data?.contractAmount ?? 0;
-        const paidAmount = params.data?.paidAmount ?? 0;
-        return contractAmount - paidAmount;
-      },
-    },
-    {
-      field: "status",
-      headerName: "Durum",
-      editable: true,
-      minWidth: 200,
     },
     {
       field: "description",
@@ -147,7 +122,7 @@ const QuantityGrid = () => {
       showButtons={{
         refresh: true,
         add: true,
-        delete: true,
+        delete: false,
         save: true,
         bar: true,
       }}

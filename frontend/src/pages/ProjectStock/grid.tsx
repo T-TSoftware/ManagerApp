@@ -1,12 +1,13 @@
 "use client";
-import { useRef } from "react";
 import { useStock } from "./hook";
-import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
+import BaseGrid from "../../components/grid/BaseGrid";
 import type {
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { StockRows } from "./types";
+import { stockCategories } from "../../constants/stockCategories";
+import { units } from "../../constants/units";
 
 const StockGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
@@ -38,6 +39,14 @@ const StockGrid = () => {
       headerName: "Kategori",
       editable: true,
       minWidth: 200,
+       cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: stockCategories.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockCategories.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -47,6 +56,14 @@ const StockGrid = () => {
       headerName: "Birim",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: units.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = units.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -60,13 +77,6 @@ const StockGrid = () => {
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
-    },
-    {
-      field: "minimumQuantity",
-      headerName: "Minimum Miktar",
-      editable: true,
-      minWidth: 200,
-      type: "numberColumn",
     },
     {
       field: "description",
@@ -84,19 +94,8 @@ const StockGrid = () => {
       minWidth: 200,
     },
     {
-      field: "stockDate",
-      headerName: "Stok Tarihi",
-      editable: true,
-      minWidth: 200,
-      valueFormatter: (params) => {
-        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
-      }
-    },
-    {
       field: "projectCode",
-      headerName: "Proje Kodu",
-      editable: false,
-      minWidth: 200,
+      hide: true,
     },
     {
       field: "createdBy",
@@ -148,9 +147,9 @@ const StockGrid = () => {
       isLoading={loading}
       showButtons={{
         refresh: true,
-        add: true,
-        delete: true,
-        save: true,
+        add: false,
+        delete: false,
+        save: false,
         bar: true,
       }}
     />

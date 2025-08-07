@@ -15,9 +15,7 @@ const CostSummaryGrid = () => {
   const colDefs: ColDef<CostSummaryRows>[] = [
     {
       field: "projectcode",
-      headerName: "Proje Kodu",
-      editable: false,
-      minWidth: 200,
+      hide: true,
     },
     {
       field: "quantityitemcode",
