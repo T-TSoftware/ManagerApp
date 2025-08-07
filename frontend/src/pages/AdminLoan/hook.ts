@@ -5,15 +5,22 @@ import {
   addLoan,
   updateLoan,
   deleteLoan,
+  fetchAccounts,
 } from "./service";
 import { getToken } from "../../utils/token";
 import type { LoansRows } from "./types";
+import { useNotifier } from "../../hooks/useNotifier";
+import { AutocompleteOption } from "../../types/grid/commonTypes";
 
 
 export const useLoan = () => {
   const [localData, setLocalData] = useState<LoansRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
+  const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>(
+  []
+   );
+  const notify = useNotifier();
   const token = getToken();
 
   useEffect(() => {
@@ -24,9 +31,11 @@ export const useLoan = () => {
     setLoading(true);
     try {
       const result = await getAllLoans(token!);
+      const optionResult = await fetchAccounts(token!);
       setLocalData(result);
+      setAccountOptions(optionResult);
     } catch (err) {
-      setAlert({ message: "Veriler yüklenemedi", type: "error" });
+      notify.error("Bir sorun oluştu.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +45,7 @@ export const useLoan = () => {
     try {
       return await getLoanById(token!, id);
     } catch (err) {
-      setAlert({ message: "Kayıt alınamadı", type: "error" });
+       notify.error("Bir sorun oluştu.");
       return undefined;
     }
   };
@@ -56,9 +65,8 @@ export const useLoan = () => {
       const record = selected[0];
       await deleteLoan(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
-      setAlert({ message: "Silme işlemi başarılı", type: "success" });
     } catch (err) {
-      setAlert({ message: "Silme işlemi başarısız", type: "error" });
+       notify.error("Bir sorun oluştu.");
     }
   };
 
@@ -73,14 +81,14 @@ export const useLoan = () => {
   };
 
   const saveChanges = async (allRows: LoansRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
-    setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
+     notify.success("Değişiklikler kaydedildi");
   };
 
   return {
     localData,
     loading,
     alert,
+    accountOptions,
     setAlert,
     fetchData,
     getById,

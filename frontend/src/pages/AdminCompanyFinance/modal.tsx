@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ModalWrapper from "../../components/layout/ModalWrapper";
-import type { AutocompleteOption, FinanceTransactionRows } from "./types";
+import type { FinanceTransactionRows } from "./types";
 import { financeTypes } from "../../constants/financeTypes";
 import { financeCategory } from "../../constants/financeCategory";
 import { currencyList } from "../../constants/currencyList";
-import { yesNo } from "../../constants/yesNo";
 import { paymentMethods } from "../../constants/paymentMethods";
 import {
   TextInput,
@@ -18,6 +17,10 @@ import {
   DatePicker,
   AutoComplete,
 } from "../../components/inputs";
+import { useProjects } from "../../hooks/useProjects";
+import { AutocompleteOption } from "../../types/grid/commonTypes";
+import { useReferenceOptions } from "../../hooks/useReferenceOptions";
+import { useParams } from "react-router-dom";
 
 const optionalString = z.string().optional().or(z.literal(""));
 const schema = z.object({
@@ -26,7 +29,8 @@ const schema = z.object({
   amount: z.coerce.number().positive("Tutar pozitif olmalı."),
   currency: z.string().min(1, "Para birimi zorunludur."),
   code: optionalString,
-  project: optionalString,
+  projectCode: optionalString,
+  orderCode: optionalString,
   fromAccountCode: optionalString,
   toAccountCode: optionalString,
   transactionDate: z.date({
@@ -36,9 +40,9 @@ const schema = z.object({
   method: optionalString,
   category: optionalString,
   description: optionalString,
-  invoiceYN: optionalString,
   invoiceCode: optionalString,
   targetName: optionalString,
+  referenceCode: optionalString,
 });
 
 type FinanceFormSchema = z.infer<typeof schema>;
@@ -73,10 +77,12 @@ const FinanceTransactionModal = ({
   } = useForm<FinanceFormSchema>({
     resolver: zodResolver(schema),
   });
-
+  const selectedCategory = watch("category");
+    const { projectId } = useParams();
+  const { options: referenceOptions, loading: refLoading } =
+    useReferenceOptions(selectedCategory, projectId);
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
-
       return {
         ...defaultValues,
         transactionDate: defaultValues?.transactionDate
@@ -84,7 +90,8 @@ const FinanceTransactionModal = ({
           : undefined,
         fromAccountCode: defaultValues.fromAccount?.code,
         toAccountCode: defaultValues.toAccount?.code,
-        project: defaultValues.project ?? undefined,
+        projectCode: defaultValues.project?.code,
+        orderCode: defaultValues.order?.code,
       };
     }
 
@@ -96,17 +103,19 @@ const FinanceTransactionModal = ({
       type: "",
       source: "",
       currency: "",
-      project: "",
+      projectCode: "",
       fromAccountCode: "",
       toAccountCode: "",
+      orderCode: "",
       method: "",
       category: "",
       invoiceYN: "",
       invoiceCode: "",
       targetName: "",
+      referenceCode:"",
     };
   }, [defaultValues, mode]);
-
+  const { projectOptionsByCode } = useProjects();
   useEffect(() => {
     reset(memoizedDefaultValues);
   }, [reset, memoizedDefaultValues]);
@@ -119,6 +128,7 @@ const FinanceTransactionModal = ({
         transactionDate: data.transactionDate
           ? new Date(data.transactionDate)
           : undefined,
+        invoiceYN: data.invoiceCode ? "Y" : "N",
       };
 
       await onSubmit(transformed);
@@ -160,11 +170,12 @@ const FinanceTransactionModal = ({
             error={errors.source?.message}
           />
 
-          <TextInput
-            name="project"
+          <Dropdown
+            name="projectCode"
             label="Proje"
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsByCode]}
             register={register}
-            error={errors.project?.message}
+            error={errors.projectCode?.message}
           />
 
           <NumberInput
@@ -205,10 +216,11 @@ const FinanceTransactionModal = ({
           />
 
           <Dropdown
-            name="invoiceYN"
-            label="Faturalı mı?"
-            options={yesNo}
+            name="referenceCode"
+            label="Referans Kodu"
+            options={referenceOptions}
             register={register}
+            error={errors.referenceCode?.message}
           />
 
           <DatePicker

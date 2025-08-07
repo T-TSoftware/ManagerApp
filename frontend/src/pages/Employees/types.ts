@@ -1,9 +1,8 @@
-
 export type EmployeesRows = {
   edit: string;
   id?: string;
   code: string;
-  firstname: string;
+  firstName: string;
   lastName: string;
   age: number;
   startDate: Date;
@@ -23,6 +22,12 @@ export type EmployeesRows = {
   createdatetime: Date;
   updatedatetime: Date;
 
+  employee: {
+    id: string;
+    code: string;
+    firstName: string;
+    lastName: string;
+  };
   company: {
     id: string;
   };

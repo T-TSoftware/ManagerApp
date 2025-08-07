@@ -18,6 +18,7 @@ export const addSubcontractor = async (
   projectId: string,
   payload: NewSubcontractorPayload[]
 ): Promise<void> => {
+  console.log(payload);
   const res = await axios.post(
     `/projects/${projectId}/subcontractors`,
     payload,

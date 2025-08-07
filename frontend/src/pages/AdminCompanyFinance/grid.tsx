@@ -16,6 +16,7 @@ import { financeCategory } from "../../constants/financeCategory";
 import { FilePenLine } from "lucide-react";
 import { paymentMethods } from "../../constants/paymentMethods";
 import { yesNo } from "../../constants/yesNo";
+import { useNotifier } from "../../hooks/useNotifier";
 
 const FinanceGrid = () => {
   const {
@@ -37,7 +38,8 @@ const FinanceGrid = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editData, setEditData] = useState<Partial<FinanceTransactionRows> | undefined>();
-
+  const notify = useNotifier();
+  
   const colDefs: ColDef<FinanceTransactionRows>[] = [
     {
       headerName: "",
@@ -85,7 +87,7 @@ const FinanceGrid = () => {
       },
     },
     {
-      field: "project",
+      field: "project.name",
       headerName: "Proje",
       editable: false,
       minWidth: 200,
@@ -186,30 +188,6 @@ const FinanceGrid = () => {
       minWidth: 200,
     },
     {
-      field: "checkCode",
-      headerName: "Çek Kodu",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "checkstatus",
-      headerName: "Çek Durumu",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "loanCode",
-      headerName: "Kredi Kodu",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "loanStatus",
-      headerName: "Kredi Durumu",
-      editable: false,
-      minWidth: 200,
-    },
-    {
       field: "description",
       headerName: "Açıklama",
       editable: false,
@@ -251,9 +229,11 @@ const handleModalSubmit = async (formData: Partial<FinanceTransactionRows>) => {
   if (modalMode === "create") {
     const newItem = await create(formData);
     addRow(newItem);
+    notify.success("Kayıt başarıyla oluşturuldu");
   } else {
-    const updatedItem = await update(formData);
+    const updatedItem = await update({ ...formData, id: editData!.id });
     updateRow(updatedItem);
+    notify.success("Değişiklikler kaydedildi");
   }
 };
 

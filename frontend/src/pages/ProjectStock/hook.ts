@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { StockRows, validateStockRow, UpdateStockPayload } from "./types";
 import { useParams } from "react-router-dom";
 import { getAllStocks, addStock, updateStock, deleteStock } from "./service";
@@ -24,21 +24,21 @@ export const useStock = () => {
     try {
       if (!projectId || !token) return;
       const data = await getAllStocks(projectId, token);
-      
-      const dataWithTracking = data.map(row => {
+
+      const dataWithTracking = data.map((row) => {
         const ensuredId = row.id || uuid();
         const rowWithId = {
           ...row,
           id: ensuredId,
-          code: row.code
+          code: row.code,
         };
-        
+
         return {
           ...rowWithId,
-          _originalData: { ...rowWithId }
+          _originalData: { ...rowWithId },
         };
       });
-      
+
       setOriginalData(dataWithTracking);
       setLocalData(dataWithTracking);
     } catch (error) {
@@ -52,10 +52,19 @@ export const useStock = () => {
     fetchData();
   }, [projectId, token]);
 
+  const hasChanges = useMemo(() => {
+    const added = localData.some((row) => row.isNew);
+    const modified = localData.some((row) => !row.isNew && isRowModified(row));
+    const deleted = originalData.some(
+      (row) => !localData.some((localRow) => localRow.id === row.id)
+    );
+    return added || modified || deleted;
+  }, [localData, originalData]);
+
   const addRow = () => {
     const currentDate = new Date();
     const rowId = uuid();
-    
+
     const newRow: StockRows = {
       id: rowId,
       code: "",
@@ -72,47 +81,45 @@ export const useStock = () => {
       updatedBy: "",
       createdatetime: currentDate,
       updatedatetime: currentDate,
-      isNew: true
+      isNew: true,
     };
-    
+
     const originalData = { ...newRow };
     delete (originalData as any).isNew;
     newRow._originalData = originalData;
-    
-    setLocalData(prev => [newRow, ...prev]);
+
+    setLocalData((prev) => [newRow, ...prev]);
   };
 
   const updateRow = (event: CellValueChangedEvent<StockRows>) => {
     const { data, colDef } = event;
-    
+
     if (!data?.id || !colDef?.field) {
       notify.error("Geçersiz güncelleme: Satır kodu veya alan eksik");
       return;
     }
 
     const field = colDef.field as keyof StockRows;
-    
-    setLocalData(prev => 
-      prev.map(item => {
+
+    setLocalData((prev) =>
+      prev.map((item) => {
         if (!item.id || item.id !== data.id) return item;
-        
+
         let value: any = data[field];
-        if ([
-          'quantity',
-          'minimumQuantity'
-        ].includes(field)) {
-          const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
+        if (["quantity", "minimumQuantity"].includes(field)) {
+          const numValue =
+            typeof value === "string" ? parseFloat(value) : Number(value);
           value = isNaN(numValue) ? 0 : numValue;
         }
 
-        if (['stockDate', 'createdatetime', 'updatedatetime'].includes(field)) {
+        if (["stockDate", "createdatetime", "updatedatetime"].includes(field)) {
           value = value ? new Date(value) : new Date();
         }
 
         const updatedItem = {
           ...item,
           [field]: value,
-          updatedatetime: new Date()
+          updatedatetime: new Date(),
         };
 
         return updatedItem;
@@ -121,36 +128,39 @@ export const useStock = () => {
   };
 
   const deleteRows = (selected: StockRows[]) => {
-    const validSelectedRows = selected.filter(row => row.id);
-    
+    const validSelectedRows = selected.filter((row) => row.id);
+
     if (validSelectedRows.length !== selected.length) {
       notify.error("Bazı satırlar ID eksikliği nedeniyle silinemedi");
     }
 
-    setLocalData(prev => {
-      const deletedIds = new Set(validSelectedRows.map(row => row.id));
-      return prev.filter(row => row.id && !deletedIds.has(row.id));
+    setLocalData((prev) => {
+      const deletedIds = new Set(validSelectedRows.map((row) => row.id));
+      return prev.filter((row) => row.id && !deletedIds.has(row.id));
     });
   };
 
-  const getModifiedFields = (current: StockRows, original: Partial<StockRows>): UpdateStockPayload => {
+  const getModifiedFields = (
+    current: StockRows,
+    original: Partial<StockRows>
+  ): UpdateStockPayload => {
     const modifiedFields: UpdateStockPayload = {
-      code: current.code
+      code: current.code,
     };
 
     const fieldsToCheck = [
-      'name',
-      'category',
-      'unit',
-      'quantity',
-      'minimumQuantity',
-      'description',
-      'location',
-      'stockDate',
-      'projectCode'
+      "name",
+      "category",
+      "unit",
+      "quantity",
+      "minimumQuantity",
+      "description",
+      "location",
+      "stockDate",
+      "projectCode",
     ] as const;
 
-    fieldsToCheck.forEach(field => {
+    fieldsToCheck.forEach((field) => {
       if (current[field] !== original[field]) {
         (modifiedFields as any)[field] = current[field];
       }
@@ -161,45 +171,48 @@ export const useStock = () => {
 
   const saveChanges = async () => {
     try {
-      // Grid düzenlemeyi durdur
-      gridRef.current?.getGridApi()?.stopEditing();
-
-      if (!projectId || !token) {
-        notify.error("Project ID veya token eksik");
+      if (!hasChanges) {
+        notify.error("Kaydedilecek işlem bulunamadı.");
         return;
       }
 
-      const added = localData.filter(row => row.isNew);
-      const modified = localData.filter(row => !row.isNew && isRowModified(row));
-      const deleted = originalData.filter(row => 
-        !localData.some(localRow => localRow.id === row.id)
+      gridRef.current?.getGridApi()?.stopEditing();
+
+      const added = localData.filter((row) => row.isNew);
+      const modified = localData.filter(
+        (row) => !row.isNew && isRowModified(row)
+      );
+      const deleted = originalData.filter(
+        (row) => !localData.some((localRow) => localRow.id === row.id)
       );
 
       const hasErrors = validateRows([...added, ...modified]);
       if (hasErrors) return;
 
-      notify.loading("Değişiklikler kaydediliyor...");
+      notify.showLoading("Kaydediliyor...");
 
       if (added.length > 0) {
-        const addedItems = added.map(({ isNew, _originalData, ...rest }) => rest);
-        await addStock(token, projectId, addedItems);
+        const addedItems = added.map(
+          ({ isNew, _originalData, ...rest }) => rest
+        );
+        await addStock(token!, projectId!, addedItems);
       }
 
       if (modified.length > 0) {
-        const payload = modified.map(row => {
+        const payload = modified.map((row) => {
           const originalRow = row._originalData;
           if (!originalRow) {
             return { code: row.code } as UpdateStockPayload;
           }
           return getModifiedFields(row, originalRow);
         });
-        
-        await updateStock(token, projectId, payload);
+
+        await updateStock(token!, projectId!, payload);
       }
 
       if (deleted.length > 0) {
-        const codes = deleted.map(row => row.code);
-        await deleteStock(token, projectId, codes);
+        const codes = deleted.map((row) => row.code);
+        await deleteStock(token!, projectId!, codes);
       }
 
       await fetchData();
@@ -232,6 +245,6 @@ export const useStock = () => {
     updateRow,
     deleteRows,
     saveChanges,
-    gridRef
+    gridRef,
   };
 };

@@ -5,14 +5,14 @@ export const getAllAnnualLeaves = async (token: string): Promise<AnnualLeavesRow
   const response = await axios.get(`employee-leaves`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data.transactions;
+  return response.data.employeeLeaves;
 };
 
 export const getAnnualLeaveById = async (
   token: string,
   id: string
 ): Promise<AnnualLeavesRows> => {
-  const response = await axios.get(`finances/${id}`, {
+  const response = await axios.get(`employee-leaves/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
@@ -23,20 +23,8 @@ export const addAnnualLeave = async (
   token: string,
   data: Partial<AnnualLeavesRows>
 ): Promise<AnnualLeavesRows> => {
-  const data2 = [
-    {
-      type: "COLLECTION",
-      amount: 100000,
-      currency: "TRY",
-      fromAccountCode: "ZIR001", 
-      transactionDate: "2024-08-01T00:00:00.000Z",
-      method: "BANK",
-      category: "INTERNAL_TRANSFER", 
-      description: "Ziraat Bankası hesabından Garanti hesabına transfer",
-      source: "Finans Otomatik Transfer Modülü",
-    },
-  ];
-  const response = await axios.post(`finances`, data2, {
+
+  const response = await axios.post(`employee-leaves`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
@@ -46,7 +34,7 @@ export const updateAnnualLeave = async (
   token: string,
   data: Partial<AnnualLeavesRows>
 ): Promise<AnnualLeavesRows> => {
-  const response = await axios.patch(`finances`, data, {
+  const response = await axios.patch(`employee-leaves`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;

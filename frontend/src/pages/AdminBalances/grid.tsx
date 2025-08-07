@@ -2,12 +2,12 @@
 import { useRef } from "react";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
-  CellValueChangedEvent,
   ColDef,
   GetRowIdParams,
 } from "ag-grid-community";
 import type { BalanceRows } from "./types";
 import { useBalance } from "./hook";
+import { currencyList } from "../../constants/currencyList";
 
 const BalanceGrid = () => {
   const {
@@ -17,10 +17,10 @@ const BalanceGrid = () => {
     updateRow,
     deleteRows,
     saveChanges,
+    gridRef,
   } = useBalance();
 
-  const baseGridRef = useRef<BaseGridHandle<BalanceRows>>(null);
-
+  
   const colDefs: ColDef<BalanceRows>[] = [
     {
       field: "code",
@@ -42,10 +42,7 @@ const BalanceGrid = () => {
       headerName: "Miktar",
       editable: true,
       minWidth: 150,
-      valueParser: (params) => {
-        const val = params.newValue?.toString().replace(",", ".");
-        return parseFloat(val);
-      },
+      type: "numberColumn",
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
@@ -55,6 +52,14 @@ const BalanceGrid = () => {
       headerName: "Döviz Birimi",
       editable: true,
       minWidth: 150,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: currencyList.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = currencyList.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
       },
@@ -64,32 +69,27 @@ const BalanceGrid = () => {
   const getRowId = (params: GetRowIdParams<BalanceRows>) => {
     return params.data.id!;
   };
-  const handleCellChange = (e: CellValueChangedEvent<BalanceRows>) => {
-    updateRow({
-      ...e.data,
-    });
-  };
 
   return (
     <>
       <BaseGrid<BalanceRows>
-          ref={baseGridRef}
-          rowData={localData}
-          columnDefs={colDefs}
-          getRowId={getRowId}
-          onAddRow={addRow}
-          onDeleteRow={deleteRows}
-          onSaveChanges={saveChanges}
-          onCellValueChanged={handleCellChange}
-          isLoading={loading}
-          showButtons={{
-            refresh: true,
-            add: true,
-            delete: true,
-            save: true,
-            bar: true,
-          }}
-        />
+        ref={gridRef}
+        rowData={localData}
+        columnDefs={colDefs}
+        getRowId={getRowId}
+        onAddRow={addRow}
+        onDeleteRow={deleteRows}
+        onSaveChanges={saveChanges}
+        onCellValueChanged={updateRow}
+        isLoading={loading}
+        showButtons={{
+          refresh: true,
+          add: true,
+          delete: false,
+          save: true,
+          bar: true,
+        }}
+      />
     </>
   );
 };

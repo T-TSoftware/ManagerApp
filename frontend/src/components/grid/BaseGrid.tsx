@@ -47,10 +47,12 @@ type BaseGridProps<T> = {
     delete?: boolean;
     save?: boolean;
   };
+  onRowClick?: (row: T) => void;
   RowSelectionOptions?: (e: RowSelectionOptions<T>) => void;
   onCellValueChanged?: (e: CellValueChangedEvent<T>) => void;
   onOpenCreateModal?: () => void;
   enableSelection?: boolean;
+  autoSelectRowOnClick?: boolean;
 };
 
 const BaseGridInner = <T,>(
@@ -67,7 +69,9 @@ const BaseGridInner = <T,>(
     onCellValueChanged,
     RowSelectionOptions,
     onOpenCreateModal,
+    onRowClick,
     enableSelection = true,
+    autoSelectRowOnClick,
   }: BaseGridProps<T>,
   ref: Ref<BaseGridHandle<T>>
 ) => {
@@ -109,7 +113,7 @@ const BaseGridInner = <T,>(
         gridApi.current?.applyTransaction({ remove: selected });
       }
     },
-    getGridApi: () => gridApi.current
+    getGridApi: () => gridApi.current,
   }));
   const { agGridThemeClass, agGridThemeObject } = useTheme();
   return (
@@ -171,11 +175,21 @@ const BaseGridInner = <T,>(
           rowData={rowData}
           columnDefs={columnDefs}
           columnTypes={ColumnTypes}
-          defaultColDef={{ editable: true, flex: 1, filter: true }}
+          defaultColDef={{ flex: 1, filter: true }}
           theme={agGridThemeObject}
           pagination={true}
           paginationAutoPageSize={true}
           paginationPageSize={100}
+          onRowClicked={(e) => {
+            if (autoSelectRowOnClick) {
+              const api = e.api;
+              api.deselectAll();
+              e.node.setSelected(true);
+            }
+            if (e.data && onRowClick) {
+              onRowClick(e.data);
+            }
+          }}
           rowSelection={rowSelection}
           getRowId={getRowId}
           onGridReady={onGridReady}

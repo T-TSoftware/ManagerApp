@@ -9,11 +9,13 @@ import {
 import { getToken } from "../../utils/token";
 import { useApp } from "../../hooks/useApp";
 import type { SalesRows } from "./types";
+import { useNotifier } from "../../hooks/useNotifier";
 
 export const useSales = () => {
   const [localData, setLocalData] = useState<SalesRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
+  const notify = useNotifier();
   const token = getToken();
   const { projectId } = useApp();
 
@@ -27,7 +29,7 @@ export const useSales = () => {
       const result = await getAllSales(token!, projectId!);
       setLocalData(result);
     } catch (err) {
-      setAlert({ message: "Veriler yüklenemedi", type: "error" });
+      notify.error("Bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -37,7 +39,7 @@ export const useSales = () => {
     try {
       return await getSalesById(token!, projectId!, id);
     } catch (err) {
-      setAlert({ message: "Kayıt alınamadı", type: "error" });
+      notify.error("Bir hata oluştu.");
       return undefined;
     }
   };
@@ -57,9 +59,8 @@ export const useSales = () => {
       const record = selected[0];
       await deleteSales(token!, projectId!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
-      setAlert({ message: "Silme işlemi başarılı", type: "success" });
     } catch (err) {
-      setAlert({ message: "Silme işlemi başarısız", type: "error" });
+      notify.error("Bir hata oluştu.");
     }
   };
 
@@ -74,8 +75,7 @@ export const useSales = () => {
   };
 
   const saveChanges = async (allRows: SalesRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
-    setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
+    notify.success("Değişiklikler kaydedildi.");
   };
 
   return {

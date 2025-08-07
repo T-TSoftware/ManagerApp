@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { QuantityRows, validateQuantityRow, UpdateQuantityPayload } from "./types";
 import { useParams } from "react-router-dom";
 import {
@@ -57,6 +57,17 @@ export const useQuantity = () => {
     fetchData();
   }, [projectId, token]);
 
+    const hasChanges = useMemo(() => {
+      const added = localData.some((row) => row.isNew);
+      const modified = localData.some(
+        (row) => !row.isNew && isRowModified(row)
+      );
+      const deleted = originalData.some(
+        (row) => !localData.some((localRow) => localRow.id === row.id)
+      );
+      return added || modified || deleted;
+    }, [localData, originalData]);
+
   const addRow = () => {
     const currentDate = new Date();
     const rowId = uuid();
@@ -66,11 +77,7 @@ export const useQuantity = () => {
       code: "",
       category: "",
       unit: "",
-      unitPrice: 0,
       quantity: 0,
-      contractAmount: 0,
-      paidAmount: 0,
-      remainingAmount: 0,
       status: "Pending",
       description: "",
       createdBy: "",
@@ -149,11 +156,7 @@ export const useQuantity = () => {
     const fieldsToCheck = [
       'category',
       'unit',
-      'unitPrice',
       'quantity',
-      'contractAmount',
-      'paidAmount',
-      'remainingAmount',
       'status',
       'description'
     ] as const;
@@ -169,12 +172,13 @@ export const useQuantity = () => {
 
   const saveChanges = async () => {
     try {
-      gridRef.current?.getGridApi()?.stopEditing();
 
-      if (!projectId || !token) {
-        notify.error("Project ID veya token eksik");
-        return;
-      }
+       if (!hasChanges) {
+         notify.error("Kaydedilecek işlem bulunamadı.");
+         return;
+       }
+
+      gridRef.current?.getGridApi()?.stopEditing();
 
       const added = localData.filter(row => row.isNew);
       const modified = localData.filter(row => !row.isNew && isRowModified(row));
@@ -185,11 +189,11 @@ export const useQuantity = () => {
       const hasErrors = validateRows([...added, ...modified]);
       if (hasErrors) return;
 
-      notify.loading("Değişiklikler kaydediliyor...");
+      notify.showLoading("Kaydediliyor...");
 
       if (added.length > 0) {
         const addedItems = added.map(({ isNew, _originalData, ...rest }) => rest);
-        await addQuantity(token, projectId, addedItems);
+        await addQuantity(token!, projectId!, addedItems);
       }
 
       if (modified.length > 0) {
@@ -201,12 +205,12 @@ export const useQuantity = () => {
           return getModifiedFields(row, originalRow);
         });
         
-        await updateQuantity(token, projectId, payload);
+        await updateQuantity(token!, projectId!, payload);
       }
 
       if (deleted.length > 0) {
         const codes = deleted.map(row => row.code);
-        await deleteQuantity(token, projectId, codes);
+        await deleteQuantity(token!, projectId!, codes);
       }
 
       await fetchData();

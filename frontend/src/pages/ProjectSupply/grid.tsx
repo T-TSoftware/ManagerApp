@@ -7,13 +7,22 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { SupplyRows } from "./types";
+import { stockCategories } from "../../constants/stockCategories";
+import { checkStatus } from "../../constants/checkStatus";
+import { units } from "../../constants/units";
 
 const SupplyGrid = () => {
-  const { localData, loading, addRow, updateRow, deleteRows, saveChanges } =
-    useSupply();
+  const {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    saveChanges,
+    gridRef,
+  } = useSupply();
 
-  const baseGridRef = useRef<BaseGridHandle<SupplyRows>>(null);
-
+  
   const colDefs: ColDef<SupplyRows>[] = [
     {
       field: "id",
@@ -31,6 +40,14 @@ const SupplyGrid = () => {
       headerName: "Kategori",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: stockCategories.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockCategories.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -58,6 +75,14 @@ const SupplyGrid = () => {
       headerName: "Birim",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: units.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = units.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -71,7 +96,7 @@ const SupplyGrid = () => {
     },
     {
       field: "quantity",
-      headerName: "Metraj",
+      headerName: "Miktar",
       editable: true,
       minWidth: 200,
       type: "numberColumn",
@@ -107,6 +132,14 @@ const SupplyGrid = () => {
       headerName: "Durum",
       editable: true,
       minWidth: 200,
+      cellEditor: "agSelectCellEditor",
+      cellEditorParams: {
+        values: checkStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = checkStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       cellClassRules: {
         "border border-red-300": (params) => !!params.data?.isNew,
       },
@@ -135,8 +168,10 @@ const SupplyGrid = () => {
       editable: false,
       minWidth: 200,
       valueFormatter: (params) => {
-        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
-      }
+        return params.value
+          ? new Date(params.value).toLocaleString("tr-TR")
+          : "";
+      },
     },
     {
       field: "updatedatetime",
@@ -144,8 +179,10 @@ const SupplyGrid = () => {
       editable: false,
       minWidth: 200,
       valueFormatter: (params) => {
-        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
-      }
+        return params.value
+          ? new Date(params.value).toLocaleString("tr-TR")
+          : "";
+      },
     },
   ];
 
@@ -156,7 +193,7 @@ const SupplyGrid = () => {
 
   return (
     <BaseGrid<SupplyRows>
-      ref={baseGridRef}
+      ref={gridRef}
       rowData={localData}
       columnDefs={colDefs}
       getRowId={getRowId}
@@ -168,7 +205,7 @@ const SupplyGrid = () => {
       showButtons={{
         refresh: true,
         add: true,
-        delete: true,
+        delete: false,
         save: true,
         bar: true,
       }}

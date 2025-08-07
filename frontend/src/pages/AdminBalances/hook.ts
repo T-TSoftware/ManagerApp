@@ -179,7 +179,6 @@ const updateRow = (event: CellValueChangedEvent<BalanceRows>) => {
           }
           return getModifiedFields(row, originalRow);
         });
-
         await updateBalances(token!, payload);
       }
 

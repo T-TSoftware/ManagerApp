@@ -1,4 +1,4 @@
-import { FinancialGridRow, ValidationFields } from '../../types/grid/commonTypes';
+import { FinancialGridRow } from '../../types/grid/commonTypes';
 
 // Row state types
 export type RowState = 'unchanged' | 'new' | 'modified' | 'deleted';
@@ -34,7 +34,8 @@ export interface SupplyRows extends FinancialGridRow {
   unit: string;
   description: string;
   status: string;
-  _originalData?: Omit<SupplyRows, '_originalData' | 'isNew'>;
+  isNew?: boolean;
+  _originalData?: Omit<SupplyRows, "_originalData" | "isNew">;
 }
 
 // Type for new supply payload (without id)
@@ -47,27 +48,56 @@ export type UpdateSupplyPayload = {
 
 // Type for row validation
 export interface ValidationError {
-  id: string;
+  code: string;
   field: keyof BaseSupplyRow;
   message: string;
 }
 
-export const SUPPLY_REQUIRED_FIELDS: ValidationFields<SupplyRows> = {
-  category: 'Kategori',
-  quantityItemCode: 'Metraj Kodu',
-  companyName: 'Şirket',
-  unit: 'Birim',
-  description: 'Açıklama'
+export interface ValidationRule {
+  label: string;
+  required?: boolean;
+  mustBePositiveNumber?: boolean;
+}
+
+export const SUPPLY_VALIDATION_RULES: Record<keyof BaseSupplyRow, ValidationRule> = {
+  id: { label: "Id" },
+  code: { label: "Kod" },
+  category: { label: "Kategori", required: true },
+  unit: { label: "Birim", required: true },
+  quantity: { label: "Miktar", required: true, mustBePositiveNumber: true },
+  description: { label: "Açıklama", required: true },
+  quantityItemCode: { label: "Metraj", required: true },
+  companyName: { label: "Şirket" },
+  unitPrice: { label: "Birim Fiyatı" },
+  contractAmount: { label: "Sözleşme Tutarı" },
+  paidAmount: { label: "Ödenen Tutar" },
+  remainingAmount: { label: "Kalan Tutar" },
+  status: { label: "Durum", required: true },
+  createdBy: { label: "Oluşturan" },
+  updatedBy: { label: "Güncelleyen" },
+  createdatetime: { label: "Oluşturulma Tarihi" },
+  updatedatetime: { label: "Güncellenme Tarihi" },
 };
+
 
 export const validateSupplyRow = (row: SupplyRows): string[] => {
   const errors: string[] = [];
-  Object.entries(SUPPLY_REQUIRED_FIELDS).forEach(([field, label]) => {
-    const value = row[field as keyof typeof SUPPLY_REQUIRED_FIELDS];
-    if (value === undefined || value === null || value === '') {
-      errors.push(`${label} zorunludur`);
+
+  Object.entries(SUPPLY_VALIDATION_RULES).forEach(([field, rule]) => {
+    const value = row[field as keyof SupplyRows];
+
+    if (
+      rule.required &&
+      (value === undefined || value === null || value === "")
+    ) {
+      errors.push(`${rule.label} zorunludur`);
+    }
+
+    if (rule.mustBePositiveNumber && typeof value === "number" && value <= 0) {
+      errors.push(`${rule.label} pozitif bir değer olmalıdır`);
     }
   });
+
   return errors;
 };
 

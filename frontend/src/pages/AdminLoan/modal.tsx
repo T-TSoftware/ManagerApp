@@ -10,26 +10,40 @@ import {
   NumberInput,
   TextAreaInput,
   DatePicker,
+  Dropdown,
+  AutoComplete,
 } from "../../components/inputs";
+import { loanStatus } from "../../constants/loanStatus";
+import { useProjects } from "../../hooks/useProjects";
+import { AutocompleteOption } from "../../types/grid/commonTypes";
+import { useNotifier } from "../../hooks/useNotifier";
+
+const optionalString = z.string().optional().or(z.literal(""));
 
 const schema = z.object({
-  code: z.string().min(1, "Kod zorunludur."),
+  code: optionalString,
   name: z.string().min(1, "Ad zorunludur."),
   accountNo: z.string().min(1, "Hesap No zorunludur."),
   totalAmount: z.coerce
     .number()
     .positive("Toplam Kredi Tutarı pozitif olmalı."),
-  interestRate: z.coerce.number().positive("Faiz Oranı pozitif olmalı."),
+  interestRate: z.coerce.number().positive("Kalan Ana Para pozitif olmalı."),
+  remainingPrincipal: z.coerce.number().positive("Faiz Oranı pozitif olmalı."),
+  remainingInstallmentAmount: z.coerce
+    .number()
+    .positive("Faiz Oranı pozitif olmalı."),
   totalInstallmentCount: z.coerce
     .number()
-    .positive("Toplam Taksit Sayısı  pozitif olmalı."),
+    .positive("Kalan Taksit Tutarı pozitif olmalı."),
   loanDate: z.date({
     required_error: "Kredi tarihi zorunludur.",
     invalid_type_error: "Geçerli bir tarih girin.",
   }),
   purpose: z.string().min(1, "Kredi Amacı zorunludur."),
   loanType: z.string().min(1, "Kredi Türü zorunludur."),
-  status: z.string().min(1, "Durum zorunludur."),
+  projectCode: optionalString,
+  bankCode:optionalString,
+  status: optionalString,
   description: z.string().optional(),
 });
 
@@ -39,6 +53,7 @@ type Props = {
   open: boolean;
   mode: "create" | "edit";
   defaultValues?: Partial<LoansRows>;
+  options: AutocompleteOption[];
   onClose: () => void;
   onSubmit: (data: Partial<LoansRows>) => Promise<void>;
   onSuccess: () => void;
@@ -48,6 +63,7 @@ const LoanModal = ({
   open,
   mode,
   defaultValues,
+  options,
   onClose,
   onSubmit,
   onSuccess,
@@ -62,7 +78,7 @@ const LoanModal = ({
   } = useForm<LoanFormSchema>({
     resolver: zodResolver(schema),
   });
-
+  const notify = useNotifier();
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
      
@@ -71,6 +87,8 @@ const LoanModal = ({
         loanDate: defaultValues?.loanDate
           ? new Date(defaultValues.loanDate)
           : undefined,
+        projectCode: defaultValues.project?.name,
+        bankCode: defaultValues.bank?.name,
       };
     }
 
@@ -86,9 +104,14 @@ const LoanModal = ({
       loanType: "",
       status: "",
       description: "",
+      remainingPrincipal: 0,
+      remainingInstallmentAmount: 0,
+      projectCode: "",
+      bankCode:"",
     };
   }, [defaultValues, mode]);
-
+const { projectOptionsByCode, loading } = useProjects();
+  
   useEffect(() => {
     reset(memoizedDefaultValues);
   }, [reset, memoizedDefaultValues]);
@@ -105,7 +128,7 @@ const onFormSubmit = async (data: LoanFormSchema) => {
     await onSubmit(transformed);
     onSuccess();
   } catch {
-    alert("Bir hata oluştu.");
+    notify.error("Bir hata oluştu.");
   }
 };
 
@@ -120,31 +143,23 @@ const onFormSubmit = async (data: LoanFormSchema) => {
           onSubmit={handleSubmit(onFormSubmit)}
           className="grid grid-cols-3 gap-4"
         >
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-white">
-              Durum
-            </label>
-            <input
-              {...register("status")}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black"
-              placeholder="Aktif / Pasif vb."
-            />
-            {errors.status && (
-              <p className="text-red-500 text-sm">{errors.status.message}</p>
-            )}
-          </div>
-          <TextInput
-            name="status"
-            label="Durum"
-            register={register}
-            error={errors.status?.message}
-          />
           <TextInput
             name="code"
             label="Kod"
             register={register}
-            error={errors.code?.message}
+            hidden={mode === "create" ? true : false}
+            editable={false}
           />
+
+          <Dropdown
+            name="status"
+            label="Durum"
+            options={loanStatus}
+            hidden={mode === "create" ? true : false}
+            register={register}
+            editable={false}
+          />
+
           <TextInput
             name="name"
             label="Ad"
@@ -162,6 +177,18 @@ const onFormSubmit = async (data: LoanFormSchema) => {
             label="Toplam Kredi Tutarı"
             register={register}
             error={errors.totalAmount?.message}
+          />
+          <NumberInput
+            name="remainingPrincipal"
+            label="Kalan Ana Para"
+            register={register}
+            error={errors.remainingPrincipal?.message}
+          />
+          <NumberInput
+            name="remainingInstallmentAmount"
+            label="Kalan Taksit Tutarı"
+            register={register}
+            error={errors.remainingInstallmentAmount?.message}
           />
           <NumberInput
             name="interestRate"
@@ -193,6 +220,19 @@ const onFormSubmit = async (data: LoanFormSchema) => {
             label="Kredi Türü"
             register={register}
             error={errors.loanType?.message}
+          />
+          <Dropdown
+            name="projectCode"
+            label="Proje"
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsByCode]}
+            register={register}
+          />
+          <AutoComplete
+            options={options}
+            label="Banka"
+            value={watch("bankCode")!}
+            onChange={(val) => setValue("bankCode", val)}
+            placeholder="Banka"
           />
           <TextAreaInput
             classes="col-span-3"

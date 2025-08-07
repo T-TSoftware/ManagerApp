@@ -3,17 +3,26 @@ export type SalesRows = {
   id?: string;
   code?: string;
   customerName: string;
-  stocktype: string;
+  stockType: string;
   description: string;
   totalAmount: number;
   receivedamount: number;
   remainingamount: number;
   status: string;
   companyid: string;
-  projectid: string;
-  stockid: string;
+  stock : {
+    id: string;
+    code:string;
+    name:string
+  }
+    project : {
+    id: string;
+    code:string;
+    name:string
+  }
   createdby: string;
   updatedby: string;
   createdatetime: Date;
   updatedatetime: Date;
 };
+

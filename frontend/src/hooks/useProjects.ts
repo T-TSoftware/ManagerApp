@@ -16,5 +16,21 @@ export const useProjects = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  return { projects, loading };
+  const projectOptionsByCode = projects.map((p) => ({
+    code: p.code,
+    name: p.name,
+  }));
+
+
+  const projectOptionsById = projects.map((p) => ({
+    code: p.id, 
+    name: p.name,
+  }));
+
+  return {
+    projects,
+    loading,
+    projectOptionsByCode,
+    projectOptionsById,
+  };
 };

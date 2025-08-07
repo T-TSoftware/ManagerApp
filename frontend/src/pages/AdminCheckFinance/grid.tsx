@@ -11,11 +11,15 @@ import { useCheckFinance } from "./hook";
 import CheckFinanceModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { FilePenLine } from "lucide-react";
+import { checkStatus } from "../../constants/checkStatus";
+import { checkTypes } from "../../constants/checkTypes";
+import { useNotifier } from "../../hooks/useNotifier";
 
 const CheckGrid = () => {
   const {
     localData,
     loading,
+    accountOptions,
     addRow,
     updateRow,
     deleteRows,
@@ -33,6 +37,7 @@ const CheckGrid = () => {
   const [editData, setEditData] = useState<
     Partial<CheckFinanceRows> | undefined
   >();
+  const notify = useNotifier();
 
   const colDefs: ColDef<CheckFinanceRows>[] = [
     {
@@ -81,11 +86,18 @@ const CheckGrid = () => {
       editable: false,
       minWidth: 200,
     },
-
-    { field: "firm", headerName: "Tür", editable: false, minWidth: 200 },
+    {
+      field: "dueDate",
+      headerName: "Son Ödeme Tarihi",
+      type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    { field: "firm", headerName: "Firma", editable: false, minWidth: 200 },
     {
       field: "amount",
       headerName: "Miktar",
+      valueFormatter: (params) => Number(params.value).toLocaleString(),
       editable: false,
       minWidth: 200,
     },
@@ -104,18 +116,32 @@ const CheckGrid = () => {
     {
       field: "status",
       headerName: "Durum",
+      cellEditorParams: {
+        values: checkStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = checkStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
     {
       field: "type",
       headerName: "Tür",
+      cellEditorParams: {
+        values: checkTypes.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = checkTypes.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
     {
-      field: "bankCode",
-      headerName: "Bank Code",
+      field: "bank.name",
+      headerName: "Banka",
       editable: false,
       minWidth: 200,
     },
@@ -124,8 +150,10 @@ const CheckGrid = () => {
       hide: true,
     },
     {
-      field: "projectid",
-      hide: true,
+      field: "project.name",
+      headerName: "Proje",
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "companyid",
@@ -169,9 +197,11 @@ const CheckGrid = () => {
     if (modalMode === "create") {
       const newItem = await create(formData);
       addRow(newItem);
+      notify.success("Kayıt başarıyla oluşturuldu");
     } else {
       const updatedItem = await update(formData);
       updateRow(updatedItem);
+       notify.success("Değişiklikler kaydedildi");
     }
   };
 
@@ -183,6 +213,7 @@ const CheckGrid = () => {
         open={modalOpen}
         mode={modalMode}
         defaultValues={editData}
+        options={accountOptions}
         onClose={() => setModalOpen(false)}
         onSuccess={() => setModalOpen(false)}
         onSubmit={handleModalSubmit}

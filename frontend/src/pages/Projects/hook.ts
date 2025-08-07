@@ -8,12 +8,14 @@ import {
 } from "./service";
 import { getToken } from "../../utils/token";
 import type { ProjectRows } from "./types";
+import { useNotifier } from "../../hooks/useNotifier";
 
 
 export const useProject = () => {
   const [localData, setLocalData] = useState<ProjectRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
+  const notify = useNotifier();
   const token = getToken();   
 
     useEffect(() => {
@@ -26,7 +28,7 @@ export const useProject = () => {
       const result = await getAllProjects(token!);
       setLocalData(result);
     } catch (err) {
-      setAlert({ message: "Veriler yüklenemedi", type: "error" });
+      notify.error("Bir sorun oluştu.");
     } finally {
       setLoading(false);
     }
@@ -36,7 +38,7 @@ export const useProject = () => {
     try {
       return await getProjectById(token!, id);
     } catch (err) {
-      setAlert({ message: "Kayıt alınamadı", type: "error" });
+      notify.error("Bir sorun oluştu.");
       return undefined;
     }
   };
@@ -56,9 +58,8 @@ export const useProject = () => {
       const record = selected[0];
       await deleteProject(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
-      setAlert({ message: "Silme işlemi başarılı", type: "success" });
     } catch (err) {
-      setAlert({ message: "Silme işlemi başarısız", type: "error" });
+      notify.error("Bir sorun oluştu.");
     }
   };
 
@@ -73,10 +74,9 @@ export const useProject = () => {
   };
 
   const saveChanges = async (allRows: ProjectRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
-    setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
+    notify.success("Değişiklikler kaydedildi.");
   };
-
+  
   return {
     localData,
     loading,

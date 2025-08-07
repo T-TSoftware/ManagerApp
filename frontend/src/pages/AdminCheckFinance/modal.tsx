@@ -13,25 +13,36 @@ import {
   NumberInput,
   TextAreaInput,
   DatePicker,
+  AutoComplete,
 } from "../../components/inputs";
+import { useNotifier } from "../../hooks/useNotifier";
+import Button from "../../components/buttons/Button";
+import { useProjects } from "../../hooks/useProjects";
+import { AutocompleteOption } from "../../types/grid/commonTypes";
+
+const optionalString = z.string().optional().or(z.literal(""));
 
 const schema = z.object({
   checkDate: z.date({
     required_error: "Çek tarihi zorunludur.",
     invalid_type_error: "Geçerli bir tarih girin.",
   }),
-  bankCode: z.string().min(1, "Banka Kodu zorunludur"),
+  bankCode: z.string().min(1, "Banka zorunludur"),
   transactionDate: z.date({
     required_error: "İşlem tarihi zorunludur.",
     invalid_type_error: "Geçerli bir tarih girin.",
   }),
-  firm: z.string().min(1, "Firma adı zorunludur"),
+  firm: z.string().min(1, "Firma zorunludur"),
   amount: z.coerce.number().positive("Tutar pozitif olmalı"),
-  checkNo: z.string().min(1, "Çek numarası zorunludur"),
-  projectid: z.string().optional(),
-  status: z.string().optional(),
+  checkNo: z.string().min(1, "Çek No zorunludur"),
+  projectId: optionalString,
+  status: z.string().min(1, "Durum zorunludur"),
   type: z.string().min(1, "Tür zorunludur"),
-  description: z.string().optional(),
+  description: optionalString,
+  dueDate: z.date({
+    required_error: "Son Ödeme tarihi zorunludur.",
+    invalid_type_error: "Geçerli bir tarih girin.",
+  }),
 });
 
 type FormSchema = z.infer<typeof schema>;
@@ -40,6 +51,7 @@ type Props = {
   open: boolean;
   mode: "create" | "edit";
   defaultValues?: Partial<CheckFinanceRows>;
+  options: AutocompleteOption[];
   onClose: () => void;
   onSubmit: (data: Partial<CheckFinanceRows>) => Promise<void>;
   onSuccess: () => void;
@@ -49,6 +61,7 @@ const CheckFinanceModal = ({
   open,
   mode,
   defaultValues,
+  options,
   onClose,
   onSubmit,
   onSuccess,
@@ -63,14 +76,9 @@ const CheckFinanceModal = ({
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
-
+  const notify = useNotifier();
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
-      const formatDateOne = (date?: string | Date) =>
-        date ? new Date(date).toISOString().slice(0, 10) : "";
-      const formatDateTwo = (date?: string | Date) =>
-        date ? new Date(date).toISOString().slice(0, 16) : "";
-
       return {
         ...defaultValues,
         checkDate: defaultValues?.checkDate
@@ -79,25 +87,39 @@ const CheckFinanceModal = ({
         transactionDate: defaultValues?.transactionDate
           ? new Date(defaultValues.transactionDate)
           : undefined,
+          dueDate: defaultValues?.dueDate
+          ? new Date(defaultValues.dueDate)
+          : undefined,
+        projectId: defaultValues?.project?.id,
+        bankCode: defaultValues?.bank?.code,
+
+        
       };
     }
 
     return {
       checkDate: new Date(),
       bankCode: "",
+      code: "",
       transactionDate: new Date(),
+      dueDate: new Date(),
       firm: "",
       amount: 0,
       checkNo: "",
-      status: "",
+      status: "PENDING",
       type: "",
       description: "",
+      projectId: "",
     };
   }, [defaultValues, mode]);
-
+  
+  const { projectOptionsById, loading } = useProjects();
+  
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
+    if (open) {
+      reset(memoizedDefaultValues);
+    }
+  }, [open, reset, memoizedDefaultValues]);
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
@@ -107,23 +129,22 @@ const CheckFinanceModal = ({
         transactionDate: data.transactionDate
           ? new Date(data.transactionDate)
           : undefined,
-        checkDate: data.transactionDate
-          ? new Date(data.transactionDate)
-          : undefined,
+        dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+        checkDate: data.checkDate ? new Date(data.checkDate) : undefined,
+        code: defaultValues?.code,
       };
 
       await onSubmit(transformed);
       onSuccess();
     } catch {
-      alert("Bir hata oluştu.");
+      notify.error("Bir hata oluştu.");
     }
   };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>
-      {" "}
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-4xl">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">
+      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-6xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
+        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Çek Ekle" : "Çek Bilgilerini Düzenle"}
         </h2>
 
@@ -131,6 +152,13 @@ const CheckFinanceModal = ({
           onSubmit={handleSubmit(onFormSubmit)}
           className="grid grid-cols-3 gap-4"
         >
+          <TextInput
+            name="checkNo"
+            label="Çek No"
+            register={register}
+            error={errors.checkNo?.message}
+            required
+          />
 
           <DatePicker
             label="Çek Tarihi"
@@ -140,11 +168,12 @@ const CheckFinanceModal = ({
             required
           />
 
-          <TextInput
-            name="checkNo"
-            label="Çek No"
-            register={register}
-            error={errors.checkNo?.message}
+          <DatePicker
+            label="Çek Tarihi"
+            value={watch("dueDate")}
+            onChange={(val) => setValue("dueDate", val!)}
+            error={errors.checkDate?.message}
+            required
           />
 
           <DatePicker
@@ -154,18 +183,41 @@ const CheckFinanceModal = ({
             error={errors.transactionDate?.message}
             required
           />
+
+          <Dropdown
+            name="status"
+            label="Durum"
+            options={checkStatus}
+            hidden={mode === "create" ? true : false}
+            register={register}
+            editable={false}
+          />
+
           <TextInput
             name="firm"
             label="Firma"
             register={register}
             error={errors.firm?.message}
+            required
           />
 
-          <TextInput
-            name="bankCode"
+          <AutoComplete
+            options={options}
             label="Banka"
-            register={register}
+            value={watch("bankCode")!}
+            onChange={(val) => setValue("bankCode", val)}
+            placeholder="Banka"
             error={errors.bankCode?.message}
+            required
+          />
+
+          <Dropdown
+            name="type"
+            label="Tür"
+            options={checkTypes}
+            register={register}
+            error={errors.type?.message}
+            required
           />
 
           <NumberInput
@@ -173,20 +225,13 @@ const CheckFinanceModal = ({
             label="Tutar"
             register={register}
             error={errors.amount?.message}
-          />
-          <TextInput name="projectid" label="Proje" register={register} />
-
-          <Dropdown
-            name="status"
-            label="Durum"
-            options={checkStatus}
-            register={register}
+            required
           />
 
           <Dropdown
-            name="type"
-            label="Tür"
-            options={checkTypes}
+            name="projectId"
+            label="Proje"
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
             register={register}
           />
 
@@ -198,20 +243,19 @@ const CheckFinanceModal = ({
           />
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border bg-gray-200 text-gray-700 hover:bg-gray-300"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+              disabled
+            />
+            <Button
               type="submit"
+              label="Kaydet"
+              loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-primary text-white hover:bg-blue-700 transition"
-            >
-              {isSubmitting ? "Güncelleniyor..." : "Kaydet"}
-            </button>
+            />
           </div>
         </form>
       </div>

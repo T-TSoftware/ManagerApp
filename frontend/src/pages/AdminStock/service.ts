@@ -9,6 +9,7 @@ export const getAllStocks = async (
       Authorization: `Bearer ${token}`,
     },
   });
+  console.log("project",res.data)
   return res.data;
 };
 

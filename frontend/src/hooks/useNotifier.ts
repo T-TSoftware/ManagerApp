@@ -2,14 +2,29 @@ import { toast } from "react-hot-toast";
 import { ZodError } from "zod";
 import { useAlertContext } from "../context/AlertContext";
 import type { AlertMessage } from "../types/alert/AlertTypes";
+import { useRef } from "react";
 
 export const useNotifier = () => {
   const { addMessage, removeMessage, clearMessages } = useAlertContext();
+  const loadingIdRef = useRef<string | null>(null);
 
   const success = (msg: string) => toast.success(msg);
   const error = (msg: string) => toast.error(msg);
   const loading = (msg: string) => toast.loading(msg);
   const dismiss = () => toast.dismiss();
+
+  const showLoading = (msg: string) => {
+    if (!loadingIdRef.current) {
+      loadingIdRef.current = toast.loading(msg);
+    }
+  };
+
+  const dismissLoading = () => {
+    if (loadingIdRef.current) {
+      toast.dismiss(loadingIdRef.current);
+      loadingIdRef.current = null;
+    }
+  };
 
   const alert = (alert: AlertMessage) => {
     addMessage(alert);
@@ -20,25 +35,24 @@ export const useNotifier = () => {
   };
 
   const handleError = (err: unknown) => {
-    dismiss(); 
-    
+    dismissLoading();
+
+    let errorMsg = "Beklenmeyen bir hata oluştu";
+
     if (err instanceof ZodError) {
       const first = err.errors?.[0];
       if (first) {
-        error(first.message || "Form doğrulama hatası");
+        errorMsg = first.message || "Form doğrulama hatası";
       } else {
-        error("Geçersiz form verisi");
+        errorMsg = "Geçersiz form verisi";
       }
-      return;
+    } else if (typeof err === "object" && err !== null && "message" in err) {
+      errorMsg = (err as any).message || errorMsg;
     }
 
-    if (typeof err === "object" && err !== null && "message" in err) {
-      const msg = (err as any).message || "Bilinmeyen hata oluştu";
-      error(msg);
-      return;
-    }
-
-    error("Beklenmeyen bir hata oluştu");
+    setTimeout(() => {
+      toast.error(errorMsg);
+    }, 50);
   };
 
   return {
@@ -46,6 +60,10 @@ export const useNotifier = () => {
     error,
     loading,
     dismiss,
+
+    showLoading,
+    dismissLoading,
+
     alert,
     dismissAlert,
     clearAlerts: clearMessages,

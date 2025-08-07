@@ -17,9 +17,9 @@ import AdminSales from "./pages/AdminSales";
 import AdminStock from "./pages/AdminStock";
 import AdminSubcontractor from "./pages/AdminSubcontractor/index";
 import AdminSupplier from "./pages/AdminSupplier/index";
+import Barter from "./pages/Barter/index";
 import Employees from "./pages/Employees";
 import EmployeesAnnualLeave from "./pages/EmployeesAnnualLeave";
-import EmployeesDashboard from "./pages/EmployeesDashboard/index";
 import LoginPage from "./pages/Login/index";
 import ProjectCostSummary from "./pages/ProjectCostSummary/index";
 import ProjectDashboard from "./pages/ProjectDashboard/index";
@@ -79,6 +79,7 @@ function App() {
             <Route path="subcontractor-list" element={<AdminSubcontractor />} />
             <Route path="supplier-list" element={<AdminSupplier />} />
             <Route path="user-settings" element={<UserSettings />} />
+            <Route path="barter" element={<Barter />} />
           </Route>
 
           <Route path="/project/:projectId" element={<MainLayout />}>
@@ -93,7 +94,6 @@ function App() {
           </Route>
 
           <Route path="/employees-portal/" element={<MainLayout />}>
-            <Route path="dashboard" element={<EmployeesDashboard />} />
             <Route path="employees" element={<Employees />} />
             <Route path="annual-leave" element={<EmployeesAnnualLeave />} />
           </Route>
