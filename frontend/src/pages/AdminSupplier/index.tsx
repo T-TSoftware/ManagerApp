@@ -1,4 +1,4 @@
-import React from "react";
+/* import React from "react";
 import SupplierListGrid from "./grid";
 
 const AdminSupplier: React.FC = () => {
@@ -23,3 +23,4 @@ const AdminSupplier: React.FC = () => {
 };
 
 export default AdminSupplier;
+ */

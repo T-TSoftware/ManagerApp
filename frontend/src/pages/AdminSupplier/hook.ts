@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+/* import { useState, useEffect } from "react";
 import {
   getAllSuppliers,
   getSupplierById,
@@ -91,3 +91,4 @@ export const useSupplierList = () => {
     saveChanges,
   };
 };
+ */

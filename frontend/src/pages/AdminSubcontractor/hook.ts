@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+/* import { useState, useEffect } from "react";
 import {
   getAllSubcontractorList,
   getSubcontractorById,
@@ -91,3 +91,4 @@ export const SubcontractorList = () => {
     saveChanges,
   };
 };
+ */
