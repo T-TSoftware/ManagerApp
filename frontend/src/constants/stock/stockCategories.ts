@@ -4,19 +4,10 @@ export const stockCategories = [
   { code: "CEMENT", name: "Çimentolar"},
   { code: "STEEL", name: "Çelik Malzemeler"},
   { code: "WOOD", name: "Ahşap Malzemeler"},
-  {
-    code: "INSULATION",
-    name: "Yalıtım Malzemeleri",
-  },
+  { code: "INSULATION", name: "Yalıtım Malzemeleri"},
   { code: "PAINT", name: "Boya ve Kaplama"},
-  {
-    code: "PLUMBING",
-    name: "Tesisat Malzemeleri"
-  },
-  {
-    code: "ELECTRICAL",
-    name: "Elektrik Malzemeleri"
-  },
+  { code: "PLUMBING", name: "Tesisat Malzemeleri"},
+  { code: "ELECTRICAL", name: "Elektrik Malzemeleri"},
   { code: "TOOLS", name: "El Aletleri"},
   { code: "OTHER", name: "Diğer"},
 ];

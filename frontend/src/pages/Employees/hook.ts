@@ -9,6 +9,7 @@ import {
 import { getToken } from "../../utils/token";
 import type { EmployeesRows } from "./types";
 import { useNotifier } from "../../hooks/useNotifier";
+import { extractApiError } from "../../utils/axios";
 
 export const useEmployees = () => {
   const [localData, setLocalData] = useState<EmployeesRows[]>([]);
@@ -19,7 +20,7 @@ export const useEmployees = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [token]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -27,7 +28,8 @@ export const useEmployees = () => {
       const result = await getAllEmployees(token!);
       setLocalData(result);
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -37,19 +39,30 @@ export const useEmployees = () => {
     try {
       return await getEmployeeById(token!, id);
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
-      return undefined;
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
   const create = async (data: Partial<EmployeesRows>) => {
-    const newItem = await addEmployee(token!, data);
-    return newItem;
+    try {
+      const newItem = await addEmployee(token!, data);
+      return newItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
+    }
   };
 
   const update = async (data: Partial<EmployeesRows>) => {
-    const updatedItem = await updateEmployee(token!, data);
-    return updatedItem;
+   try {
+     const updatedItem = await updateEmployee(token!, data);
+     return updatedItem;
+   } catch (err) {
+     const { errorMessage } = extractApiError(err);
+     throw new Error(errorMessage);
+   }
+    
   };
 
   const deleteRows = async (selected: EmployeesRows[]) => {
@@ -58,7 +71,8 @@ export const useEmployees = () => {
       await deleteEmployee(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
@@ -70,10 +84,6 @@ export const useEmployees = () => {
     setLocalData((prev) =>
       prev.map((row) => (row.id === item.id ? item : row))
     );
-  };
-
-  const saveChanges = async (allRows: EmployeesRows[]) => {
-    notify.success("Değişiklikler kaydedildi.");
   };
 
   return {
@@ -88,6 +98,5 @@ export const useEmployees = () => {
     deleteRows,
     addRow,
     updateRow,
-    saveChanges,
   };
 };

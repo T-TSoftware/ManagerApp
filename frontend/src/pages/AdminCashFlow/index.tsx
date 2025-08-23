@@ -3,20 +3,18 @@ import CashFlowGrid from "./grid";
 
 const AdminCashFlow: React.FC = () => {
   return (
-    <div className="grow p-3 lg:rounded-lg lg:shadow-xs h-full border-gray-100">
-      <div className="mx-auto max-w-7xl">
-        <div className="flex items-end justify-between gap-4">
-          <p className="text-3xl font-semibold sm:text-3xl text-black dark:text-white">
+    <div className="h-full grow">
+      <div className="mx-auto max-w-7xl p-3 lg:px-4">
+        <div className="flex items-end justify-between gap-4 pt-3">
+          <h1 className="text-2xl font-semibold text-black dark:text-white">
             Nakit Akış
-          </p>
+          </h1>
         </div>
-        <div className="flow-root">
-          <div className="mt-8 overflow-x-auto whitespace-nowrap rounded-md">
-            <div className="flex flex-col min-w-full p-3 rounded-md shadow-xl h-[34rem] max-h-[60rem] 2xl:h-[60rem] bg-white dark:bg-tertiary ">
-              <CashFlowGrid />
-            </div>
+        <section className="mt-6">
+          <div className="rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-tertiary shadow-sm p-2 sm:p-4 overflow-hidden h-[34rem] max-h-[60rem] 2xl:h-[60rem]">
+            <CashFlowGrid />
           </div>
-        </div>
+        </section>
       </div>
     </div>
   );

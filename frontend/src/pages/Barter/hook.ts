@@ -11,7 +11,7 @@ import { getToken } from "../../utils/token";
 import type { BarterRows } from "./types";
 import { BarterItemRows } from "./BarterItems/types";
 import { useNotifier } from "../../hooks/useNotifier";
-
+import { extractApiError } from "../../utils/axios";
 
 export const useBarter = () => {
   const [localData, setLocalData] = useState<BarterRows[]>([]);
@@ -24,7 +24,7 @@ export const useBarter = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [token]);
 
   // Parent row seçildiğinde çağrılır
   const handleRowSelection = (barterId: string) => {
@@ -37,8 +37,9 @@ export const useBarter = () => {
     try {
       const response = await getBarterItemsById(token!, barterId);
       setBarterItems(response);
-    } catch (error) {
-      notify.error("Bir sorun oluştu.");
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     }
   };
   const fetchData = async () => {
@@ -47,7 +48,8 @@ export const useBarter = () => {
       const result = await getAllBarters(token!);
       setLocalData(result);
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -57,19 +59,29 @@ export const useBarter = () => {
     try {
       return await getBarterById(token!, id);
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
-      return undefined;
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
   const create = async (data: Partial<BarterRows>) => {
-    const newItem = await addBarter(token!, data);
-    return newItem;
+    try {
+      const newItem = await addBarter(token!, data);
+      return newItem;
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      throw new Error(errorMessage);
+    }
   };
 
   const update = async (data: Partial<BarterRows>) => {
-    const updatedItem = await updateBarter(token!, data);
-    return updatedItem;
+    try {
+      const updatedItem = await updateBarter(token!, data);
+      return updatedItem;
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      throw new Error(errorMessage);
+    }
   };
 
   const deleteRows = async (selected: BarterRows[]) => {
@@ -78,7 +90,8 @@ export const useBarter = () => {
       await deleteBarter(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
@@ -90,10 +103,6 @@ export const useBarter = () => {
     setLocalData((prev) =>
       prev.map((row) => (row.id === item.id ? item : row))
     );
-  };
-
-  const saveChanges = async (allRows: BarterRows[]) => {
-    notify.success("Değişiklikler kaydedildi");
   };
 
   return {
@@ -108,7 +117,6 @@ export const useBarter = () => {
     deleteRows,
     addRow,
     updateRow,
-    saveChanges,
     selectedBarterId,
     setSelectedBarterId,
     barterItems,

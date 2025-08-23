@@ -20,11 +20,11 @@ export default function FormFieldWrapper({
       {label && (
         <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-white">
           {label}
-          {required && <span className="text-red-500 text-sm">*</span>}
+          {required && <span className="text-error text-sm">*</span>}
         </label>
       )}
       {children}
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-error text-sm">{error}</p>}
     </div>
   );
 }

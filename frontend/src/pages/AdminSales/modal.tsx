@@ -13,7 +13,7 @@ import {
 } from "../../components/inputs";
 import { useProjects } from "../../hooks/useProjects";
 import Button from "../../components/buttons/Button";
-import { stockCategories } from "../../constants/stockCategories";
+import { stockCategories } from "../../constants/stock/stockCategories";
 import { useStocks } from "../../hooks/useStocks";
 import { useNotifier } from "../../hooks/useNotifier";
 
@@ -23,7 +23,7 @@ const schema = z.object({
   customerName: z.string().min(1, "Müşteri zorunludur"),
   description: optionalString,
   totalAmount: z.coerce.number().positive("Toplam Ödeme zorunludur"),
-  projectId: z.string().min(1, "Proje zorunludur."),
+  projectId: optionalString,
   stockType: z.string().min(1, "Stok Tipi zorunludur."),
   stockCode: z.string().min(1, "Stok Kodu zorunludur."),
 });
@@ -57,7 +57,8 @@ const SalesModal = ({
   });
 
   const notify = useNotifier();
-  
+  const { projectOptionsById } = useProjects();
+
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
       return {
@@ -70,21 +71,21 @@ const SalesModal = ({
       customerName: "",
       description: "",
       totalAmount: 0,
-      receivedamount: 0,
-      projectId: "",
+      projectCode: "",
       stockType: "",
       stockCode: "",
     };
   }, [defaultValues, mode]);
 
-    const { projectOptionsById } = useProjects();
 
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
+    if (open) {
+      reset(memoizedDefaultValues);
+    }
+  }, [open, reset, memoizedDefaultValues]);
 
   const { stockOptions, loading: loadingStocks } = useStocks();
-  
+
   const onFormSubmit = async (data: FormSchema) => {
     try {
       await onSubmit(data);

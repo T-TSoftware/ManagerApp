@@ -2,13 +2,12 @@ import BaseGrid from "../../../../components/grid/BaseGrid";
 import { useCashDetails } from "./hook";
 import { BarterItemCashDetailRows } from "./types";
 import { ColDef, GetRowIdParams } from "ag-grid-community";
-import { cashPaymentMethods } from "../../../../constants/cashPaymentMethods";
-import { currencyList } from "../../../../constants/currencyList";
+import { cashPaymentMethods } from "../../../../constants/finance/cashPaymentMethods";
+import { currencyList } from "../../../../constants/common/currencyList";
 
 const CashDetailsGrid = ({ barterItemId }: { barterItemId: string }) => {
-  const { localData, loading, gridRef } =
-    useCashDetails(barterItemId);
-   console.log(localData);
+  const { localData, loading, gridRef } = useCashDetails(barterItemId);
+  console.log(localData);
   const colDefs: ColDef<BarterItemCashDetailRows>[] = [
     {
       field: "amount",
@@ -56,13 +55,17 @@ const CashDetailsGrid = ({ barterItemId }: { barterItemId: string }) => {
     params.data?.id ?? "";
 
   return (
-    <div className="w-[950px] h-[450px] ">
+    <div
+      className="min-w-0 w-full 
+                  h-[52vh] sm:h-[56vh] md:h-[60vh] lg:h-[64vh] 2xl:h-[68vh]"
+    >
       <BaseGrid<BarterItemCashDetailRows>
         ref={gridRef}
         rowData={localData}
         columnDefs={colDefs}
         getRowId={getRowId}
         isLoading={loading}
+        enableSelection={false}
         showButtons={{
           refresh: false,
           add: false,

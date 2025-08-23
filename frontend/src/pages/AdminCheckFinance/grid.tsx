@@ -11,8 +11,8 @@ import { useCheckFinance } from "./hook";
 import CheckFinanceModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { FilePenLine } from "lucide-react";
-import { checkStatus } from "../../constants/checkStatus";
-import { checkTypes } from "../../constants/checkTypes";
+import { checkStatus } from "../../constants/check/checkStatus";
+import { checkTypes } from "../../constants/check/checkTypes";
 import { useNotifier } from "../../hooks/useNotifier";
 
 const CheckGrid = () => {
@@ -23,7 +23,6 @@ const CheckGrid = () => {
     addRow,
     updateRow,
     deleteRows,
-    saveChanges,
     alert,
     setAlert,
     getById,
@@ -71,7 +70,17 @@ const CheckGrid = () => {
       },
     },
     { field: "id", hide: true },
+    {
+      field: "transaction",
+      hide: true,
+    },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
+    {
+      field: "checkNo",
+      headerName: "Çek Numarası",
+      editable: false,
+      minWidth: 200,
+    },
     {
       field: "checkDate",
       headerName: "Çek Tarihi",
@@ -80,36 +89,9 @@ const CheckGrid = () => {
       minWidth: 200,
     },
     {
-      field: "transactionDate",
-      headerName: "İşlem Tarihi",
-      type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    {
       field: "dueDate",
       headerName: "Son Ödeme Tarihi",
       type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    { field: "firm", headerName: "Firma", editable: false, minWidth: 200 },
-    {
-      field: "amount",
-      headerName: "Miktar",
-      valueFormatter: (params) => Number(params.value).toLocaleString(),
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "checkNo",
-      headerName: "Çek Numarası",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "description",
-      headerName: "Açıklama",
       editable: false,
       minWidth: 200,
     },
@@ -123,6 +105,13 @@ const CheckGrid = () => {
         const item = checkStatus.find((c) => c.code === value);
         return item?.name ?? value;
       },
+      editable: false,
+      minWidth: 200,
+    },
+    { field: "firm", headerName: "Firma", editable: false, minWidth: 200 },
+    {
+      field: "bank.name",
+      headerName: "Banka",
       editable: false,
       minWidth: 200,
     },
@@ -140,14 +129,25 @@ const CheckGrid = () => {
       minWidth: 200,
     },
     {
-      field: "bank.name",
-      headerName: "Banka",
+      field: "remainingAmount",
+      headerName: "Kalan Miktar",
+      valueFormatter: (params) => Number(params.value).toLocaleString(),
       editable: false,
       minWidth: 200,
     },
     {
-      field: "transactionid",
-      hide: true,
+      field: "processedAmount",
+      headerName: "İşlem Gören Miktar",
+      valueFormatter: (params) => Number(params.value).toLocaleString(),
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "amount",
+      headerName: "Miktar",
+      valueFormatter: (params) => Number(params.value).toLocaleString(),
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "project.name",
@@ -156,13 +156,28 @@ const CheckGrid = () => {
       minWidth: 200,
     },
     {
-      field: "companyid",
-      hide: true,
+      field: "description",
+      headerName: "Açıklama",
+      editable: false,
+      minWidth: 200,
     },
+    {
+      field: "createdBy.email",
+      headerName: "Oluşturan",
+      editable: false,
+      minWidth: 200,
+    },
+
     {
       field: "createdatetime",
       headerName: "Oluşturulma Tarihi",
       type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy.email",
+      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
@@ -173,22 +188,10 @@ const CheckGrid = () => {
       editable: false,
       minWidth: 200,
     },
-    {
-      field: "createdby",
-      headerName: "Oluşturan",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "updatedby",
-      headerName: "Güncelleyen",
-      editable: false,
-      minWidth: 200,
-    },
   ];
 
   const getRowId = (params: GetRowIdParams<CheckFinanceRows>) => {
-    return params.data.id!;
+    return params.data.id! || params.data.code!;
   };
 
   const handleModalSubmit = async (
@@ -199,7 +202,7 @@ const CheckGrid = () => {
       addRow(newItem);
       notify.success("Kayıt başarıyla oluşturuldu");
     } else {
-      const updatedItem = await update(formData);
+      const updatedItem = await update({ ...formData, id: editData!.id });
       updateRow(updatedItem);
        notify.success("Değişiklikler kaydedildi");
     }
@@ -231,7 +234,6 @@ const CheckGrid = () => {
         }}
         enableSelection={false}
         onDeleteRow={deleteRows}
-        onSaveChanges={saveChanges}
         isLoading={loading}
         showButtons={{
           refresh: true,

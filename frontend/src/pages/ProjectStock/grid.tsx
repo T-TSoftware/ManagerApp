@@ -6,8 +6,8 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { StockRows } from "./types";
-import { stockCategories } from "../../constants/stockCategories";
-import { units } from "../../constants/units";
+import { stockCategories } from "../../constants/stock/stockCategories";
+import { units } from "../../constants/stock/units";
 
 const StockGrid = () => {
   const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
@@ -31,7 +31,8 @@ const StockGrid = () => {
       editable: true,
       minWidth: 200,
       cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
     {
@@ -39,7 +40,7 @@ const StockGrid = () => {
       headerName: "Kategori",
       editable: true,
       minWidth: 200,
-       cellEditor: "agSelectCellEditor",
+      cellEditor: "agSelectCellEditor",
       cellEditorParams: {
         values: stockCategories.map((c) => c.code),
       },
@@ -48,7 +49,8 @@ const StockGrid = () => {
         return item?.name ?? value;
       },
       cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
     {
@@ -65,7 +67,8 @@ const StockGrid = () => {
         return item?.name ?? value;
       },
       cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
     {
@@ -75,7 +78,8 @@ const StockGrid = () => {
       minWidth: 200,
       type: "numberColumn",
       cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
     {
@@ -104,19 +108,21 @@ const StockGrid = () => {
       minWidth: 200,
     },
     {
-      field: "updatedBy",
-      headerName: "Güncelleyen Kişi",
-      editable: false,
-      minWidth: 200,
-    },
-    {
       field: "createdatetime",
       headerName: "Oluşturulma Tarihi",
       editable: false,
       minWidth: 200,
       valueFormatter: (params) => {
-        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
-      }
+        return params.value
+          ? new Date(params.value).toLocaleString("tr-TR")
+          : "";
+      },
+    },
+    {
+      field: "updatedBy",
+      headerName: "Güncelleyen Kişi",
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "updatedatetime",
@@ -124,8 +130,10 @@ const StockGrid = () => {
       editable: false,
       minWidth: 200,
       valueFormatter: (params) => {
-        return params.value ? new Date(params.value).toLocaleString('tr-TR') : '';
-      }
+        return params.value
+          ? new Date(params.value).toLocaleString("tr-TR")
+          : "";
+      },
     },
   ];
 
@@ -144,6 +152,7 @@ const StockGrid = () => {
       onDeleteRow={deleteRows}
       onSaveChanges={saveChanges}
       onCellValueChanged={updateRow}
+      enableSelection={false}
       isLoading={loading}
       showButtons={{
         refresh: true,

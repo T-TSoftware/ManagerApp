@@ -1,33 +1,23 @@
 import React from "react";
-import { useCurrencyRates } from "./hook";
-import { DollarSign, Euro } from "lucide-react";
+import { useDashboard } from "./hook";
+import { ChartLine, DollarSign, Euro } from "lucide-react";
+import UpcomingPaymentsGrid from "./payment-grid";
 
 const AdminDashboard: React.FC = () => {
-  const { eurRate, usdRate, error } = useCurrencyRates();
+  const { eurRate, usdRate, error } = useDashboard();
   
   return (
     <div className="grow p-3 lg:rounded-lg lg:shadow-xs h-full">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between p-3">
+        <div className="flex flex-row md:flex-row md:items-center md:justify-between p-3">
           <p className="text-3xl font-semibold sm:text-3xl dark:text-white">
             Admin Genel Bakış
           </p>
-          <div className="flex flex-wrap gap-2">
-            <button className="bg-white dark:bg-black px-4 py-2 rounded-full">
-              Date: Now
-            </button>
-            <button className="bg-white dark:bg-black px-4 py-2 rounded-full">
-              Product: All
-            </button>
-            <button className="bg-white dark:bg-black px-4 py-2 rounded-full">
-              Profile: Bogdan
-            </button>
-          </div>
         </div>
         {/* Main Grid */}
-        <div className="flex flex-1 flex-col lg:flex-row gap-4 h-[calc(100vh-160px)]">
+        <div className="flex flex-1 flex-row lg:flex-row gap-4 h-[calc(100vh-160px)]">
           {/* Left Column */}
-          <div className="flex flex-col gap-4 flex-1">
+          <div className="flex gap-4 flex-1 flex-row">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
               <div className="bg-white dark:bg-black rounded-2xl p-4 flex-1">
                 <p className="font-bold dark:text-white mb-3">Para Piyasa</p>
@@ -39,7 +29,10 @@ const AdminDashboard: React.FC = () => {
                       <Euro></Euro>
                     </span>
                     <span>₺{eurRate ? eurRate.toFixed(2) : "..."}</span>
-                    <span className="text-lg">↗</span>
+                    <span className="text-lg">
+                      {" "}
+                      <ChartLine></ChartLine>
+                    </span>
                   </div>
                 </div>
 
@@ -50,22 +43,20 @@ const AdminDashboard: React.FC = () => {
                       <DollarSign></DollarSign>
                     </span>
                     <span>₺{usdRate ? usdRate.toFixed(2) : "..."}</span>
-                    <span className="text-lg">↗</span>
+                    <span className="text-lg">
+                      <ChartLine></ChartLine>
+                    </span>
                   </div>
                 </div>
               </div>
               <div className="bg-white dark:bg-black rounded-2xl p-4 flex-1">
-                Product
-              </div>
+                </div>
             </div>
-            <div className="bg-white dark:bg-black rounded-2xl p-4 flex-1">
-              Product Chart
-            </div>
+            
           </div>
 
-          {/* Right Column */}
-          <div className="bg-white dark:bg-black rounded-2xl p-4 flex-1">
-            Projects Timeline
+          <div className="bg-white dark:bg-black rounded-2xl p-4 flex-1 relative">
+            <UpcomingPaymentsGrid />
           </div>
         </div>
       </div>

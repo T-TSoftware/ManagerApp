@@ -10,22 +10,43 @@ import {
 import { getToken } from "../../utils/token";
 import type { LoansRows } from "./types";
 import { useNotifier } from "../../hooks/useNotifier";
-import { AutocompleteOption } from "../../types/grid/commonTypes";
-
+import { AutocompleteOptionById } from "../../types/grid/commonTypes";
+import { extractApiError } from "../../utils/axios";
+import { LoanPaymentRows } from "./LoanPayments/types";
+import { getAllLoanPayments } from "./LoanPayments/service";
 
 export const useLoan = () => {
   const [localData, setLocalData] = useState<LoansRows[]>([]);
+  const [selectedLoanId, setSelectedLoanId] = useState<string | null>(null);
+  const [loanPayments, setLoanPayments] = useState<LoanPaymentRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
-  const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>(
-  []
-   );
+  const [accountOptions, setAccountOptions] = useState<
+    AutocompleteOptionById[]
+  >([]);
   const notify = useNotifier();
   const token = getToken();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [token]);
+
+  // Parent row seçildiğinde çağrılır
+  const handleRowSelection = (loanId: string) => {
+    setSelectedLoanId(loanId);
+    fetchLoanPayment(loanId);
+  };
+
+  // API'den child grid verisi çekilir
+  const fetchLoanPayment = async (loanId: string) => {
+    try {
+      const response = await getAllLoanPayments(token!, loanId);
+      setLoanPayments(response);
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -35,7 +56,8 @@ export const useLoan = () => {
       setLocalData(result);
       setAccountOptions(optionResult);
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -45,19 +67,29 @@ export const useLoan = () => {
     try {
       return await getLoanById(token!, id);
     } catch (err) {
-       notify.error("Bir sorun oluştu.");
-      return undefined;
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
   const create = async (data: Partial<LoansRows>) => {
-    const newItem = await addLoan(token!, data);
-    return newItem;
+    try {
+      const newItem = await addLoan(token!, data);
+      return newItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
+    }
   };
 
   const update = async (data: Partial<LoansRows>) => {
-    const updatedItem = await updateLoan(token!, data);
-    return updatedItem;
+    try {
+      const updatedItem = await updateLoan(token!, data);
+      return updatedItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
+    }
   };
 
   const deleteRows = async (selected: LoansRows[]) => {
@@ -66,7 +98,8 @@ export const useLoan = () => {
       await deleteLoan(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
     } catch (err) {
-       notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
@@ -78,10 +111,6 @@ export const useLoan = () => {
     setLocalData((prev) =>
       prev.map((row) => (row.id === item.id ? item : row))
     );
-  };
-
-  const saveChanges = async (allRows: LoansRows[]) => {
-     notify.success("Değişiklikler kaydedildi");
   };
 
   return {
@@ -97,6 +126,7 @@ export const useLoan = () => {
     deleteRows,
     addRow,
     updateRow,
-    saveChanges,
+    selectedLoanId,
+    setSelectedLoanId,
   };
 };

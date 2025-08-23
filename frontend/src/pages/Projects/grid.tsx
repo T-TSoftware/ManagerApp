@@ -11,7 +11,7 @@ import { FilePenLine } from "lucide-react";
 import { useProject } from "./hook";
 import ProjectModal from "./modal";
 import Alert from "../../components/feedback/Alert";
-import { projectStatus } from "../../constants/projectStatus";
+import { projectStatus } from "../../constants/project/projectStatus";
 import { useNotifier } from "../../hooks/useNotifier";
 
 const ProjectGrid = () => {
@@ -35,7 +35,7 @@ const ProjectGrid = () => {
   const [editData, setEditData] = useState<Partial<ProjectRows> | undefined>();
   const notify = useNotifier();
   const colDefs: ColDef<ProjectRows>[] = [
-/*     {
+    /*     {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -111,14 +111,8 @@ const ProjectGrid = () => {
       minWidth: 200,
     },
     {
-      field: "createdBy",
+      field: "createdBy.email",
       headerName: "Oluşturan Kişi",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "updatedBy",
-      headerName: "Güncelleyen Kişi",
       editable: false,
       minWidth: 200,
     },
@@ -126,6 +120,12 @@ const ProjectGrid = () => {
       field: "createdatetime",
       headerName: "Oluşturulma Tarihi",
       type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy.email",
+      headerName: "Güncelleyen Kişi",
       editable: false,
       minWidth: 200,
     },

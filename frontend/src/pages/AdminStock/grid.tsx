@@ -1,23 +1,76 @@
 "use client";
+import { useRef, useState } from "react";
 import { useStock } from "./hook";
-import BaseGrid from "../../components/grid/BaseGrid";
+import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type {
   ColDef,
   GetRowIdParams,
+  ICellRendererParams,
 } from "ag-grid-community";
+
 import type { StockRows } from "./types";
-import { units } from "../../constants/units";
-import { stockCategories } from "../../constants/stockCategories";
-import { useProjects } from "../../hooks/useProjects";
+import { useNotifier } from "../../hooks/useNotifier";
+import { FilePenLine } from "lucide-react";
+import StockModal from "./modal";
+import Alert from "../../components/feedback/Alert";
+import { stockCategories } from "../../constants/stock/stockCategories";
+import { units } from "../../constants/stock/units";
+
 
 const StockGrid = () => {
-  const { localData, loading, addRow, updateRow, deleteRows, saveChanges, gridRef } =
-    useStock();
-  const { projectOptionsByCode } = useProjects();
+  const {
+    localData,
+    loading,
+    addRow,
+    updateRow,
+    deleteRows,
+    alert,
+    setAlert,
+    getById,
+    create,
+    update,
+  } = useStock();
+  const baseGridRef = useRef<BaseGridHandle<StockRows>>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [editData, setEditData] = useState<
+    Partial<StockRows> | undefined
+  >();
+  const notify = useNotifier();
+  
   const colDefs: ColDef<StockRows>[] = [
     {
+      headerName: "",
+      field: "edit",
+      pinned: "left",
+      width: 60,
+      editable: false,
+      suppressMovable: true,
+      filter: false,
+      cellRenderer: (params: ICellRendererParams<StockRows>) => {
+        return (
+          <button
+            className="text-black hover:underline text-sm"
+            onClick={async () => {
+              if (!params.data?.id) return;
+              const record = await getById(params.data.id);
+              if (record) {
+                setEditData(record);
+                setModalMode("edit");
+                setModalOpen(true);
+              }
+            }}
+          >
+            <FilePenLine
+              aria-hidden="true"
+              className="-mr-1 size-5 text-gray-500 dark:text-white"
+            />
+          </button>
+        );
+      },
+    },
+    {
       field: "id",
-      headerName: "ID",
       hide: true,
     },
     {
@@ -29,18 +82,12 @@ const StockGrid = () => {
     {
       field: "name",
       headerName: "İsim",
-      editable: true,
+      editable: false,
       minWidth: 300,
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
     },
     {
       field: "category",
       headerName: "Kategori",
-      editable: true,
-      minWidth: 200,
-      cellEditor: "agSelectCellEditor",
       cellEditorParams: {
         values: stockCategories.map((c) => c.code),
       },
@@ -48,16 +95,12 @@ const StockGrid = () => {
         const item = stockCategories.find((c) => c.code === value);
         return item?.name ?? value;
       },
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "unit",
       headerName: "Birim",
-      editable: true,
-      minWidth: 200,
-      cellEditor: "agSelectCellEditor",
       cellEditorParams: {
         values: units.map((c) => c.code),
       },
@@ -65,66 +108,44 @@ const StockGrid = () => {
         const item = units.find((c) => c.code === value);
         return item?.name ?? value;
       },
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "quantity",
-      headerName: "Miktar",
-      editable: true,
-      minWidth: 200,
-      type: "numberColumn",
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "projectCode",
-      headerName: "Proje",
-      editable: true,
-      minWidth: 200,
-      cellEditor: "agSelectCellEditor",
-      cellEditorParams: {
-        values: [{ code: "", name: "Seçiniz" }, ...projectOptionsByCode].map(
-          (c) => c.code
-        ),
-      },
-      valueFormatter: ({ value }) => {
-        const item = [
-          { code: "", name: "Seçiniz" },
-          ...projectOptionsByCode,
-        ].find((c) => c.code === value);
-        return item?.name ?? value;
-      },
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "description",
-      headerName: "Açıklama",
-      editable: true,
-      minWidth: 200,
-      cellClassRules: {
-        "border border-red-300": (params) => !!params.data?.isNew,
-      },
-    },
-    {
-      field: "location",
-      headerName: "Konum",
-      editable: true,
-      minWidth: 200,
-    },
-    {
-      field: "createdBy",
-      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "updatedBy",
-      headerName: "Güncelleyen",
+      field: "quantity",
+      headerName: "Miktar",
+      editable: false,
+      minWidth: 200,
+      type: "numberColumn",
+    },
+    {
+      field: "minimumQuantity",
+      headerName: "Minimum Miktar",
+      editable: false,
+      minWidth: 200,
+      type: "numberColumn",
+    },
+    {
+      field: "project.name",
+      headerName: "Proje",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "description",
+      headerName: "Açıklama",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "location",
+      headerName: "Konum",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdBy.email",
+      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
     },
@@ -133,49 +154,71 @@ const StockGrid = () => {
       headerName: "Oluşturulma Tarihi",
       editable: false,
       minWidth: 200,
-      valueFormatter: (params) => {
-        return params.value
-          ? new Date(params.value).toLocaleString("tr-TR")
-          : "";
-      },
+    },
+    {
+      field: "updatedBy.email",
+      headerName: "Güncelleyen",
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "updatedatetime",
       headerName: "Güncelleme Tarihi",
       editable: false,
       minWidth: 200,
-      valueFormatter: (params) => {
-        return params.value
-          ? new Date(params.value).toLocaleString("tr-TR")
-          : "";
-      },
     },
   ];
 
   const getRowId = (params: GetRowIdParams<StockRows>) => {
-    if (!params.data) return '';
-    return String(params.data.id || params.data.code);
+    return params.data.id! || params.data.code!;
   };
 
+    const handleModalSubmit = async (formData: Partial<StockRows>) => {
+      if (modalMode === "create") {
+        const newItem = await create(formData);
+        addRow(newItem);
+        notify.success("Kayıt başarıyla oluşturuldu");
+      } else {
+        const updatedItem = await update({ ...formData, id: editData!.id });
+        updateRow(updatedItem);
+        notify.success("Değişiklikler kaydedildi");
+      }
+    };
   return (
-    <BaseGrid<StockRows>
-      ref={gridRef}
-      rowData={localData}
-      columnDefs={colDefs}
-      getRowId={getRowId}
-      onAddRow={addRow}
-      onDeleteRow={deleteRows}
-      onSaveChanges={saveChanges}
-      onCellValueChanged={updateRow}
-      isLoading={loading}
-      showButtons={{
-        refresh: true,
-        add: true,
-        delete: false,
-        save: true,
-        bar: true,
-      }}
-    />
+    <>
+      {alert && <Alert {...alert} onClose={() => setAlert(null)} />}
+
+      <StockModal
+        open={modalOpen}
+        mode={modalMode}
+        defaultValues={editData}
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => setModalOpen(false)}
+        onSubmit={handleModalSubmit}
+      />
+
+      <BaseGrid<StockRows>
+        ref={baseGridRef}
+        rowData={localData}
+        columnDefs={colDefs}
+        getRowId={getRowId}
+        onOpenCreateModal={() => {
+          setModalMode("create");
+          setEditData(undefined);
+          setModalOpen(true);
+        }}
+        enableSelection={false}
+        onDeleteRow={deleteRows}
+        isLoading={loading}
+        showButtons={{
+          refresh: true,
+          add: true,
+          delete: false,
+          save: false,
+          bar: true,
+        }}
+      />
+    </>
   );
 };
 

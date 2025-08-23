@@ -13,17 +13,19 @@ import { useBarterItem } from "./hook";
 import type { BarterItemRows } from "./types";
 import { useNotifier } from "../../../hooks/useNotifier";
 import CashDetailsModal from "./CashDetails/modal";
-import { barterItemType } from "../../../constants/barterItemType";
-import { direction } from "../../../constants/direction";
-import { checkStatus } from "../../../constants/checkStatus";
+import { barterItemType } from "../../../constants/barter/barterItemType";
+import { barterDirection } from "../../../constants/barter/barterDirection";
+import { barterStatus } from "../../../constants/barter/barterStatus";
+import { extractApiError } from "../../../utils/axios";
 
 type Props = {
   barterId: string;
+  projectId: string;
 };
 
-const BarterItemGrid = ({ barterId }: Props) => {
+const BarterItemGrid = ({ barterId, projectId }: Props) => {
   const { barterItems, loading, alert, setAlert, create, update, remove } =
-    useBarterItem(barterId);
+    useBarterItem(barterId,projectId);
 
   const baseGridRef = useRef<BaseGridHandle<BarterItemRows>>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,7 +40,7 @@ const BarterItemGrid = ({ barterId }: Props) => {
   const notify = useNotifier();
 
   const colDefs: ColDef<BarterItemRows>[] = [
-/*     {
+    /*     {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -108,10 +110,10 @@ const BarterItemGrid = ({ barterId }: Props) => {
       field: "status",
       headerName: "Durum",
       cellEditorParams: {
-        values: checkStatus.map((c) => c.code),
+        values: barterStatus.map((c) => c.code),
       },
       valueFormatter: ({ value }) => {
-        const item = checkStatus.find((c) => c.code === value);
+        const item = barterStatus.find((c) => c.code === value);
         return item?.name ?? value;
       },
       editable: false,
@@ -121,10 +123,10 @@ const BarterItemGrid = ({ barterId }: Props) => {
       field: "direction",
       headerName: "Girdi/Çıktı",
       cellEditorParams: {
-        values: direction.map((c) => c.code),
+        values: barterDirection.map((c) => c.code),
       },
       valueFormatter: ({ value }) => {
-        const item = direction.find((c) => c.code === value);
+        const item = barterDirection.find((c) => c.code === value);
         return item?.name ?? value;
       },
       editable: false,
@@ -171,20 +173,26 @@ const BarterItemGrid = ({ barterId }: Props) => {
       minWidth: 200,
     },
     {
-      field: "relatedStock",
+      field: "relatedStock.name",
       headerName: "İlişkili Stok",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "relatedSubcontractor",
+      field: "relatedSubcontractor.name",
       headerName: "İlişkili Taşeron İşi",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "relatedSupplier",
+      field: "relatedSupplier.name",
       headerName: "İlişkili Tedarik",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdBy.email",
+      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
     },
@@ -192,6 +200,12 @@ const BarterItemGrid = ({ barterId }: Props) => {
       field: "createdatetime",
       headerName: "Oluşturulma Tarihi",
       type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy.email",
+      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
@@ -208,19 +222,21 @@ const BarterItemGrid = ({ barterId }: Props) => {
     return params.data.id!;
   };
 
-  const handleModalSubmit = async (formData: Partial<BarterItemRows>) => {
-    try {
-      if (modalMode === "create") {
-        await create({ ...formData, id: undefined });
-      } else {
-        await update(formData);
-      }
-    } catch (err) {
-      notify.error("Bir sorun oluştu.");
-    } finally {
-      setModalOpen(false);
+const handleModalSubmit = async (formData: Partial<BarterItemRows>) => {
+  try {
+    if (modalMode === "create") {
+      await create({ ...formData, id: undefined });
+      notify.success("Kayıt başarıyla oluşturuldu");
+    } else {
+      await update(formData);
+      notify.success("Değişiklikler kaydedildi");
     }
-  };
+    setModalOpen(false);
+  } catch (error) {
+    const { errorMessage } = extractApiError(error);
+    notify.error(errorMessage); 
+  }
+};
 
   return (
     <>
@@ -230,6 +246,7 @@ const BarterItemGrid = ({ barterId }: Props) => {
         open={modalOpen}
         mode={modalMode}
         defaultValues={editData}
+        projectId={projectId} 
         onClose={() => setModalOpen(false)}
         onSuccess={() => setModalOpen(false)}
         onSubmit={handleModalSubmit}
@@ -256,7 +273,7 @@ const BarterItemGrid = ({ barterId }: Props) => {
         isLoading={loading}
         showButtons={{
           refresh: true,
-          add: true,
+          add: !!barterId,
           delete: false,
           save: false,
           bar: true,

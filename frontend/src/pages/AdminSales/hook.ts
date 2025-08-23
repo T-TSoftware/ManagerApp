@@ -26,7 +26,7 @@ export const useSales = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const result = await getAllSales(token!, projectId!);
+      const result = await getAllSales(token!);
       setLocalData(result);
     } catch (err) {
       notify.error("Bir hata oluştu.");
@@ -37,7 +37,7 @@ export const useSales = () => {
 
   const getById = async (id: string) => {
     try {
-      return await getSalesById(token!, projectId!, id);
+      return await getSalesById(token!, id);
     } catch (err) {
       notify.error("Bir hata oluştu.");
       return undefined;
@@ -45,19 +45,19 @@ export const useSales = () => {
   };
 
   const create = async (data: Partial<SalesRows>) => {
-    const newItem = await addSales(token!, projectId!, data);
+    const newItem = await addSales(token!, data);
     return newItem;
   };
 
   const update = async (data: Partial<SalesRows>) => {
-    const updatedItem = await updateSales(token!, projectId!, data);
+    const updatedItem = await updateSales(token!, data);
     return updatedItem;
   };
 
   const deleteRows = async (selected: SalesRows[]) => {
     try {
       const record = selected[0];
-      await deleteSales(token!, projectId!, record.id!);
+      await deleteSales(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
     } catch (err) {
       notify.error("Bir hata oluştu.");

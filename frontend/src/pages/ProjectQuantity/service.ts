@@ -1,5 +1,6 @@
+import { data } from "react-router-dom";
 import axios from "../../utils/axios";
-import { QuantityRows, NewQuantityPayload, UpdateQuantityPayload } from "./types";
+import { QuantityRows} from "./types";
 
 export const getAllQuantityByProject = async (
   projectId: string,
@@ -13,50 +14,55 @@ export const getAllQuantityByProject = async (
   return res.data;
 };
 
-export const addQuantity = async (
-  token: string,
+export const getQuantityById = async (
   projectId: string,
-  payload: NewQuantityPayload[]
-): Promise<void> => {
-  const res = await axios.post(
-    `/projects/${projectId}/quantities`,
-    payload,
+  token: string
+): Promise<QuantityRows> => {
+  const res = await axios.get(
+    `/projects/${projectId}/quantities/${projectId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }
   );
+  return res.data;
+};
+
+export const addQuantity = async (
+  token: string,
+  projectId: string,
+  data: Partial<QuantityRows>
+): Promise<QuantityRows> => {
+  const res = await axios.post(`/projects/${projectId}/quantities`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return res.data;
 };
 
 export const updateQuantity = async (
   token: string,
   projectId: string,
-  payload: UpdateQuantityPayload[]
-): Promise<void> => {
-  const res = await axios.put(
-    `/projects/${projectId}/quantities`,
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  data: Partial<QuantityRows>
+): Promise<QuantityRows> => {
+  const res = await axios.put(`/projects/${projectId}/quantities`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return res.data;
 };
 
 export const deleteQuantity = async (
   token: string,
-  projectId: string,
-  codes: string[]
-): Promise<void> => {
+  projectId: string
+): Promise<QuantityRows> => {
   const res = await axios.delete(`/projects/${projectId}/quantities`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    data: codes,
   });
   return res.data;
 };

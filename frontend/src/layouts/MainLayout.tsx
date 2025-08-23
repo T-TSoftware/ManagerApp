@@ -11,9 +11,9 @@ const MainLayout = () => {
   const handleToggleSidebar = () => {
     const isDesktop = window.innerWidth >= 1024; // lg breakpoint
     if (isDesktop) {
-      setIsSidebarExpanded(!isSidebarExpanded);
+      setIsSidebarExpanded((s) => !s);
     } else {
-      setIsMobileSidebarOpen(!isMobileSidebarOpen);
+      setIsMobileSidebarOpen((s) => !s);
     }
   };
 
@@ -33,20 +33,20 @@ const MainLayout = () => {
   }, [isMobileSidebarOpen]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-primary">
-      {/* Header */}
-      <Header 
-        onToggleSidebar={handleToggleSidebar} 
+    <div className="h-dvh flex flex-col bg-white dark:bg-primary">
+      <Header
+        onToggleSidebar={handleToggleSidebar}
         isSidebarExpanded={isSidebarExpanded}
       />
 
-      <div className="flex flex-1 relative">
-        {/* Desktop Sidebar */}
-        <Sidebar 
-          className="z-20 shadow-lg lg:shadow-none max-lg:hidden absolute top-0 bottom-0" 
+      {/* İçteki satırda akışı kilitle, sadece content scroll yapsın */}
+      <div className="flex flex-1 relative overflow-hidden">
+        {/* Desktop Sidebar (absolute, parent relative) */}
+        <Sidebar
+          className="z-20 shadow-lg lg:shadow-none max-lg:hidden absolute top-0 bottom-0 left-0"
           isExpanded={isSidebarExpanded}
         />
-        
+
         {/* Mobile Sidebar */}
         <div
           ref={mobileSidebarRef}
@@ -54,22 +54,27 @@ const MainLayout = () => {
             isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <Sidebar 
-            onClose={() => setIsMobileSidebarOpen(false)} 
+          <Sidebar
+            onClose={() => setIsMobileSidebarOpen(false)}
             isExpanded={true}
           />
         </div>
 
-        {/* Main Content */}
-        <main className={`flex-1 p-2 transition-all duration-300 ${isSidebarExpanded ? "lg:ml-64" : "lg:ml-16"}`}>
-          <div className="h-full w-full rounded-lg bg-light_primary dark:bg-secondary">
+        {/* Main Content (sidebar genişliğine göre margin) */}
+        <main
+          className={`flex-1 p-2 transition-all duration-300 ${
+            isSidebarExpanded ? "lg:ml-64" : "lg:ml-16"
+          } h-full overflow-hidden`}
+        >
+          {/* SADECE burası scroll yapsın */}
+          <div className="h-full w-full overflow-y-auto rounded-lg bg-light_primary dark:bg-secondary">
             <Outlet />
           </div>
         </main>
 
         {/* Mobile Sidebar Overlay */}
         {isMobileSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 lg:hidden z-40"
             onClick={() => setIsMobileSidebarOpen(false)}
           />

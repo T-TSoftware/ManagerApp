@@ -10,22 +10,22 @@ import {
 import { getToken } from "../../utils/token";
 import type { CheckFinanceRows } from "./types";
 import { useNotifier } from "../../hooks/useNotifier";
-import { AutocompleteOption } from "../../types/grid/commonTypes";
-
+import { AutocompleteOptionById } from "../../types/grid/commonTypes";
+import { extractApiError } from "../../utils/axios";
 
 export const useCheckFinance = () => {
   const [localData, setLocalData] = useState<CheckFinanceRows[]>([]);
   const [loading, setLoading] = useState(false);
-    const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>(
-      []
-    );
+  const [accountOptions, setAccountOptions] = useState<
+    AutocompleteOptionById[]
+  >([]);
   const [alert, setAlert] = useState<any>(null);
   const notify = useNotifier();
   const token = getToken();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [token]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -35,7 +35,8 @@ export const useCheckFinance = () => {
       setLocalData(result);
       setAccountOptions(optionResult);
     } catch (err) {
-       notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -45,19 +46,34 @@ export const useCheckFinance = () => {
     try {
       return await getCheckById(token!, id);
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
-      return undefined;
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
+      throw new Error(errorMessage);
     }
   };
 
-  const create = async (data: Partial<CheckFinanceRows>) => {
-    const newItem = await addCheck(token!, data);
-    return newItem;
+  const create = async (
+    data: Partial<CheckFinanceRows>
+  ): Promise<CheckFinanceRows> => {
+    try {
+      const newItem = await addCheck(token!, data);
+      return newItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+       throw new Error(errorMessage); 
+    }
   };
 
-  const update = async (data: Partial<CheckFinanceRows>) => {
-    const updatedItem = await updateCheck(token!, data);
-    return updatedItem;
+  const update = async (
+    data: Partial<CheckFinanceRows>
+  ): Promise<CheckFinanceRows> => {
+    try {
+      const updatedItem = await updateCheck(token!, data);
+      return updatedItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
+    }
   };
 
   const deleteRows = async (selected: CheckFinanceRows[]) => {
@@ -66,7 +82,8 @@ export const useCheckFinance = () => {
       await deleteCheck(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
     } catch (err) {
-      notify.error("Bir sorun oluştu.");
+       const { errorMessage } = extractApiError(err);
+       throw new Error(errorMessage);
     }
   };
 
@@ -78,10 +95,6 @@ export const useCheckFinance = () => {
     setLocalData((prev) =>
       prev.map((row) => (row.id === item.id ? item : row))
     );
-  };
-
-  const saveChanges = async (allRows: CheckFinanceRows[]) => {
-    notify.success("Değişiklikler kaydedildi.");
   };
 
   return {
@@ -97,6 +110,5 @@ export const useCheckFinance = () => {
     deleteRows,
     addRow,
     updateRow,
-    saveChanges,
   };
 };

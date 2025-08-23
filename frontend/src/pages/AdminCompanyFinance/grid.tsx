@@ -10,12 +10,11 @@ import type { FinanceTransactionRows } from "./types";
 import { useFinance } from "./hook";
 import FinanceTransactionModal from "./modal";
 import Alert from "../../components/feedback/Alert";
-import { currencyList } from "../../constants/currencyList";
-import { financeTypes } from "../../constants/financeTypes";
-import { financeCategory } from "../../constants/financeCategory";
+import { currencyList } from "../../constants/common/currencyList";
+import { financeTypes } from "../../constants/finance/financeTypes";
+import { financeCategory } from "../../constants/finance/financeCategory";
 import { FilePenLine } from "lucide-react";
-import { paymentMethods } from "../../constants/paymentMethods";
-import { yesNo } from "../../constants/yesNo";
+import { paymentMethods } from "../../constants/finance/paymentMethods";
 import { useNotifier } from "../../hooks/useNotifier";
 
 const FinanceGrid = () => {
@@ -26,7 +25,6 @@ const FinanceGrid = () => {
     addRow,
     updateRow,
     deleteRows,
-    saveChanges,
     alert,
     setAlert,
     getById,
@@ -37,9 +35,11 @@ const FinanceGrid = () => {
   const baseGridRef = useRef<BaseGridHandle<FinanceTransactionRows>>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
-  const [editData, setEditData] = useState<Partial<FinanceTransactionRows> | undefined>();
+  const [editData, setEditData] = useState<
+    Partial<FinanceTransactionRows> | undefined
+  >();
   const notify = useNotifier();
-  
+
   const colDefs: ColDef<FinanceTransactionRows>[] = [
     {
       headerName: "",
@@ -74,6 +74,51 @@ const FinanceGrid = () => {
     { field: "id", hide: true },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
+      field: "targetType",
+      hide: true,
+    },
+    {
+      field: "targetId",
+      hide: true,
+    },
+    {
+      field: "invoiceYN",
+      hide: true,
+    },
+    {
+      field: "targetName",
+      headerName: "Hedef Adı",
+      editable: false,
+      minWidth: 200,
+    },
+    { field: "amount", headerName: "Tutar", editable: false, minWidth: 200 },
+    {
+      field: "currency",
+      headerName: "Para Birimi",
+      editable: false,
+      minWidth: 200,
+      cellEditorParams: {
+        values: currencyList.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = currencyList.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+    },
+    {
+      field: "method",
+      headerName: "Yöntem",
+      editable: false,
+      minWidth: 200,
+      cellEditorParams: {
+        values: paymentMethods.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = paymentMethods.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+    },
+    {
       field: "type",
       headerName: "Tür",
       editable: false,
@@ -85,6 +130,25 @@ const FinanceGrid = () => {
         const item = financeTypes.find((c) => c.code === value);
         return item?.name ?? value;
       },
+    },
+    {
+      field: "category",
+      headerName: "Kategori",
+      cellEditorParams: {
+        values: financeCategory.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = financeCategory.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "referenceCode",
+      headerName: "Referans Kodu",
+      editable: false,
+      minWidth: 200,
     },
     {
       field: "project.name",
@@ -106,78 +170,10 @@ const FinanceGrid = () => {
       editable: false,
       minWidth: 200,
     },
-    { field: "amount", headerName: "Tutar", editable: false, minWidth: 200 },
-    {
-      field: "currency",
-      headerName: "Para Birimi",
-      editable: false,
-      minWidth: 200,
-      cellEditorParams: {
-        values: currencyList.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = currencyList.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
-    },
-    { field: "source", headerName: "Kaynak", editable: false, minWidth: 200 },
-    {
-      field: "targetType",
-      hide: true,
-    },
-    {
-      field: "targetId",
-      hide: true,
-    },
-    {
-      field: "targetName",
-      headerName: "Hedef Adı",
-      editable: false,
-      minWidth: 200,
-    },
     {
       field: "transactionDate",
       headerName: "İşlem Tarihi",
       type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "method",
-      headerName: "Yöntem",
-      editable: false,
-      minWidth: 200,
-      cellEditorParams: {
-        values: paymentMethods.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = paymentMethods.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
-    },
-    {
-      field: "category",
-      headerName: "Kategori",
-      cellEditorParams: {
-        values: financeCategory.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = financeCategory.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "invoiceYN",
-      headerName: "Faturalı mı?",
-      cellEditorParams: {
-        values: yesNo.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = yesNo.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
       editable: false,
       minWidth: 200,
     },
@@ -187,9 +183,16 @@ const FinanceGrid = () => {
       editable: false,
       minWidth: 200,
     },
+    { field: "source", headerName: "Kaynak", editable: false, minWidth: 200 },
     {
       field: "description",
       headerName: "Açıklama",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "createdBy.email",
+      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
     },
@@ -201,21 +204,15 @@ const FinanceGrid = () => {
       minWidth: 200,
     },
     {
-      field: "updatedatetime",
-      headerName: "Güncellenme Tarihi",
-      type: "dateTimeColumn",
+      field: "updatedBy.email",
+      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
-    // {
-    //   field: "createdby",
-    //   headerName: "Oluşturan",
-    //   editable: false,
-    //   minWidth: 200,
-    // },
     {
-      field: "updatedBy.name",
-      headerName: "Güncelleyen",
+      field: "updatedatetime",
+      headerName: "Güncellenme Tarihi",
+      type: "dateTimeColumn",
       editable: false,
       minWidth: 200,
     },
@@ -225,18 +222,32 @@ const FinanceGrid = () => {
     return params.data.id!;
   };
 
-const handleModalSubmit = async (formData: Partial<FinanceTransactionRows>) => {
-  if (modalMode === "create") {
-    const newItem = await create(formData);
-    addRow(newItem);
-    notify.success("Kayıt başarıyla oluşturuldu");
-  } else {
-    const updatedItem = await update({ ...formData, id: editData!.id });
-    updateRow(updatedItem);
-    notify.success("Değişiklikler kaydedildi");
-  }
-};
-
+  const handleModalSubmit = async (
+    formData: Partial<FinanceTransactionRows>
+  ) => {
+    if (modalMode === "create") {
+      try {
+        const newItems = await create(formData);
+        notify.success(
+          newItems.length > 1
+            ? "Transfer kayıtları başarıyla oluşturuldu"
+            : "Kayıt başarıyla oluşturuldu"
+        );
+        setModalOpen(false);
+      } catch (err) {
+        notify.error((err as Error).message);
+      }
+    } else {
+      try {
+        const updatedItem = await update({ ...formData, id: editData!.id });
+        updateRow(updatedItem);
+        notify.success("Değişiklikler kaydedildi");
+        setModalOpen(false);
+      } catch (err) {
+        notify.error((err as Error).message);
+      }
+    }
+  };
 
   return (
     <>
@@ -264,7 +275,6 @@ const handleModalSubmit = async (formData: Partial<FinanceTransactionRows>) => {
         }}
         enableSelection={false}
         onDeleteRow={deleteRows}
-        onSaveChanges={saveChanges}
         isLoading={loading}
         showButtons={{
           refresh: true,

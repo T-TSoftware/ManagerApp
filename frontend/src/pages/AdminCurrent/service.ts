@@ -7,7 +7,6 @@ export const getAllCurrents = async (
 const response = await axios.get(`current-movements`, {
   headers: { Authorization: `Bearer ${token}` },
 });
- console.log(response.data)
   return response.data;
 };
 

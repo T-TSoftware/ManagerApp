@@ -6,19 +6,15 @@ export type EmployeesRows = {
   lastName: string;
   age: number;
   startDate: Date;
-
   netSalary: number;
   grossSalary: number;
-
   position: string;
   department: string;
-
   paidLeaveAmount: number;
   unpaidLeaveAmount: number;
   sickLeaveAmount: number;
   roadLeaveAmount: number;
   excuseLeaveAmount: number;
-
   createdatetime: Date;
   updatedatetime: Date;
 
@@ -34,9 +30,11 @@ export type EmployeesRows = {
 
   createdBy: {
     id: string;
+    email: string;
   };
 
   updatedBy: {
     id: string;
+    email: string;
   };
 };

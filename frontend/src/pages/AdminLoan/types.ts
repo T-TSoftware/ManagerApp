@@ -14,6 +14,7 @@ export type LoansRows = {
   totalInstallmentCount: number;
   loanDate: Date;
   purpose: string;
+  currency:string;
   loanType: string;
   status: string;
   description: string;
@@ -21,11 +22,13 @@ export type LoansRows = {
   bankCode: string;
   createdatetime: string;
   updatedatetime: string;
-  updatedby?: {
+  updatedBy?: {
     id: string;
+    email: string;
   };
-  createdby?: {
+  createdBy?: {
     id: string;
+    email: string;
   };
 
   bank?: {

@@ -5,10 +5,10 @@ export const getAllSales = async (
   token: string,
   projectId: string
 ): Promise<SalesRows[]> => {
-  const response = await axios.get(`orders`, {
+  const response = await axios.get(`orders/project/${projectId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data.transactions;
+  return response.data;
 };
 
 export const getSalesById = async (
@@ -27,7 +27,7 @@ export const addSales = async (
   projectId: string,
   data: Partial<SalesRows>
 ): Promise<SalesRows> => {
-  const response = await axios.post(`finances`, [data], {
+  const response = await axios.post(`orders`, [data], {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;

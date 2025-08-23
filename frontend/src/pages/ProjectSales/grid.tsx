@@ -11,6 +11,10 @@ import { useSales } from "./hook";
 import SalesModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { FilePenLine } from "lucide-react";
+import { useNotifier } from "../../hooks/useNotifier";
+import { useStocks } from "../../hooks/useStocks";
+import { salesStatus } from "../../constants/sales/salesStatus";
+import { stockCategories } from "../../constants/stock/stockCategories";
 
 const SalesGrid = () => {
   const {
@@ -31,9 +35,11 @@ const SalesGrid = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editData, setEditData] = useState<Partial<SalesRows> | undefined>();
+  const { stockOptions, loading: loadingStocks } = useStocks();
+  const notify = useNotifier();
 
   const colDefs: ColDef<SalesRows>[] = [
-    {
+    /*     {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -62,13 +68,17 @@ const SalesGrid = () => {
           </button>
         );
       },
-    },
+    }, */
     { field: "id", hide: true },
-    { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
-      field: "projectid",
+      field: "companyid",
       hide: true,
     },
+    {
+      field: "project.name",
+      hide: true,
+    },
+    { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
       field: "customerName",
       headerName: "Müşteri",
@@ -76,14 +86,63 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "stocktype",
-      headerName: "Stok Tipi",
+      field: "status",
+      headerName: "Durum",
+      cellEditorParams: {
+        values: salesStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = salesStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
     {
-      field: "stockid",
-      headerName: "Stok Id",
+      field: "stockType",
+      headerName: "Stok Tipi",
+      cellEditorParams: {
+        values: stockCategories.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockCategories.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "stock.name",
+      headerName: "Stok Kodu",
+      cellEditorParams: {
+        values: stockOptions.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = stockOptions.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      editable: false,
+      minWidth: 200,
+    },
+
+    {
+      field: "totalAmount",
+      headerName: "Toplam Ödeme",
+      type: "numberColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "receivedamount",
+      headerName: "Alınan Ödeme",
+      type: "numberColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "remainingamount",
+      headerName: "Kalan Ödeme",
+      type: "numberColumn",
       editable: false,
       minWidth: 200,
     },
@@ -94,32 +153,10 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "totalAmount",
-      headerName: "Toplam Ödeme",
+      field: "createdBy.email",
+      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
-    },
-    {
-      field: "receivedamount",
-      headerName: "Alınan Ödeme",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "remainingamount",
-      headerName: "Kalan Ödeme",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "status",
-      headerName: "Durum",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "companyid",
-      hide: true,
     },
     {
       field: "createdatetime",
@@ -129,21 +166,15 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
+      field: "updatedBy.email",
+      headerName: "Güncelleyen",
+      editable: false,
+      minWidth: 200,
+    },
+    {
       field: "updatedatetime",
       headerName: "Güncellenme Tarihi",
       type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "createdby",
-      headerName: "Oluşturan",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "updatedby",
-      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },

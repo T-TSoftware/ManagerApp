@@ -12,6 +12,9 @@ export default {
         fifth: "#121212",
         light_primary: "#F5F4EB",
         light_fourth: "#227d54",
+        error: "#A6221E",
+        light_error: "#f98b8b",
+        dark_error: "#bf5252",
       },
       fontFamily: {
         handwriting: ['"Dancing Script"', "cursive"],

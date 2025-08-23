@@ -21,6 +21,7 @@ export const createProject = async (token: string,
   const response = await axios.post(`projects`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log(response)
   return response.data;
 };
 

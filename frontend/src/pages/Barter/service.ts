@@ -34,7 +34,6 @@ export const addBarter = async (
   data: Partial<BarterRows>
 ): Promise<BarterRows> => {
   const { code, counterpartyId, ...cleanedData } = data;
-
   return (
     await axios.post("barters", cleanedData, {
       headers: { Authorization: `Bearer ${token}` },
