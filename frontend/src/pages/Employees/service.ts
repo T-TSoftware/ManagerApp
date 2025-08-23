@@ -23,7 +23,6 @@ export const addEmployee = async (
   token: string,
   data: Partial<EmployeesRows>
 ): Promise<EmployeesRows> => {
-  console.log("emp:",data)
   const response = await axios.post(`employees`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });

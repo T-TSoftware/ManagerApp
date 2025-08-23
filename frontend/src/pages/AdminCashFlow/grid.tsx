@@ -1,16 +1,19 @@
 "use client";
 import { useCashFlow } from "./hook";
-import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
+import BaseGrid from "../../components/grid/BaseGrid";
 import type { ColDef, GetRowIdParams } from "ag-grid-community";
 import type { CashFlowRows } from "./types";
 import { v4 as uuid } from "uuid";
-import { checkTypes } from "../../constants/checkTypes";
-import { paymentMethods } from "../../constants/paymentMethods";
+import { paymentMethods } from "../../constants/finance/paymentMethods";
 
 const BankMovementGrid = () => {
   const { localData, loading, gridRef } = useCashFlow();
 
   const colDefs: ColDef<CashFlowRows>[] = [
+    {
+      field: "companyid",
+      hide: true,
+    },
     {
       field: "transactiondate",
       headerName: "İşlem Tarihi",
@@ -32,12 +35,6 @@ const BankMovementGrid = () => {
       minWidth: 200,
     },
     {
-      field: "description",
-      headerName: "Açıklama",
-      editable: false,
-      minWidth: 150,
-    },
-    {
       field: "income",
       headerName: "Gelen Ödeme",
       editable: false,
@@ -50,8 +47,10 @@ const BankMovementGrid = () => {
       minWidth: 150,
     },
     {
-      field: "companyid",
-      hide: true,
+      field: "description",
+      headerName: "Açıklama",
+      editable: false,
+      minWidth: 150,
     },
   ];
 
@@ -66,6 +65,7 @@ const BankMovementGrid = () => {
       columnDefs={colDefs}
       getRowId={getRowId}
       isLoading={loading}
+      enableSelection={false}
       showButtons={{
         refresh: true,
         add: false,

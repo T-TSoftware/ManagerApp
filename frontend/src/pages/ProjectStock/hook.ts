@@ -22,8 +22,7 @@ export const useStock = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      if (!projectId || !token) return;
-      const data = await getAllStocks(projectId, token);
+      const data = await getAllStocks(projectId!, token!);
 
       const dataWithTracking = data.map((row) => {
         const ensuredId = row.id || uuid();
@@ -81,7 +80,6 @@ export const useStock = () => {
       updatedBy: "",
       createdatetime: currentDate,
       updatedatetime: currentDate,
-      isNew: true,
     };
 
     const originalData = { ...newRow };
@@ -224,20 +222,42 @@ export const useStock = () => {
     }
   };
 
-  const validateRows = (rows: StockRows[]): boolean => {
-    let hasError = false;
+   const validateRows = (rows: StockRows[]): boolean => {
+     let rowsWithErrors = 0;
+     const messageCount = new Map<string, number>();
 
-    rows.forEach((row) => {
-      const errors = validateStockRow(row);
-      if (errors.length > 0) {
-        errors.forEach((error) => notify.error(error));
-        hasError = true;
-      }
-    });
+     rows.forEach((row) => {
+       const errors = validateStockRow(row); // mevcut fonksiyon aynen kullanılıyor
+       if (errors.length > 0) {
+         rowsWithErrors++;
+         errors.forEach((msg) =>
+           messageCount.set(msg, (messageCount.get(msg) ?? 0) + 1)
+         );
+       }
+     });
 
-    return hasError;
-  };
+     if (rowsWithErrors > 0) {
+       const totalIssues = Array.from(messageCount.values()).reduce(
+         (a, b) => a + b,
+         0
+       );
 
+       const top3 = Array.from(messageCount.entries())
+         .sort((a, b) => b[1] - a[1])
+         .slice(0, 3)
+         .map(([msg, cnt]) => `${msg} (${cnt})`)
+         .join(" • ");
+
+       notify.error(
+         `Eksik/Geçersiz alanlar var: ${rowsWithErrors} satırda ${totalIssues} sorun. ${
+           top3 ? "Özet: " + top3 : ""
+         }`
+       );
+       return true;
+     }
+
+     return false;
+   };
   return {
     localData,
     loading,

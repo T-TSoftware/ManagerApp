@@ -1,18 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { LoanPaymentRows, UpdateLoanPaymentPayload, validateLoanPaymentRow } from "./types";
+import {
+  LoanPaymentRows, validateLoanPaymentRow
+} from "./types";
 import {
   getAllLoanPayments,
   addLoanPayments,
   updateLoanPayments,
   deleteLoanPayments,
+  getLoanPaymentById,
 } from "./service";
 import { BaseGridHandle } from "../../../components/grid/BaseGrid";
 import { getToken } from "../../../utils/token";
 import { useNotifier } from "../../../hooks/useNotifier";
 import { CellValueChangedEvent } from "ag-grid-community";
 import { isRowModified } from "../../../types/grid/commonTypes";
-
+import { extractApiError } from "../../../utils/axios";
 
 export const useLoanPaymentDetails = (loanId: string) => {
   const [originalData, setOriginalData] = useState<LoanPaymentRows[]>([]);
@@ -55,6 +58,18 @@ export const useLoanPaymentDetails = (loanId: string) => {
     if (loanId) fetchData();
   }, [token, loanId]);
 
+
+    const getById = async (id: string) => {
+      try {
+        return await getLoanPaymentById(token!, id);
+      } catch (err) {
+        const { errorMessage } = extractApiError(err);
+        notify.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+    };
+
+
   const hasChanges = useMemo(() => {
     const added = localData.some((row) => row.isNew);
     const modified = localData.some((row) => !row.isNew && isRowModified(row));
@@ -79,7 +94,7 @@ export const useLoanPaymentDetails = (loanId: string) => {
       paymentAmount: 0,
       description: "",
       remainingAmount: 0,
-      status: "",
+      status: "PENDING",
       paymentDate: currentDate,
       penaltyAmount: 0,
       loan: {
@@ -92,13 +107,13 @@ export const useLoanPaymentDetails = (loanId: string) => {
           name: "",
         },
       },
-      bank:{
-   id: "",
-          code: "",
-          name: "",
-  },
-    createdBy:"",
-  updatedBy:"",
+      bank: {
+        id: "",
+        code: "",
+        name: "",
+      },
+      createdBy: "",
+      updatedBy: "",
       createdatetime: currentDate,
       updatedatetime: currentDate,
       isNew: true,
@@ -111,81 +126,26 @@ export const useLoanPaymentDetails = (loanId: string) => {
     setLocalData((prev) => [newRow, ...prev]);
   };
 
-  const updateRow = (event: CellValueChangedEvent<LoanPaymentRows>) => {
-    const { data, colDef } = event;
-
-    if (!data?.id || !colDef?.field) {
-      notify.error("Geçersiz güncelleme: Satır kodu veya alan eksik");
-      return;
+  const update = async (
+    data: Partial<LoanPaymentRows>
+  ): Promise<LoanPaymentRows> => {
+    try {
+      const updatedItem = await updateLoanPayments(
+        token!,
+        data
+      );
+      return updatedItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
-
-    const field = colDef.field as keyof LoanPaymentRows;
-
-    setLocalData((prev) =>
-      prev.map((item) => {
-        if (!item.id || item.id !== data.id) return item;
-
-        let value: any = data[field];
-        if (["quantity", "minimumQuantity"].includes(field)) {
-          const numValue =
-            typeof value === "string" ? parseFloat(value) : Number(value);
-          value = isNaN(numValue) ? 0 : numValue;
-        }
-
-        if (["stockDate", "createdatetime", "updatedatetime"].includes(field)) {
-          value = value ? new Date(value) : new Date();
-        }
-
-        const updatedItem = {
-          ...item,
-          [field]: value,
-          updatedatetime: new Date(),
-        };
-
-        return updatedItem;
-      })
-    );
   };
 
-  const deleteRows = (selected: LoanPaymentRows[]) => {
-    const validSelectedRows = selected.filter((row) => row.id);
-
-    if (validSelectedRows.length !== selected.length) {
-      notify.error("Bazı satırlar ID eksikliği nedeniyle silinemedi");
-    }
-
-    setLocalData((prev) => {
-      const deletedIds = new Set(validSelectedRows.map((row) => row.id));
-      return prev.filter((row) => row.id && !deletedIds.has(row.id));
-    });
-  };
-
-  const getModifiedFields = (
-    current: LoanPaymentRows,
-    original: Partial<LoanPaymentRows>
-  ): UpdateLoanPaymentPayload => {
-    const modifiedFields: UpdateLoanPaymentPayload = {
-      code: current.code,
+    const updateRow = (item: LoanPaymentRows) => {
+      setLocalData((prev) =>
+        prev.map((row) => (row.id === item.id ? item : row))
+      );
     };
-
-    const fieldsToCheck = [
-      "dueDate",
-      "totalAmount",
-      "interestAmount",
-      "description",
-      "penaltyAmount",
-      "paymentDate",
-      "loan",
-    ] as const;
-
-    fieldsToCheck.forEach((field) => {
-      if (current[field] !== original[field]) {
-        (modifiedFields as any)[field] = current[field];
-      }
-    });
-
-    return modifiedFields;
-  };
 
   const saveChanges = async () => {
     try {
@@ -196,14 +156,7 @@ export const useLoanPaymentDetails = (loanId: string) => {
       gridRef.current?.getGridApi()?.stopEditing();
 
       const added = localData.filter((row) => row.isNew);
-      const modified = localData.filter(
-        (row) => !row.isNew && isRowModified(row)
-      );
-      const deleted = originalData.filter(
-        (row) => !localData.some((localRow) => localRow.id === row.id)
-      );
-
-      const hasErrors = validateRows([...added, ...modified]);
+      const hasErrors = validateRows([...added]);
       if (hasErrors) return;
 
       notify.showLoading("Kaydediliyor...");
@@ -212,56 +165,64 @@ export const useLoanPaymentDetails = (loanId: string) => {
         const addedItems = added.map(
           ({ isNew, _originalData, ...rest }) => rest
         );
-           console.log(loanId);
+        console.log(loanId);
         await addLoanPayments(token!, addedItems, loanId);
-      }
-
-      if (modified.length > 0) {
-        const payload = modified.map((row) => {
-          const originalRow = row._originalData;
-          if (!originalRow) {
-            return { code: row.code } as UpdateLoanPaymentPayload;
-          }
-          return getModifiedFields(row, originalRow);
-        });
-
-        await updateLoanPayments(token!, payload, loanId);
-      }
-
-      if (deleted.length > 0) {
-        const codes = deleted.map((row) => row.code);
-        await deleteLoanPayments(token!, codes);
       }
 
       await fetchData();
       notify.dismiss();
       notify.success("Kayıt başarılı");
     } catch (err) {
-      notify.handleError(err);
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     }
   };
 
   const validateRows = (rows: LoanPaymentRows[]): boolean => {
-    let hasError = false;
+  let rowsWithErrors = 0;
+  const messageCount = new Map<string, number>();
 
-    rows.forEach((row) => {
-      const errors = validateLoanPaymentRow(row);
-      if (errors.length > 0) {
-        errors.forEach((error) => notify.error(error));
-        hasError = true;
-      }
-    });
+ rows.forEach((row) => {
+   const errors = validateLoanPaymentRow(row); 
+   if (errors.length > 0) {
+     rowsWithErrors++;
+     errors.forEach((msg) =>
+       messageCount.set(msg, (messageCount.get(msg) ?? 0) + 1)
+     );
+   }
+ });
 
-    return hasError;
+ if (rowsWithErrors > 0) {
+   const totalIssues = Array.from(messageCount.values()).reduce(
+     (a, b) => a + b,
+     0
+   );
+
+   const top3 = Array.from(messageCount.entries())
+     .sort((a, b) => b[1] - a[1])
+     .slice(0, 3)
+     .map(([msg, cnt]) => `${msg} (${cnt})`)
+     .join(" • ");
+
+   notify.error(
+     `Eksik/Geçersiz alanlar var: ${rowsWithErrors} satırda ${totalIssues} sorun. ${
+       top3 ? "Özet: " + top3 : ""
+     }`
+   );
+   return true;
+ }
+
+ return false; 
   };
 
   return {
     localData,
     loading,
     addRow,
-    updateRow,
-    deleteRows,
     saveChanges,
+    getById,
     gridRef,
+    update,
+    updateRow,
   };
 };

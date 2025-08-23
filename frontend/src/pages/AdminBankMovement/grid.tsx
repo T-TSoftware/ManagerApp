@@ -6,9 +6,9 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { BankMovementRows } from "./types";
-import { financeCategory } from "../../constants/financeCategory";
-import { currencyList } from "../../constants/currencyList";
-import { paymentMethods } from "../../constants/paymentMethods";
+import { financeCategory } from "../../constants/finance/financeCategory";
+import { currencyList } from "../../constants/common/currencyList";
+import { paymentMethods } from "../../constants/finance/paymentMethods";
 import { useProjects } from "../../hooks/useProjects";
 
 const BankMovementGrid = () => {
@@ -24,6 +24,12 @@ const BankMovementGrid = () => {
       hide: true,
     },
     {
+      field: "code",
+      headerName: "İşlem Kodu",
+      editable: false,
+      minWidth: 150,
+    },
+    {
       field: "projectid",
       headerName: "Proje",
       cellEditorParams: {
@@ -33,12 +39,6 @@ const BankMovementGrid = () => {
         const item = projectOptionsById.find((c) => c.code === value);
         return item?.name ?? value;
       },
-      editable: false,
-      minWidth: 150,
-    },
-    {
-      field: "code",
-      headerName: "İşlem Kodu",
       editable: false,
       minWidth: 150,
     },
@@ -53,12 +53,6 @@ const BankMovementGrid = () => {
       headerName: "Hedef Hesap",
       editable: false,
       minWidth: 200,
-    },
-    {
-      field: "description",
-      headerName: "Açıklama",
-      editable: false,
-      minWidth: 150,
     },
     {
       field: "currency",
@@ -118,6 +112,12 @@ const BankMovementGrid = () => {
       editable: false,
       minWidth: 150,
     },
+    {
+      field: "description",
+      headerName: "Açıklama",
+      editable: false,
+      minWidth: 150,
+    },
   ];
 
   const getRowId = (params: GetRowIdParams<BankMovementRows>) => {
@@ -132,6 +132,7 @@ const BankMovementGrid = () => {
       columnDefs={colDefs}
       getRowId={getRowId}
       isLoading={loading}
+      enableSelection={false}
       showButtons={{
         refresh: true,
         add: false,

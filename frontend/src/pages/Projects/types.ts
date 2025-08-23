@@ -1,5 +1,5 @@
 export type ProjectRows = {
-  edit:string;
+  edit: string;
   id?: string;
   code: string;
   name: string;
@@ -9,8 +9,14 @@ export type ProjectRows = {
   actualStartDate: Date;
   estimatedEndDate: Date;
   actualEndDate: Date;
-  createdBy: string;
-  updatedBy: string;
+  createdBy: {
+    id: string;
+    email: string;
+  };
+  updatedBy: {
+    id: string;
+    email: string;
+  };
   createdatetime: Date;
   updatedatetime: Date;
 };

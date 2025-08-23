@@ -7,7 +7,7 @@ import type {
 } from "ag-grid-community";
 import type { BalanceRows } from "./types";
 import { useBalance } from "./hook";
-import { currencyList } from "../../constants/currencyList";
+import { currencyList } from "../../constants/common/currencyList";
 
 const BalanceGrid = () => {
   const {
@@ -34,7 +34,8 @@ const BalanceGrid = () => {
       editable: true,
       minWidth: 150,
       cellClassRules: {
-        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
     {
@@ -44,7 +45,8 @@ const BalanceGrid = () => {
       minWidth: 150,
       type: "numberColumn",
       cellClassRules: {
-        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
     {
@@ -61,7 +63,8 @@ const BalanceGrid = () => {
         return item?.name ?? value;
       },
       cellClassRules: {
-        "border border-red-300 rounded-sm": (params) => !!params.data?.isNew,
+        "border border-error bg-light_error dark:bg-dark_error ": (params) =>
+          !!params.data?.isNew,
       },
     },
   ];

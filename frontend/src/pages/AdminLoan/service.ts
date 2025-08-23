@@ -1,6 +1,6 @@
 import type { LoansRows } from "./types";
 import axios from "../../utils/axios";
-import { AutocompleteOption } from "../../types/grid/commonTypes";
+import { AutocompleteOptionById } from "../../types/grid/commonTypes";
 
 export const getAllLoans = async (token: string): Promise<LoansRows[]> => {
   const response = await axios.get(`loans`, {
@@ -51,7 +51,7 @@ export const deleteLoan = async (token: string, id: string): Promise<void> => {
 
 export const fetchAccounts = async (
   token: string
-): Promise<AutocompleteOption[]> => {
+): Promise<AutocompleteOptionById[]> => {
   const response = await axios.get(`balances`, {
     headers: { Authorization: `Bearer ${token}` },
   });

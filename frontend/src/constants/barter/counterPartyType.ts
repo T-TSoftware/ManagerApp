@@ -4,5 +4,5 @@ export const counterPartyType = [
   { code: "SUPPLIER", name: "Tedarikçi" },
   { code: "CUSTOMER", name: "Müşteri" },
   { code: "EXTERNAL", name: "Harici" },
-  { code: "SERVICE", name: "Service" },
+ // { code: "SERVICE", name: "Service" },
 ];

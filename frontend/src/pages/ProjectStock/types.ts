@@ -1,6 +1,8 @@
 // Row state types
 export type RowState = 'unchanged' | 'new' | 'modified' | 'deleted';
 
+// Common alias for ISO date strings (or null if cleared)
+export type ISODateString = string | Date | null;
 // Base Stock Row interface
 export interface BaseStockRow {
   id?: string;
@@ -12,35 +14,19 @@ export interface BaseStockRow {
   minimumQuantity: number;
   description: string;
   location: string;
-  stockDate: Date;
+  stockDate: ISODateString;
   projectCode: string;
   createdBy: string;
   updatedBy: string;
-  createdatetime: Date;
-  updatedatetime: Date;
+  createdatetime: ISODateString;
+  updatedatetime: ISODateString;
 }
 
 // Stock row with tracking information
-export interface StockRows {
-  id?: string;
-  code: string;
-  name: string;
-  category: string;
-  unit: string;
-  quantity: number;
-  minimumQuantity: number;
-  description: string;
-  location: string;
-  stockDate: Date;
-  projectCode: string;
-  createdBy: string;
-  updatedBy: string;
-  createdatetime: Date;
-  updatedatetime: Date;
+export interface StockRows extends BaseStockRow {
   isNew?: boolean;
-  _originalData?: Omit<StockRows, '_originalData' | 'isNew'>;
+  _originalData?: Omit<StockRows, "_originalData" | "isNew">;
 }
-
 // Type for new stock payload (without tracking fields)
 export type NewStockPayload = Omit<StockRows, 'id' | 'isNew' | '_originalData'>;
 

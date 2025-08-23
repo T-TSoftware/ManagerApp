@@ -12,9 +12,9 @@ import SalesModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { FilePenLine } from "lucide-react";
 import { useStocks } from "../../hooks/useStocks";
-import { stockCategories } from "../../constants/stockCategories";
-import { checkStatus } from "../../constants/checkStatus";
+import { stockCategories } from "../../constants/stock/stockCategories";
 import { useNotifier } from "../../hooks/useNotifier";
+import { salesStatus } from "../../constants/sales/salesStatus";
 
 const SalesGrid = () => {
   const {
@@ -36,9 +36,9 @@ const SalesGrid = () => {
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editData, setEditData] = useState<Partial<SalesRows> | undefined>();
   const { stockOptions, loading: loadingStocks } = useStocks();
-   const notify = useNotifier();
+  const notify = useNotifier();
   const colDefs: ColDef<SalesRows>[] = [
-/*     {
+    /*     {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -69,6 +69,10 @@ const SalesGrid = () => {
       },
     }, */
     { field: "id", hide: true },
+    {
+      field: "companyid",
+      hide: true,
+    },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
       field: "project.name",
@@ -79,6 +83,19 @@ const SalesGrid = () => {
     {
       field: "customerName",
       headerName: "Müşteri",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "status",
+      headerName: "Durum",
+      cellEditorParams: {
+        values: salesStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = salesStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 200,
     },
@@ -108,6 +125,28 @@ const SalesGrid = () => {
       editable: false,
       minWidth: 200,
     },
+
+    {
+      field: "totalAmount",
+      headerName: "Toplam Ödeme",
+      type: "numberColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "receivedAmount",
+      headerName: "Alınan Ödeme",
+      type: "numberColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "remainingAmount",
+      headerName: "Kalan Ödeme",
+      type: "numberColumn",
+      editable: false,
+      minWidth: 200,
+    },
     {
       field: "description",
       headerName: "Açıklama",
@@ -115,42 +154,7 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "totalAmount",
-      headerName: "Toplam Ödeme",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "receivedamount",
-      headerName: "Alınan Ödeme",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "remainingamount",
-      headerName: "Kalan Ödeme",
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "status",
-      headerName: "Durum",
-      cellEditorParams: {
-        values: checkStatus.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = checkStatus.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "companyid",
-      hide: true,
-    },
-    {
-      field: "createdby",
+      field: "createdBy.email",
       headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
@@ -163,7 +167,7 @@ const SalesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "updatedby",
+      field: "updatedBy.email",
       headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,

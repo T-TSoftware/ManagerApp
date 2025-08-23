@@ -12,11 +12,12 @@ import {
   DatePicker,
   Dropdown,
 } from "../../components/inputs";
-import { loanStatus } from "../../constants/loanStatus";
-import { counterPartyType } from "../../constants/counterPartyType";
+import { counterPartyType } from "../../constants/barter/counterPartyType";
 import { useNotifier } from "../../hooks/useNotifier";
 import Button from "../../components/buttons/Button";
 import { useProjects } from "../../hooks/useProjects";
+import { barterStatus } from "../../constants/barter/barterStatus";
+import { extractApiError } from "../../utils/axios";
 
 const optionalString = z.string().optional().or(z.literal(""));
 const schema = z.object({
@@ -29,7 +30,7 @@ const schema = z.object({
   }),
   status: z.string().min(1, "Durum zorunludur."),
   description: optionalString,
-  projectId: optionalString,
+  projectId: z.string().min(1, "Proje zorunludur."),
   totalOurValue: z.coerce.number().positive("Gider Değeri pozitif olmalı."),
   totalTheirValue: z.coerce.number().positive("Gelir Değeri pozitif olmalı."),
 });
@@ -59,7 +60,7 @@ const BarterAgreementModal = ({
     reset,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<BarterFormSchema>({
     resolver: zodResolver(schema),
   });
@@ -71,7 +72,7 @@ const BarterAgreementModal = ({
         agreementDate: defaultValues?.agreementDate
           ? new Date(defaultValues.agreementDate)
           : undefined,
-          projectId: defaultValues.project?.id,
+        projectId: defaultValues.project?.id,
       };
     }
 
@@ -85,30 +86,38 @@ const BarterAgreementModal = ({
       description: "",
       totalOurValue: 0,
       totalTheirValue: 0,
-      projectId:""
+      projectId: "",
     };
   }, [defaultValues, mode]);
 
   const notify = useNotifier();
+
   const { projectOptionsById } = useProjects();
+
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
+    if (open) {
+      reset(memoizedDefaultValues, { keepDirty: false }); 
+    }
+  }, [open, reset, memoizedDefaultValues]);
 
   const onFormSubmit = async (data: BarterFormSchema) => {
-    try {  
+    try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
       const transformed: Partial<BarterRows> = {
         ...data,
         agreementDate: data.agreementDate
           ? new Date(data.agreementDate)
           : undefined,
-
       };
 
       await onSubmit(transformed);
       onSuccess();
-    } catch {
-      notify.error("Bir hata oluştu.");
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
   };
 
@@ -142,9 +151,18 @@ const BarterAgreementModal = ({
           <Dropdown
             name="status"
             label="Durum"
-            options={loanStatus}
+            options={barterStatus}
             register={register}
             error={errors.status?.message}
+            required
+          />
+
+          <Dropdown
+            name="projectId"
+            label="Proje"
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
+            register={register}
+            error={errors.projectId?.message}
             required
           />
 
@@ -181,13 +199,6 @@ const BarterAgreementModal = ({
             required
           />
 
-          <Dropdown
-            name="projectId"
-            label="Proje"
-            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
-            register={register}
-          />
-
           <TextAreaInput
             classes="col-span-4"
             name="description"
@@ -206,7 +217,7 @@ const BarterAgreementModal = ({
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

@@ -12,6 +12,7 @@ import { useEmployees } from "./hook";
 import EmployeesModal from "./modal";
 import Alert from "../../components/feedback/Alert";
 import { useParams } from "react-router-dom";
+import { useNotifier } from "../../hooks/useNotifier";
 
 const EmployeesGrid = () => {
   const {
@@ -20,7 +21,6 @@ const EmployeesGrid = () => {
     addRow,
     updateRow,
     deleteRows,
-    saveChanges,
     alert,
     setAlert,
     getById,
@@ -34,6 +34,7 @@ const EmployeesGrid = () => {
   const [editData, setEditData] = useState<
     Partial<EmployeesRows> | undefined
   >();
+  const notify = useNotifier();
 
   const colDefs: ColDef<EmployeesRows>[] = [
     {
@@ -153,7 +154,7 @@ const EmployeesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "createdBy",
+      field: "createdBy.email",
       headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
@@ -166,7 +167,7 @@ const EmployeesGrid = () => {
       minWidth: 200,
     },
     {
-      field: "updatedBy",
+      field: "updatedBy.email",
       headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
@@ -190,9 +191,11 @@ const EmployeesGrid = () => {
     if (modalMode === "create") {
       const newItem = await create(formData);
       addRow(newItem);
+      notify.success("Kayıt başarıyla oluşturuldu");
     } else {
       const updatedItem = await update({ ...formData, id: editData!.id });
       updateRow(updatedItem);
+      notify.success("Değişiklikler kaydedildi");
     }
   };
 
@@ -221,7 +224,6 @@ const EmployeesGrid = () => {
         }}
         enableSelection={false}
         onDeleteRow={deleteRows}
-        onSaveChanges={saveChanges}
         isLoading={loading}
         showButtons={{
           refresh: true,

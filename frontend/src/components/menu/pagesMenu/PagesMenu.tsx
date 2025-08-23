@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { useMemo } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import { PageMenuItems } from "../../../config/menu/PageMenuItems";
 import PageMenuItemList from "./PagesMenuItemList";
 
@@ -6,38 +7,42 @@ type PagesMenuProps = {
   isExpanded?: boolean;
 };
 
+type PortalMode = "admin" | "project" | "employee";
+
+const detectPortal = (pathname: string, projectId?: string): PortalMode => {
+  if (pathname.startsWith("/employees-portal")) return "employee";
+  if (projectId) return "project";
+  return "admin";
+};
+
 const PagesMenu = ({ isExpanded = false }: PagesMenuProps) => {
   const { projectId } = useParams<{ projectId: string }>();
-  const pathname = window.location.pathname;
+  const { pathname } = useLocation();
 
-  const isEmployeePortal = pathname.startsWith("/employees-portal");
-  const menuItems = PageMenuItems(projectId);
+  const portal = detectPortal(pathname, projectId);
+  const items = useMemo(() => PageMenuItems(projectId), [projectId]);
 
-  const roleMode = isEmployeePortal
-    ? "employee"
-    : projectId
-    ? "project"
-    : "admin";
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      // New explicit visibility rule (preferred):
+      if (Array.isArray(item.visibleIn)) {
+        return item.visibleIn.includes(portal);
+      }
 
-  const filteredItems = menuItems.filter((item) => {
-    switch (roleMode) {
-      case "employee":
-        return item.employeeYN;
-      case "project":
-        return !item.adminYN && !item.employeeYN;
-      case "admin":
-        return item.adminYN && !item.employeeYN;;
-      default:
-        return false;
-    }
-  });
+      // Backward compatibility (if visibleIn is not provided):
+      if (portal === "employee") return item.employeeYN === true;
+      if (portal === "project") return !item.adminYN && !item.employeeYN;
+      // admin portal:
+      return item.adminYN === true && item.employeeYN !== true;
+    });
+  }, [items, portal]);
 
   return (
     <nav className="py-3">
       <div className="space-y-1 px-3">
         {filteredItems.map((item) => (
           <PageMenuItemList
-            key={item.label}
+            key={item.href}
             item={item}
             isExpanded={isExpanded}
           />

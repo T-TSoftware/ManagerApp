@@ -46,12 +46,11 @@ export type FinanceTransactionRows = {
     id: string;
     name: string;
     email: string;
-    role: string;
-    company?: {
-      id: string;
-      name: string;
-      code: string;
-    };
+  };
+  createdBy?: {
+    id: string;
+    name: string;
+    email: string;
   };
   order?: {
     id: string;

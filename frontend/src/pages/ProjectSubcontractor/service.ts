@@ -1,63 +1,60 @@
 import axios from "../../utils/axios";
-import { SubcontractorRows, NewSubcontractorPayload, UpdateSubcontractorPayload } from "./types";
+import { SubcontractorRows} from "./types";
 
 export const getAllSubcontractorByProject = async (
+  token: string,
   projectId: string,
-  token: string
 ): Promise<SubcontractorRows[]> => {
-  const res = await axios.get(`/projects/${projectId}/subcontractors`, {
+  const response = await axios.get(`/projects/${projectId}/subcontractors`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  return res.data;
+  return response.data;
+};
+
+export const getSubcontractorById = async (
+  token: string,
+  id: string
+): Promise<SubcontractorRows> => {
+  const response = await axios.get(`subcontractor/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
 };
 
 export const addSubcontractor = async (
   token: string,
   projectId: string,
-  payload: NewSubcontractorPayload[]
-): Promise<void> => {
-  console.log(payload);
-  const res = await axios.post(
+  data: Partial<SubcontractorRows>
+): Promise<SubcontractorRows> => {
+  const response = await axios.post(
     `/projects/${projectId}/subcontractors`,
-    payload,
+    data,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }
   );
-  return res.data;
+  return response.data;
 };
 
 export const updateSubcontractor = async (
   token: string,
-  projectId: string,
-  payload: UpdateSubcontractorPayload[]
-): Promise<void> => {
-  const res = await axios.put(
-    `/projects/${projectId}/subcontractors`,
-    payload,
+  data: Partial<SubcontractorRows>
+): Promise<SubcontractorRows> => {
+  const response = await axios.patch(
+    `/projects/subcontractors/${data.id}`,
+    data,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }
   );
-  return res.data;
+  return response.data;
 };
 
-export const deleteSubcontractor = async (
-  token: string,
-  projectId: string,
-  codes: string[]
-): Promise<void> => {
-  const res = await axios.delete(`/projects/${projectId}/subcontractors`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    data: codes,
-  });
-  return res.data;
-};

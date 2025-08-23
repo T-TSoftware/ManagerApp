@@ -5,45 +5,69 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ModalWrapper from "../../components/layout/ModalWrapper";
 import type { FinanceTransactionRows } from "./types";
-import { financeTypes } from "../../constants/financeTypes";
-import { financeCategory } from "../../constants/financeCategory";
-import { currencyList } from "../../constants/currencyList";
-import { paymentMethods } from "../../constants/paymentMethods";
+import { financeTypes } from "../../constants/finance/financeTypes";
+import { financeCategory } from "../../constants/finance/financeCategory";
+import { currencyList } from "../../constants/common/currencyList";
+import { paymentMethods } from "../../constants/finance/paymentMethods";
 import {
   TextInput,
   Dropdown,
   NumberInput,
   TextAreaInput,
   DatePicker,
-  AutoComplete,
 } from "../../components/inputs";
 import { useProjects } from "../../hooks/useProjects";
 import { AutocompleteOption } from "../../types/grid/commonTypes";
 import { useReferenceOptions } from "../../hooks/useReferenceOptions";
 import { useParams } from "react-router-dom";
+import { useNotifier } from "../../hooks/useNotifier";
+import { extractApiError } from "../../utils/axios";
+import Button from "../../components/buttons/Button";
 
 const optionalString = z.string().optional().or(z.literal(""));
-const schema = z.object({
-  type: z.string().min(1, "Tür zorunludur."),
-  source: z.string().min(1, "Kaynak zorunludur."),
-  amount: z.coerce.number().positive("Tutar pozitif olmalı."),
-  currency: z.string().min(1, "Para birimi zorunludur."),
-  code: optionalString,
-  projectCode: optionalString,
-  orderCode: optionalString,
-  fromAccountCode: optionalString,
-  toAccountCode: optionalString,
-  transactionDate: z.date({
-    required_error: "İşlem tarihi zorunludur.",
-    invalid_type_error: "Geçerli bir tarih girin.",
-  }),
-  method: optionalString,
-  category: optionalString,
-  description: optionalString,
-  invoiceCode: optionalString,
-  targetName: optionalString,
-  referenceCode: optionalString,
-});
+const schema = z
+  .object({
+    type: z.string().min(1, "Tür zorunludur."),
+    source: optionalString,
+    amount: z.coerce.number().positive("Tutar pozitif olmalı."),
+    currency: z.string().min(1, "Para birimi zorunludur."),
+    code: optionalString,
+    projectId: optionalString,
+    orderCode: optionalString,
+    fromAccountCode: z.string().min(1, "Kaynak Hesap (Giden) zorunludur."),
+    toAccountCode: optionalString,
+    transactionDate: z.date({
+      required_error: "İşlem tarihi zorunludur.",
+      invalid_type_error: "Geçerli bir tarih girin.",
+    }),
+    method: z.string().min(1, "Yöntem zorunludur."),
+    category: z.string().min(1, "Kategori zorunludur."),
+    description: optionalString,
+    invoiceCode: optionalString,
+    targetName: optionalString,
+    referenceCode: optionalString,
+  })
+  .superRefine((values, ctx) => {
+    if (values.category != "TRANSFER" && values.category != "") {
+      if (values.referenceCode === "" || values.referenceCode === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["referenceCode"],
+          message: "Reference Kodu zorunludur.",
+        });
+      }
+    }
+    if (values.category === "TRANSFER") {
+      if (values.toAccountCode === "" || values.toAccountCode === undefined) {
+      
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["toAccountCode"],
+          message: "Hedef Hesap (Alan) zorunludur.",
+        });
+      }
+    }
+  });
 
 type FinanceFormSchema = z.infer<typeof schema>;
 
@@ -64,23 +88,27 @@ const FinanceTransactionModal = ({
   options,
   onClose,
   onSubmit,
-  onSuccess,
 }: Props) => {
   const {
     register,
     handleSubmit,
     reset,
     watch,
-    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FinanceFormSchema>({
     resolver: zodResolver(schema),
   });
+
   const selectedCategory = watch("category");
-    const { projectId } = useParams();
-  const { options: referenceOptions, loading: refLoading } =
-    useReferenceOptions(selectedCategory, projectId);
+  const { projectId } = useParams();
+  const { projectOptionsById } = useProjects();
+  const notify = useNotifier();
+  const { options: referenceOptions } = useReferenceOptions(
+    selectedCategory,
+    projectId
+  );
+
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
       return {
@@ -90,7 +118,7 @@ const FinanceTransactionModal = ({
           : undefined,
         fromAccountCode: defaultValues.fromAccount?.code,
         toAccountCode: defaultValues.toAccount?.code,
-        projectCode: defaultValues.project?.code,
+        projectId: defaultValues.project?.id,
         orderCode: defaultValues.order?.code,
       };
     }
@@ -103,7 +131,7 @@ const FinanceTransactionModal = ({
       type: "",
       source: "",
       currency: "",
-      projectCode: "",
+      projectId: "",
       fromAccountCode: "",
       toAccountCode: "",
       orderCode: "",
@@ -112,13 +140,15 @@ const FinanceTransactionModal = ({
       invoiceYN: "",
       invoiceCode: "",
       targetName: "",
-      referenceCode:"",
+      referenceCode: "",
     };
   }, [defaultValues, mode]);
-  const { projectOptionsByCode } = useProjects();
+
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
+    if (open) {
+      reset(memoizedDefaultValues);
+    }
+  }, [open, reset, memoizedDefaultValues]);
 
   const onFormSubmit = async (data: FinanceFormSchema) => {
     try {
@@ -132,9 +162,9 @@ const FinanceTransactionModal = ({
       };
 
       await onSubmit(transformed);
-      onSuccess();
-    } catch {
-      alert("Bir hata oluştu.");
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
   };
 
@@ -156,6 +186,91 @@ const FinanceTransactionModal = ({
             error={errors.targetName?.message}
           />
 
+          <NumberInput
+            name="amount"
+            label="Tutar"
+            register={register}
+            error={errors.amount?.message}
+            required
+          />
+          <Dropdown
+            name="currency"
+            label="Para Birimi"
+            options={currencyList}
+            register={register}
+            error={errors.currency?.message}
+            required
+          />
+
+          <Dropdown
+            name="method"
+            label="Yöntem"
+            options={paymentMethods}
+            register={register}
+            error={errors.method?.message}
+            required
+          />
+
+          <Dropdown
+            name="type"
+            label="Tür"
+            options={financeTypes}
+            register={register}
+            error={errors.type?.message}
+            required
+          />
+
+          <Dropdown
+            name="category"
+            label="Kategori"
+            options={financeCategory}
+            register={register}
+            error={errors.category?.message}
+            required
+          />
+
+          <Dropdown
+            name="referenceCode"
+            label="Referans Kodu"
+            options={referenceOptions}
+            register={register}
+            error={errors.referenceCode?.message}
+            required={selectedCategory != "" && selectedCategory != "TRANSFER"}
+          />
+
+          <Dropdown
+            name="projectId"
+            label="Proje"
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
+            register={register}
+          />
+
+          <Dropdown
+            name="fromAccountCode"
+            label="Kaynak Hesap (Giden)"
+            options={[{ code: "", name: "Seçiniz" }, ...options]}
+            register={register}
+            error={errors.fromAccountCode?.message}
+            required
+          />
+
+          <Dropdown
+            name="toAccountCode"
+            label="Hedef Hesap (Alan)"
+            options={[{ code: "", name: "Seçiniz" }, ...options]}
+            register={register}
+            error={errors.toAccountCode?.message}
+            required
+          />
+
+          <DatePicker
+            label="İşlem Tarihi"
+            value={watch("transactionDate")}
+            onChange={(val) => setValue("transactionDate", val!)}
+            error={errors.transactionDate?.message}
+            required
+          />
+
           <TextInput
             name="invoiceCode"
             label="Fatura Kodu"
@@ -170,83 +285,6 @@ const FinanceTransactionModal = ({
             error={errors.source?.message}
           />
 
-          <Dropdown
-            name="projectCode"
-            label="Proje"
-            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsByCode]}
-            register={register}
-            error={errors.projectCode?.message}
-          />
-
-          <NumberInput
-            name="amount"
-            label="Tutar"
-            register={register}
-            error={errors.amount?.message}
-          />
-
-          <Dropdown
-            name="type"
-            label="Tür"
-            options={financeTypes}
-            register={register}
-            error={errors.type?.message}
-          />
-
-          <Dropdown
-            name="currency"
-            label="Para Birimi"
-            options={currencyList}
-            register={register}
-            error={errors.currency?.message}
-          />
-
-          <Dropdown
-            name="method"
-            label="Yöntem"
-            options={paymentMethods}
-            register={register}
-          />
-
-          <Dropdown
-            name="category"
-            label="Kategori"
-            options={financeCategory}
-            register={register}
-          />
-
-          <Dropdown
-            name="referenceCode"
-            label="Referans Kodu"
-            options={referenceOptions}
-            register={register}
-            error={errors.referenceCode?.message}
-          />
-
-          <DatePicker
-            label="İşlem Tarihi"
-            value={watch("transactionDate")}
-            onChange={(val) => setValue("transactionDate", val!)}
-            error={errors.transactionDate?.message}
-            required
-          />
-
-          <AutoComplete
-            options={options}
-            label="Kaynak Hesap (Giden)"
-            value={watch("fromAccountCode")!}
-            onChange={(val) => setValue("fromAccountCode", val)}
-            placeholder="Kaynak Hesap"
-          />
-
-          <AutoComplete
-            options={options}
-            label="Hedef Hesap (Alan)"
-            value={watch("toAccountCode")!}
-            onChange={(val) => setValue("toAccountCode", val)}
-            placeholder="Hedef Hesap"
-          />
-
           <TextAreaInput
             classes="col-span-3"
             name="description"
@@ -254,20 +292,19 @@ const FinanceTransactionModal = ({
             register={register}
           />
           <div className="col-span-4 pt-6 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500  hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+              disabled
+            />
+            <Button
               type="submit"
+              label="Kaydet"
+              loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth  dark:bg-fourth transition"
-            >
-              {isSubmitting ? "Güncelleniyor..." : "Kaydet"}
-            </button>
+            />
           </div>
         </form>
       </div>

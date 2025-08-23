@@ -11,25 +11,50 @@ import {
   TextAreaInput,
   Dropdown,
 } from "../../../components/inputs";
-import { direction } from "../../../constants/direction";
-import { barterItemType } from "../../../constants/barterItemType";
+import { barterItemType } from "../../../constants/barter/barterItemType";
 import { useNotifier } from "../../../hooks/useNotifier";
-import { checkStatus } from "../../../constants/checkStatus";
+import { barterDirection } from "../../../constants/barter/barterDirection";
+import { barterItemStatus } from "../../../constants/barter/barterItemStatus";
+import Button from "../../../components/buttons/Button";
+import {
+  useStockOptions,
+  useSubcontractorOptions,
+  useSupplierOptions,
+} from "../../../hooks/useReferenceOptions";
+import { extractApiError } from "../../../utils/axios";
 
 const optionalString = z.string().optional().or(z.literal(""));
 
-const schema = z.object({
-  direction: z.string().min(1, "Girdi/Çıktı zorunludur."),
-  status: optionalString,
-  itemType: z.string().min(1, "Tür zorunludur."),
-  description: z.string().min(1, "Açıklama zorunludur."),
-  agreedValue: z.coerce.number().positive("Pozitif değer girin."),
-  remainingAmount: z.coerce.number().positive("Pozitif değer girin."),
-  processedAmount: z.coerce.number().positive("Pozitif değer girin."),
-  relatedStock: z.string().optional(),
-  relatedSubcontractor: z.string().optional(),
-  relatedSupplier: z.string().optional(),
-});
+const schema = z
+  .object({
+    direction: z.string().min(1, "Girdi/Çıktı zorunludur."),
+    status: optionalString,
+    itemType: z.string().min(1, "Tür zorunludur."),
+    description: z.string().min(1, "Açıklama zorunludur."),
+    agreedValue: z.number().optional(),
+    relatedStockCode: optionalString,
+    relatedSubcontractorCode: optionalString,
+    relatedSupplierCode: optionalString,
+  })
+  .superRefine((values, ctx) => {
+    if (values.itemType === "CASH") {
+      if (values.agreedValue === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["agreedValue"],
+          message: "Parasal Karşılık  pozitif olmalı.",
+        });
+      }
+    } else {
+      if (values.status === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["status"],
+          message: "Durum zorunludur.",
+        });
+      }
+    }
+  });
 
 type FormSchema = z.infer<typeof schema>;
 
@@ -37,6 +62,7 @@ type Props = {
   open: boolean;
   mode: "create" | "edit";
   defaultValues?: Partial<BarterItemRows>;
+  projectId: string;
   onClose: () => void;
   onSubmit: (data: Partial<BarterItemRows>) => Promise<void>;
   onSuccess: () => void;
@@ -46,6 +72,7 @@ const BarterItemModal = ({
   open,
   mode,
   defaultValues,
+  projectId,
   onClose,
   onSubmit,
   onSuccess,
@@ -59,30 +86,51 @@ const BarterItemModal = ({
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
+
+  const notify = useNotifier();
   const selectedItemType = watch("itemType");
+  const {
+    options: stockOptions,
+    loading: stockLoading,
+  } = useStockOptions(projectId);
+  const {
+    options: supplierOptions,
+    loading: supplierLoading
+  } = useSupplierOptions(projectId);
+  const {
+    options: subcontractorOptions,
+    loading: subcontractorLoading
+  } = useSubcontractorOptions(projectId);
+
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
       return {
         ...defaultValues,
+        relatedStockCode: defaultValues.relatedStock?.code,
+        relatedSubcontractorCode: defaultValues.relatedStock?.code,
+        relatedSupplierCode: defaultValues.relatedStock?.code,
       };
     }
 
     return {
+      status: "PENDING",
       direction: "",
       itemtype: "",
       assetDetails: "",
       agreedValue: 0,
-      relatedStock: "",
+      relatedStockCode: "",
       description: "",
-      relatedSubcontractor: "",
-      relatedSupplier: "",
+      relatedSubcontractorCode: "",
+      relatedSupplierCode: "",
     };
   }, [defaultValues, mode]);
-
+console.log(projectId);
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
-  const notify = useNotifier();
+    if (open) {
+      reset(memoizedDefaultValues);
+    }
+  }, [open, reset, memoizedDefaultValues]);
+
   const onFormSubmit = async (data: FormSchema) => {
     try {
       const transformed: Partial<BarterItemRows> = {
@@ -90,21 +138,21 @@ const BarterItemModal = ({
       };
 
       await onSubmit(transformed);
-      onSuccess();
-    } catch {
-      notify.error("Bir hata oluştu.");
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
   };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>
-      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-6xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
+      <div className="bg-white py-4 px-7 rounded-xl shadow-xl w-full max-w-4xl max-h-[100vh] overflow-y-auto dark:bg-primary dark:text-white">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Barter Item Ekle" : "Barter Item Düzenle"}
         </h2>
         <form
           onSubmit={handleSubmit(onFormSubmit)}
-          className="grid grid-cols-4 gap-4 p-5"
+          className="grid grid-cols-3 gap-3 p-5"
         >
           <TextInput
             label="Kod"
@@ -116,16 +164,17 @@ const BarterItemModal = ({
           <Dropdown
             name="status"
             label="Durum"
-            options={checkStatus}
+            options={barterItemStatus}
             register={register}
             error={errors.status?.message}
-            editable={selectedItemType != "CASH"}
-            required
+            editable={selectedItemType != "CASH" && mode != "create"}
+            required={selectedItemType != "CASH"}
           />
+
           <Dropdown
             name="direction"
             label="Girdi/Çıktı"
-            options={direction}
+            options={barterDirection}
             register={register}
             error={errors.direction?.message}
             required
@@ -140,21 +189,25 @@ const BarterItemModal = ({
             required
           />
 
-          <TextInput
+          <Dropdown
+            name="relatedStockCode"
             label="İlişkili Stok"
-            name="relatedStock"
+            options={stockOptions}
             register={register}
             editable={selectedItemType == "STOCK"}
           />
 
-          <TextInput
+          <Dropdown
+            name="relatedSubcontractorCode"
             label="İlişkili Taşeron İşi"
-            name="relatedSubcontractor"
+            options={subcontractorOptions}
             register={register}
           />
-          <TextInput
+
+          <Dropdown
+            name="relatedSupplierCode"
             label="İlişkili Tedarik"
-            name="relatedSupplier"
+            options={supplierOptions}
             register={register}
           />
 
@@ -163,21 +216,9 @@ const BarterItemModal = ({
             name="agreedValue"
             register={register}
             error={errors.agreedValue?.message}
-            editable={selectedItemType === "CASH"}
-          />
-
-          <NumberInput
-            label="İşlenen Ödeme"
-            name="processedAmount"
-            register={register}
-            error={errors.processedAmount?.message}
-            editable={selectedItemType === "CASH"}
-          />
-          <NumberInput
-            label="Kalan Ödeme"
-            name="remainingAmount"
-            register={register}
-            error={errors.remainingAmount?.message}
+            //editable={selectedItemType === "CASH"}
+            //required={selectedItemType === "CASH"}
+            required
           />
 
           <TextAreaInput
@@ -185,22 +226,23 @@ const BarterItemModal = ({
             label="Açıklama"
             register={register}
             classes="col-span-4"
+            error={errors.description?.message}
+            required
           />
-          <div className="col-span-4 pt-4 flex justify-end gap-2">
-            <button
+          <div className="col-span-4 pt-6 flex justify-end gap-3">
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500  hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+              disabled
+            />
+            <Button
               type="submit"
+              label="Kaydet"
+              loading={isSubmitting}
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth  dark:bg-fourth transition"
-            >
-              {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
-            </button>
+            />
           </div>
         </form>
       </div>

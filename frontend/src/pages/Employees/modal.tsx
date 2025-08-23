@@ -12,6 +12,8 @@ import {
 import { EmployeesRows } from "./types";
 import { useNotifier } from "../../hooks/useNotifier";
 import Button from "../../components/buttons/Button";
+import { extractApiError } from "../../utils/axios";
+import MultiSelect from "../../components/inputs/multiSelectInput";
 
 
 const schema = z.object({
@@ -95,8 +97,9 @@ const EmployeeModal = ({
         startDate: data.startDate ? new Date(data.startDate) : undefined,
       });
       onSuccess();
-    } catch {
-      notify.error("Bir sorun oluştu.");
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
   };
 
@@ -160,6 +163,7 @@ const EmployeeModal = ({
             register={register}
             error={errors.grossSalary?.message}
           />
+          
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">
             <Button

@@ -4,9 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { CheckFinanceRows } from "./types";
-import { checkStatus } from "../../constants/checkStatus";
+import { checkStatus } from "../../constants/check/checkStatus";
 import ModalWrapper from "../../components/layout/ModalWrapper";
-import { checkTypes } from "../../constants/checkTypes";
+import { checkTypes } from "../../constants/check/checkTypes";
 import {
   TextInput,
   Dropdown,
@@ -18,7 +18,8 @@ import {
 import { useNotifier } from "../../hooks/useNotifier";
 import Button from "../../components/buttons/Button";
 import { useProjects } from "../../hooks/useProjects";
-import { AutocompleteOption } from "../../types/grid/commonTypes";
+import { AutocompleteOptionById } from "../../types/grid/commonTypes";
+import { extractApiError } from "../../utils/axios";
 
 const optionalString = z.string().optional().or(z.literal(""));
 
@@ -27,16 +28,12 @@ const schema = z.object({
     required_error: "Çek tarihi zorunludur.",
     invalid_type_error: "Geçerli bir tarih girin.",
   }),
-  bankCode: z.string().min(1, "Banka zorunludur"),
-  transactionDate: z.date({
-    required_error: "İşlem tarihi zorunludur.",
-    invalid_type_error: "Geçerli bir tarih girin.",
-  }),
+  bankId: z.string().min(1, "Banka zorunludur"),
   firm: z.string().min(1, "Firma zorunludur"),
   amount: z.coerce.number().positive("Tutar pozitif olmalı"),
   checkNo: z.string().min(1, "Çek No zorunludur"),
   projectId: optionalString,
-  status: z.string().min(1, "Durum zorunludur"),
+  status: optionalString,
   type: z.string().min(1, "Tür zorunludur"),
   description: optionalString,
   dueDate: z.date({
@@ -51,7 +48,7 @@ type Props = {
   open: boolean;
   mode: "create" | "edit";
   defaultValues?: Partial<CheckFinanceRows>;
-  options: AutocompleteOption[];
+  options: AutocompleteOptionById[];
   onClose: () => void;
   onSubmit: (data: Partial<CheckFinanceRows>) => Promise<void>;
   onSuccess: () => void;
@@ -77,6 +74,8 @@ const CheckFinanceModal = ({
     resolver: zodResolver(schema),
   });
   const notify = useNotifier();
+  const { projectOptionsById, loading } = useProjects();
+
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
       return {
@@ -84,24 +83,18 @@ const CheckFinanceModal = ({
         checkDate: defaultValues?.checkDate
           ? new Date(defaultValues.checkDate)
           : undefined,
-        transactionDate: defaultValues?.transactionDate
-          ? new Date(defaultValues.transactionDate)
-          : undefined,
-          dueDate: defaultValues?.dueDate
+        dueDate: defaultValues?.dueDate
           ? new Date(defaultValues.dueDate)
           : undefined,
         projectId: defaultValues?.project?.id,
-        bankCode: defaultValues?.bank?.code,
-
-        
+        bankId: defaultValues?.bank?.id,
       };
     }
 
     return {
       checkDate: new Date(),
-      bankCode: "",
+      bankId: "",
       code: "",
-      transactionDate: new Date(),
       dueDate: new Date(),
       firm: "",
       amount: 0,
@@ -112,9 +105,7 @@ const CheckFinanceModal = ({
       projectId: "",
     };
   }, [defaultValues, mode]);
-  
-  const { projectOptionsById, loading } = useProjects();
-  
+
   useEffect(() => {
     if (open) {
       reset(memoizedDefaultValues);
@@ -126,9 +117,6 @@ const CheckFinanceModal = ({
       const transformed: Partial<CheckFinanceRows> = {
         ...data,
         amount: Number(data.amount),
-        transactionDate: data.transactionDate
-          ? new Date(data.transactionDate)
-          : undefined,
         dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
         checkDate: data.checkDate ? new Date(data.checkDate) : undefined,
         code: defaultValues?.code,
@@ -136,8 +124,9 @@ const CheckFinanceModal = ({
 
       await onSubmit(transformed);
       onSuccess();
-    } catch {
-      notify.error("Bir hata oluştu.");
+    } catch (error){
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
   };
 
@@ -156,6 +145,7 @@ const CheckFinanceModal = ({
             name="checkNo"
             label="Çek No"
             register={register}
+            editable={mode === "create" ? true : false}
             error={errors.checkNo?.message}
             required
           />
@@ -169,18 +159,10 @@ const CheckFinanceModal = ({
           />
 
           <DatePicker
-            label="Çek Tarihi"
+            label="Son Ödeme Tarihi"
             value={watch("dueDate")}
             onChange={(val) => setValue("dueDate", val!)}
             error={errors.checkDate?.message}
-            required
-          />
-
-          <DatePicker
-            label="İşlem Tarihi"
-            value={watch("transactionDate")}
-            onChange={(val) => setValue("transactionDate", val!)}
-            error={errors.transactionDate?.message}
             required
           />
 
@@ -204,10 +186,11 @@ const CheckFinanceModal = ({
           <AutoComplete
             options={options}
             label="Banka"
-            value={watch("bankCode")!}
-            onChange={(val) => setValue("bankCode", val)}
+            value={watch("bankId")!}
+            onChange={(val) => setValue("bankId", val)}
             placeholder="Banka"
-            error={errors.bankCode?.message}
+            error={errors.bankId?.message}
+            valueKey="id"
             required
           />
 

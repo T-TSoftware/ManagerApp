@@ -11,22 +11,22 @@ import { useBarter } from "./hook";
 import Alert from "../../components/feedback/Alert";
 import { FilePenLine } from "lucide-react";
 import BarterAgreementModal from "./modal";
-import { loanStatus } from "../../constants/loanStatus";
-import { counterPartyType } from "../../constants/counterPartyType";
+import { counterPartyType } from "../../constants/barter/counterPartyType";
 import { useNotifier } from "../../hooks/useNotifier";
+import { barterStatus } from "../../constants/barter/barterStatus";
 
 type Props = {
   onBarterSelected?: (id: string) => void;
+  onBarterProjectSelected?: (id: string) => void;
 };
 
-const BarterAgreementGrid = ({ onBarterSelected }: Props) => {
+const BarterAgreementGrid = ({ onBarterSelected, onBarterProjectSelected }: Props) => {
   const {
     localData,
     loading,
     addRow,
     updateRow,
     deleteRows,
-    saveChanges,
     alert,
     setAlert,
     getById,
@@ -77,6 +77,32 @@ const BarterAgreementGrid = ({ onBarterSelected }: Props) => {
     },
     { field: "code", headerName: "Kod", editable: false, minWidth: 200 },
     {
+      field: "agreementDate",
+      headerName: "Anlaşma Tarihi",
+      type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "status",
+      headerName: "Durum",
+      cellEditorParams: {
+        values: barterStatus.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = barterStatus.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "project.name",
+      headerName: "Proje",
+      editable: false,
+      minWidth: 200,
+    },
+    {
       field: "counterpartyType",
       headerName: "Karşı Taraf Tipi",
       cellEditorParams: {
@@ -110,35 +136,14 @@ const BarterAgreementGrid = ({ onBarterSelected }: Props) => {
       minWidth: 200,
     },
     {
-      field: "status",
-      headerName: "Durum",
-      cellEditorParams: {
-        values: loanStatus.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = loanStatus.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
-      editable: false,
-      minWidth: 200,
-    },
-    {
-      field: "agreementDate",
-      headerName: "Anlaşma Tarihi",
-      type: "dateTimeColumn",
-      editable: false,
-      minWidth: 200,
-    },
-    {
       field: "description",
       headerName: "Açıklama",
       editable: false,
       minWidth: 200,
     },
-
     {
-      field: "project.name",
-      headerName: "Proje",
+      field: "createdBy.email",
+      headerName: "Oluşturan",
       editable: false,
       minWidth: 200,
     },
@@ -146,6 +151,12 @@ const BarterAgreementGrid = ({ onBarterSelected }: Props) => {
       field: "createdatetime",
       headerName: "Oluşturulma Tarihi",
       type: "dateTimeColumn",
+      editable: false,
+      minWidth: 200,
+    },
+    {
+      field: "updatedBy.email",
+      headerName: "Güncelleyen",
       editable: false,
       minWidth: 200,
     },
@@ -168,7 +179,6 @@ const BarterAgreementGrid = ({ onBarterSelected }: Props) => {
       addRow(newItem);
       notify.success("Kayıt başarıyla oluşturuldu");
     } else {
-      console.log(formData);
       const updatedItem = await update({ ...formData, id: editData!.id });
       updateRow(updatedItem);
       notify.success("Değişiklikler kaydedildi");
@@ -201,10 +211,10 @@ const BarterAgreementGrid = ({ onBarterSelected }: Props) => {
         autoSelectRowOnClick={true}
         onRowClick={(row) => {
           onBarterSelected?.(row.id!);
+          onBarterProjectSelected?.(row.project.id!);
         }}
         enableSelection={false}
         onDeleteRow={deleteRows}
-        onSaveChanges={saveChanges}
         isLoading={loading}
         showButtons={{
           refresh: true,

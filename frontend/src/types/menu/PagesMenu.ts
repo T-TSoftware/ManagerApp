@@ -1,10 +1,9 @@
-import { ElementType } from "react";
-
 export type PagesMenuItemType = {
   label: string;
   href: string;
-  icon: ElementType;
-  adminYN: boolean;
+  icon: React.ComponentType<{ className?: string }>;
   portalYN: boolean;
+  adminYN: boolean;
   employeeYN: boolean;
+  visibleIn?: Array<"admin" | "project" | "employee">; 
 };

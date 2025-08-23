@@ -8,9 +8,10 @@ import ModalWrapper from "../../components/layout/ModalWrapper";
 import { useNotifier } from "../../hooks/useNotifier";
 import TextInput from "../../components/inputs/TextInput";
 import Dropdown from "../../components/inputs/Dropdown";
-import { projectStatus } from "../../constants/projectStatus";
+import { projectStatus } from "../../constants/project/projectStatus";
 import DatePicker from "../../components/inputs/DatePicker";
 import Button from "../../components/buttons/Button";
+import { extractApiError } from "../../utils/axios";
 
 const optionalString = z.string().optional().or(z.literal(""));
 
@@ -18,22 +19,10 @@ const schema = z.object({
   name: z.string().min(1, "Proje adı zorunludur"),
   site: z.string().min(1, "Şantiye zorunludur"),
   status: z.string().min(1, "Durum zorunludur"),
-  estimatedStartDate: z.date({
-    required_error: "Beklenen Başlama Tarihi zorunludur.",
-    invalid_type_error: "Geçerli bir tarih girin.",
-  }),
-  actualStartDate: z.date({
-    required_error: "Gerçek Başlama Tarihi zorunludur.",
-    invalid_type_error: "Geçerli bir tarih girin.",
-  }),
-  estimatedEndDate: z.date({
-    required_error: "Beklenen Bitiş Tarihi zorunludur.",
-    invalid_type_error: "Geçerli bir tarih girin.",
-  }),
-  actualEndDate: z.date({
-    required_error: "Gerçek Bitiş Tarihi zorunludur.",
-    invalid_type_error: "Geçerli bir tarih girin.",
-  }),
+  estimatedStartDate: z.date().optional(),
+  actualStartDate: z.date().optional(),
+  estimatedEndDate: z.date().optional(),
+  actualEndDate: z.date().optional(),
 });
 
 type ProjectFormSchema = z.infer<typeof schema>;
@@ -97,8 +86,10 @@ const ProjectModal = ({
   }, [defaultValues, mode]);
 
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
+    if (open) {
+      reset(memoizedDefaultValues);
+    }
+  }, [open, reset, memoizedDefaultValues]);
 
   const notify = useNotifier();
 
@@ -122,8 +113,10 @@ const ProjectModal = ({
 
       await onSubmit(transformed);
       onSuccess();
-    } catch (err) {
-      notify.error("Bir hata oluştu.");
+    } catch (error) {
+      console.log(error)
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
   };
 
@@ -138,6 +131,15 @@ const ProjectModal = ({
           onSubmit={handleSubmit(onFormSubmit)}
           className="grid grid-cols-3 gap-4"
         >
+          <Dropdown
+            name="status"
+            label="Durum"
+            options={projectStatus}
+            register={register}
+            error={errors.status?.message}
+            required
+          />
+
           <TextInput
             name="name"
             label="Proje Adı"
@@ -154,45 +156,28 @@ const ProjectModal = ({
             required
           />
 
-          <Dropdown
-            name="status"
-            label="Durum"
-            options={projectStatus}
-            register={register}
-            error={errors.status?.message}
-            required
-          />
-
           <DatePicker
             label="Tahmini Başlangıç"
             value={watch("estimatedStartDate")}
             onChange={(val) => setValue("estimatedStartDate", val!)}
-            error={errors.estimatedStartDate?.message}
-            required
           />
 
           <DatePicker
             label="Gerçek Başlangıç"
             value={watch("actualStartDate")}
             onChange={(val) => setValue("actualStartDate", val!)}
-            error={errors.actualStartDate?.message}
-            required
           />
 
           <DatePicker
             label="Tahmini Bitiş"
             value={watch("estimatedEndDate")}
             onChange={(val) => setValue("estimatedEndDate", val!)}
-            error={errors.estimatedEndDate?.message}
-            required
           />
 
           <DatePicker
             label="Gerçek Bitiş"
             value={watch("actualEndDate")}
             onChange={(val) => setValue("actualEndDate", val!)}
-            error={errors.actualEndDate?.message}
-            required
           />
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">

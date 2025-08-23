@@ -11,11 +11,13 @@ import { getToken } from "../../utils/token";
 import type { FinanceTransactionRows } from "./types";
 import { useNotifier } from "../../hooks/useNotifier";
 import { AutocompleteOption } from "../../types/grid/commonTypes";
-
+import { extractApiError } from "../../utils/axios";
 
 export const useFinance = () => {
   const [localData, setLocalData] = useState<FinanceTransactionRows[]>([]);
-  const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>([]);
+  const [accountOptions, setAccountOptions] = useState<AutocompleteOption[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
   const notify = useNotifier();
@@ -31,9 +33,10 @@ export const useFinance = () => {
       const result = await getAllFinance(token!);
       const optionResult = await fetchAccounts(token!);
       setLocalData(result);
-      setAccountOptions(optionResult) ;
+      setAccountOptions(optionResult);
     } catch (err) {
-       notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      notify.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -43,19 +46,29 @@ export const useFinance = () => {
     try {
       return await getFinanceById(token!, id);
     } catch (err) {
-       notify.error("Bir sorun oluştu.");
-      return undefined;
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
   const create = async (data: Partial<FinanceTransactionRows>) => {
-    const newItem = await addFinance(token!, data);
-    return newItem;
+    try {
+      const newItems = await addFinance(token!, data); // her zaman dizi
+      return newItems;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
+    }
   };
 
   const update = async (data: Partial<FinanceTransactionRows>) => {
-    const updatedItem = await updateFinance(token!, data);
-    return updatedItem;
+    try {
+      const updatedItem = await updateFinance(token!, data);
+      return updatedItem;
+    } catch (err) {
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
+    }
   };
 
   const deleteRows = async (selected: FinanceTransactionRows[]) => {
@@ -64,22 +77,23 @@ export const useFinance = () => {
       await deleteFinance(token!, record.id!);
       setLocalData((prev) => prev.filter((r) => r.id !== record.id));
     } catch (err) {
-       notify.error("Bir sorun oluştu.");
+      const { errorMessage } = extractApiError(err);
+      throw new Error(errorMessage);
     }
   };
 
-  const addRow = (item: FinanceTransactionRows) => {
-    setLocalData((prev) => [item, ...prev]);
+  const addRow = (items: FinanceTransactionRows | FinanceTransactionRows[]) => {
+    setLocalData((prev) => {
+      const arr = Array.isArray(items) ? items : [items];
+      console.log(arr);
+      return [...arr, ...prev];
+    });
   };
 
   const updateRow = (item: FinanceTransactionRows) => {
     setLocalData((prev) =>
       prev.map((row) => (row.id === item.id ? item : row))
     );
-  };
-
-  const saveChanges = async (allRows: FinanceTransactionRows[]) => {
-     notify.error("Değişiklikler kaydedildi");
   };
 
   return {
@@ -95,6 +109,5 @@ export const useFinance = () => {
     deleteRows,
     addRow,
     updateRow,
-    saveChanges,
   };
 };

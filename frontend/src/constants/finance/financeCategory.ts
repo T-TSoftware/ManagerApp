@@ -5,6 +5,6 @@ export const financeCategory = [
   { code: "ORDER", name: "Satış" },
   { code: "BARTER", name: "Barter" },
   { code: "SUBCONTRACTOR", name: "Taşeron" },
-  { code: "INTERNAL_TRANSFER", name: "Hesaplar Arası Transfer" },
+  { code: "TRANSFER", name: "Hesaplar Arası Transfer" },
   { code: "LOAN", name: "Kredi" },
 ];

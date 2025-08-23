@@ -7,23 +7,24 @@ import {
   deleteSales,
 } from "./service";
 import { getToken } from "../../utils/token";
-import { useApp } from "../../hooks/useApp";
 import type { SalesRows } from "./types";
+import { useParams } from "react-router-dom";
 
 export const useSales = () => {
   const [localData, setLocalData] = useState<SalesRows[]>([]);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<any>(null);
   const token = getToken();
-  const { projectId } = useApp();
+  const { projectId } = useParams();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [projectId]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
+      console.log(projectId)
       const result = await getAllSales(token!, projectId!);
       setLocalData(result);
     } catch (err) {

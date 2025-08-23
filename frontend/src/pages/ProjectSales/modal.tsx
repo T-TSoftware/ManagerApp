@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { SalesRows } from "./types";
 import ModalWrapper from "../../components/layout/ModalWrapper";
 import { Dropdown, NumberInput, TextAreaInput } from "../../components/inputs";
-import { financeTypes } from "../../constants/financeTypes";
+import { financeTypes } from "../../constants/finance/financeTypes";
 
 const schema = z.object({
   customerName: z.string().min(1, "Müşteri zorunludur"),

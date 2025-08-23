@@ -25,20 +25,18 @@ export const getFinanceById = async (
 export const addFinance = async (
   token: string,
   data: Partial<FinanceTransactionRows>
-): Promise<FinanceTransactionRows> => {
-  console.log(data)
-  const response = await axios.post(`finances`, [data], {
+): Promise<FinanceTransactionRows[]> => {
+  const response = await axios.post(`finances`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
-   console.log(response.data);
-  return response.data[0];
+  
+  return response.data.transaction;
 };
 
 export const updateFinance = async (
   token: string,
   data: Partial<FinanceTransactionRows>
 ): Promise<FinanceTransactionRows> => {
-  console.log("uuid:" , data)
   const response =  await axios.patch(`finances/${data.id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });

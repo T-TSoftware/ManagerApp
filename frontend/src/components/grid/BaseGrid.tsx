@@ -8,11 +8,15 @@ import {
   ColDef,
   GetRowIdParams,
   RowSelectionOptions,
-  CellValueChangedEvent
+  CellValueChangedEvent,
 } from "ag-grid-community";
 import ActionButton from "./ActionButton";
 import {
-  BadgePlus, BookMarked, CirclePlus, ListRestart, Trash2
+  BadgePlus,
+  BookMarked,
+  CirclePlus,
+  ListRestart,
+  Trash2,
 } from "lucide-react";
 import { useTheme } from "../../themes/appThemes/ThemeContext";
 import { AgGridLocaleTR } from "../../utils/AgGridLocaleTR";
@@ -40,6 +44,7 @@ type BaseGridProps<T> = {
     label: string;
     options?: { label: string; onClick: () => void }[];
   };
+  title?: string;
   showButtons?: {
     bar?: boolean;
     refresh?: boolean;
@@ -64,8 +69,14 @@ const BaseGridInner = <T,>(
     onDeleteRow,
     onSaveChanges,
     isLoading = false,
+    title,
     topLeftButton,
-    showButtons = { refresh: true, add: true, delete: true, save: true },
+    showButtons = {
+      refresh: true,
+      add: true,
+      delete: true,
+      save: true
+    },
     onCellValueChanged,
     RowSelectionOptions,
     onOpenCreateModal,
@@ -128,6 +139,11 @@ const BaseGridInner = <T,>(
                 isDropdown={!!topLeftButton.options}
                 options={topLeftButton.options}
               />
+            </div>
+          )}
+          {title && (
+            <div className="w-15 flex-none">
+              <p className="align-middle font-bold dark:text-white">{title}</p>
             </div>
           )}
           <div className="w-55 flex-auto"></div>

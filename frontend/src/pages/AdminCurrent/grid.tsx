@@ -6,13 +6,14 @@ import type {
   GetRowIdParams,
 } from "ag-grid-community";
 import type { CurrentRows } from "./types";
-import { financeCategory } from "../../constants/financeCategory";
-import { yesNo } from "../../constants/yesNo";
+import { financeCategory } from "../../constants/finance/financeCategory";
+import { useProjects } from "../../hooks/useProjects";
 
 const CurrentGrid = () => {
   const { localData, loading, gridRef } =
     useCurrent();
-
+  const { projectOptionsByCode, loading: loadingStocks } = useProjects();
+ 
   const colDefs: ColDef<CurrentRows>[] = [
     {
       field: "id",
@@ -23,10 +24,8 @@ const CurrentGrid = () => {
       hide: true,
     },
     {
-      field: "project",
-      headerName: "Proje",
-      editable: false,
-      minWidth: 150,
+      field: "invoiceyn",
+      hide: true,
     },
     {
       field: "firm",
@@ -45,19 +44,6 @@ const CurrentGrid = () => {
       headerName: "Giden Ödeme",
       editable: false,
       minWidth: 200,
-    },
-    {
-      field: "invoiceyn",
-      headerName: "Faturalandı mı?",
-      editable: false,
-      minWidth: 150,
-      cellEditorParams: {
-        values: yesNo.map((c) => c.code),
-      },
-      valueFormatter: ({ value }) => {
-        const item = yesNo.find((c) => c.code === value);
-        return item?.name ?? value;
-      },
     },
     {
       field: "invoicecode",
@@ -79,14 +65,27 @@ const CurrentGrid = () => {
       },
     },
     {
-      field: "checkcode",
-      headerName: "Çek Kodu",
+      field: "referencecode",
+      headerName: "Referans Kodu",
       editable: false,
       minWidth: 200,
     },
     {
       field: "description",
       headerName: "Açıklama",
+      editable: false,
+      minWidth: 150,
+    },
+    {
+      field: "project",
+      headerName: "Proje",
+      cellEditorParams: {
+        values: projectOptionsByCode.map((c) => c.code),
+      },
+      valueFormatter: ({ value }) => {
+        const item = projectOptionsByCode.find((c) => c.code === value);
+        return item?.name ?? value;
+      },
       editable: false,
       minWidth: 150,
     },
@@ -111,6 +110,7 @@ const CurrentGrid = () => {
       columnDefs={colDefs}
       getRowId={getRowId}
       isLoading={loading}
+      enableSelection={false}
       showButtons={{
         refresh: true,
         add: false,

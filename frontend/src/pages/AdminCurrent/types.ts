@@ -10,7 +10,7 @@ export type CurrentRows = {
   invoiceyn: string;
   invoicecode: string;
   category: string;
-  checkcode: number;
+  referencecode: number;
 };
 
        

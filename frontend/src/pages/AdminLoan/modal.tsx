@@ -13,10 +13,12 @@ import {
   Dropdown,
   AutoComplete,
 } from "../../components/inputs";
-import { loanStatus } from "../../constants/loanStatus";
+import { loanStatus } from "../../constants/loan/loanStatus";
 import { useProjects } from "../../hooks/useProjects";
-import { AutocompleteOption } from "../../types/grid/commonTypes";
+import { AutocompleteOptionById } from "../../types/grid/commonTypes";
 import { useNotifier } from "../../hooks/useNotifier";
+import { extractApiError } from "../../utils/axios";
+import { currencyList } from "../../constants/common/currencyList";
 
 const optionalString = z.string().optional().or(z.literal(""));
 
@@ -40,9 +42,10 @@ const schema = z.object({
     invalid_type_error: "Geçerli bir tarih girin.",
   }),
   purpose: z.string().min(1, "Kredi Amacı zorunludur."),
+  currency: z.string().min(1, "Döviz Türü zorunludur."),
   loanType: z.string().min(1, "Kredi Türü zorunludur."),
-  projectCode: optionalString,
-  bankCode:optionalString,
+  projectId: optionalString,
+  bankId:optionalString,
   status: optionalString,
   description: z.string().optional(),
 });
@@ -53,7 +56,7 @@ type Props = {
   open: boolean;
   mode: "create" | "edit";
   defaultValues?: Partial<LoansRows>;
-  options: AutocompleteOption[];
+  options: AutocompleteOptionById[];
   onClose: () => void;
   onSubmit: (data: Partial<LoansRows>) => Promise<void>;
   onSuccess: () => void;
@@ -87,8 +90,8 @@ const LoanModal = ({
         loanDate: defaultValues?.loanDate
           ? new Date(defaultValues.loanDate)
           : undefined,
-        projectCode: defaultValues.project?.name,
-        bankCode: defaultValues.bank?.name,
+        projectId: defaultValues.project?.id,
+        bankId: defaultValues.bank?.id,
       };
     }
 
@@ -106,11 +109,12 @@ const LoanModal = ({
       description: "",
       remainingPrincipal: 0,
       remainingInstallmentAmount: 0,
-      projectCode: "",
-      bankCode:"",
+      projectId: "",
+      bankId: "",
+      currency:"",
     };
   }, [defaultValues, mode]);
-const { projectOptionsByCode, loading } = useProjects();
+const { projectOptionsById } = useProjects();
   
   useEffect(() => {
     reset(memoizedDefaultValues);
@@ -127,21 +131,22 @@ const onFormSubmit = async (data: LoanFormSchema) => {
 
     await onSubmit(transformed);
     onSuccess();
-  } catch {
-    notify.error("Bir hata oluştu.");
+  } catch (error) {
+     const { errorMessage } = extractApiError(error);
+     notify.error(errorMessage);
   }
 };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-5xl dark:bg-primary dark:text-white">
+      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-6xl dark:bg-primary dark:text-white">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
           {mode === "create" ? "Kredi Ekle" : "Kredi Düzenle"}
         </h2>
 
         <form
           onSubmit={handleSubmit(onFormSubmit)}
-          className="grid grid-cols-3 gap-4"
+          className="grid grid-cols-4 gap-4"
         >
           <TextInput
             name="code"
@@ -222,17 +227,25 @@ const onFormSubmit = async (data: LoanFormSchema) => {
             error={errors.loanType?.message}
           />
           <Dropdown
-            name="projectCode"
+            name="projectId"
             label="Proje"
-            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsByCode]}
+            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
             register={register}
+          />
+          <Dropdown
+            name="currency"
+            label="Döviz Türü"
+            options={currencyList}
+            register={register}
+            error={errors.currency?.message}
           />
           <AutoComplete
             options={options}
             label="Banka"
-            value={watch("bankCode")!}
-            onChange={(val) => setValue("bankCode", val)}
+            value={watch("bankId")!}
+            onChange={(val) => setValue("bankId", val)}
             placeholder="Banka"
+            valueKey="id"
           />
           <TextAreaInput
             classes="col-span-3"
@@ -240,7 +253,7 @@ const onFormSubmit = async (data: LoanFormSchema) => {
             label="Açıklama"
             register={register}
           />
-          <div className="col-span-3 pt-6 flex justify-end gap-3">
+          <div className="col-span-4 pt-6 flex justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
