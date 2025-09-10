@@ -54,7 +54,7 @@ const SupplyModal = ({
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
@@ -88,6 +88,10 @@ const SupplyModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
+            if (mode === "edit" && !isDirty) {
+              notify.error("Kaydedilecek değişiklik yok.");
+              return;
+            }
       const transformed: Partial<SupplyRows> = {
         ...data,
       };
@@ -181,7 +185,7 @@ const SupplyModal = ({
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

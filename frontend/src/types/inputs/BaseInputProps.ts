@@ -1,4 +1,5 @@
 import { UseFormRegister } from "react-hook-form";
+import { AutocompleteOption, AutocompleteOptionById } from "../grid/commonTypes";
 
 export interface BaseInputProps {
   name: string;
@@ -14,5 +15,6 @@ export interface BaseInputProps {
 }
 
 export interface SelectInputProps extends BaseInputProps {
-  options: { code: string; name: string }[];
+  options: (AutocompleteOption | AutocompleteOptionById)[];
+  valueKey?: "code" | "id";
 }

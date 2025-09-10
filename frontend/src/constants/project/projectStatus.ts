@@ -1,7 +1,8 @@
 export const projectStatus = [
   { code: "", name: "Seçiniz" },
-  { code: "PENDING" || "ACTIVE", name: "Devam Ediyor" },
-  { code: "STARTED", name: "Başlandı" },
+  { code: "ACTIVE", name: "Devam Ediyor" },
+  { code: "ON_HOLD", name: "Beklemede" },
   { code: "PLANNED", name: "Planlandı" },
-  { code: "FINISHED", name: "Tamamlandı" },
+  { code: "COMPLETED", name: "Tamamlandı" },
+  { code: "CANCELLED", name: "İptal Edildi" },
 ];

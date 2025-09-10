@@ -24,3 +24,12 @@ export const getAllUpcomingPayments = async (
   });
   return response.data;
 };
+
+export const getAllUpcomingCollections = async (
+  token: string
+): Promise<UpcomingPaymentsRows[]> => {
+  const response = await axios.get(`/upcoming/collections`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};

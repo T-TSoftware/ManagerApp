@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getAllUpcomingPayments, getEURCurrency, getUSDCurrency } from "./service";
+import { getAllUpcomingCollections, getAllUpcomingPayments, getEURCurrency, getUSDCurrency } from "./service";
 import { getToken } from "../../utils/token";
-import { UpcomingPaymentsRows } from "./type";
+import { UpcomingCollectionsRows, UpcomingPaymentsRows } from "./type";
 
 
 export const useDashboard = () => {
@@ -9,6 +9,7 @@ export const useDashboard = () => {
   const [usdRate, setUsdRate] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [upcomingPayments, setUpcomingPayments] = useState<UpcomingPaymentsRows[]>([]);
+  const [upcomingCollections, setUpcomingCollections] = useState<UpcomingCollectionsRows[]>([]);
   const [error, setError] = useState<string | null>(null);
   const token = getToken();
 
@@ -19,10 +20,12 @@ export const useDashboard = () => {
         const eur = await getEURCurrency();
         const usd = await getUSDCurrency();
         const payments = await getAllUpcomingPayments(token!);
+        const collections = await getAllUpcomingCollections(token!);
         
         setEurRate(eur);
         setUsdRate(usd);
         setUpcomingPayments(payments);
+        setUpcomingCollections(collections);
 
       } catch (err) {
         setError("Kur bilgileri alınamadı.");
@@ -34,5 +37,5 @@ export const useDashboard = () => {
     fetchRates();
   }, []);
 
-  return { eurRate, usdRate, upcomingPayments, error, loading };
+  return { eurRate, usdRate, upcomingPayments, upcomingCollections, error, loading };
 };

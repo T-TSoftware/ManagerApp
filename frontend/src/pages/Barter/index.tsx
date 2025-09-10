@@ -29,20 +29,23 @@ const BarterAgreement = () => {
         </section>
 
         {/* Payments Header */}
-        <div className="mt-8 mb-6">
-          <p className="text-lg font-semibold text-light_fourth dark:text-white">
+        <div className="mt-8 p-2 rounded-2xl border-gray-100 dark:border-white/10 bg-white dark:bg-tertiary shadow-sm">
+          <p className="text-lg ml-2 font-semibold text-light_fourth dark:text-white">
             Anlaşmalar
           </p>
         </div>
 
         {/* Payments Panel */}
-        <section className="mt-3">
+        <section className="mt-2">
           <div className="rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-tertiary shadow-sm p-2 sm:p-4 overflow-hidden h-[34rem] max-h-[60rem] 2xl:h-[60rem]">
             {selectedBarterId ? (
-              <BarterItemGrid barterId={selectedBarterId!} projectId={selectedBarterProjectId!}/>
+              <BarterItemGrid
+                barterId={selectedBarterId!}
+                projectId={selectedBarterProjectId!}
+              />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-300">
-                Lütfen üst listeden bir kredi seçin.
+                Lütfen üst listeden bir Barter kaydı seçin.
               </div>
             )}
           </div>

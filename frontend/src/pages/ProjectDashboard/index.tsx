@@ -15,17 +15,6 @@ const Dashboard: React.FC = () => {
           <p className="text-3xl font-semibold sm:text-3xl dark:text-white">
             {selectedProject?.name ?? "Genel Bakış"}
           </p>
-          <div className="flex flex-wrap gap-2">
-            <button className="bg-white dark:bg-black px-4 py-2 rounded-full">
-              Date: Now
-            </button>
-            <button className="bg-white dark:bg-black px-4 py-2 rounded-full">
-              Product: All
-            </button>
-            <button className="bg-white dark:bg-black px-4 py-2 rounded-full">
-              Profile: Bogdan
-            </button>
-          </div>
         </div>
         {/* Main Grid */}
         <div className="flex flex-1 flex-col lg:flex-row gap-4 h-[calc(100vh-160px)]">

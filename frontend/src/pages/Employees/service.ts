@@ -2,6 +2,7 @@ import type { EmployeesRows } from "./types";
 import axios from "../../utils/axios";
 
 export const getAllEmployees = async (token: string): Promise<EmployeesRows[]> => {
+  console.log(token)
   const response = await axios.get(`employees`, {
     headers: { Authorization: `Bearer ${token}` },
   });

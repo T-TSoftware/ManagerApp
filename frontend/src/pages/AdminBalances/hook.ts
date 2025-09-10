@@ -1,248 +1,221 @@
-import { useEffect, useState, useRef, useMemo } from "react";
-import { BalanceRows, validateBalanceRow, UpdateBalancePayload } from "./types";
+// hook.ts
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CellValueChangedEvent } from "ag-grid-community";
+import { v4 as uuid } from "uuid";
+
+import type {
+  BalanceRows,
+  NewBalancePayload,
+  UpdateBalancePayload,
+} from "./types";
+import { validateBalanceRow } from "./types";
+import { isRowModified } from "../../types/grid/commonTypes";
+
 import {
   getAllBalance,
   addBalances,
   updateBalances,
   deleteBalances,
 } from "./service";
-import { useNotifier } from "../../hooks/useNotifier";
-import { CellValueChangedEvent } from "ag-grid-community";
+
 import { getToken } from "../../utils/token";
-import { v4 as uuid } from "uuid";
 import { BaseGridHandle } from "../../components/grid/BaseGrid";
-import { isRowModified } from "../../types/grid/commonTypes";
+import { useNotifier } from "../../hooks/useNotifier";
+import { extractApiError } from "../../utils/axios";
 
 export const useBalance = () => {
-  const [originalData, setOriginalData] = useState<BalanceRows[]>([]);
+  // UI state
   const [localData, setLocalData] = useState<BalanceRows[]>([]);
-  const [deletedRows, setDeletedRows] = useState<BalanceRows[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const gridRef = useRef<BaseGridHandle<BalanceRows>>(null);
 
-  const token = getToken();
+  // services/helpers
   const notify = useNotifier();
+  const token = getToken();
 
+  // immutable snapshot (silinenleri & diff’i saptamak için)
+  const [originalData, setOriginalData] = useState<BalanceRows[]>([]);
+
+  /** Server’dan veri çek */
   const fetchData = async () => {
-    setLoading(true);
     try {
-      const data = await getAllBalance(token!);
+      setLoading(true);
+      const rows = await getAllBalance(token!);
 
-      const dataWithTracking = data.map((row) => {
-        const ensuredId = row.id || uuid();
-        const rowWithId = {
-          ...row,
-          id: ensuredId,
-          code: row.code,
-        };
+      // diff için _originalData ekle
+      const withSnapshot = rows.map((r) => ({
+        ...r,
+        _originalData: { ...r },
+      }));
 
-        return {
-          ...rowWithId,
-          _originalData: { ...rowWithId },
-        };
-      });
-
-      setOriginalData(dataWithTracking);
-      setLocalData(dataWithTracking);
-    } catch (error) {
-      notify.handleError(error);
+      setLocalData(withSnapshot);
+      setOriginalData(rows);
+    } catch (err) {
+      notify.handleError(err);
     } finally {
       setLoading(false);
     }
   };
 
-    useEffect(() => {
-      fetchData();
-    }, [token]);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    const hasChanges = useMemo(() => {
-      const added = localData.some((row) => row.isNew);
-      const modified = localData.some(
-        (row) => !row.isNew && isRowModified(row)
-      );
-      const deleted = originalData.some(
-        (row) => !localData.some((localRow) => localRow.id === row.id)
-      );
-      return added || modified || deleted;
-    }, [localData, originalData]);
-  
-    
+  /** Grid’e yeni satır ekle (client-side) */
   const addRow = () => {
-    const currentDate = new Date();
-    const rowId = uuid();
+    const now = new Date();
+    const id = uuid();
+
     const newRow: BalanceRows = {
-      id: rowId,
-      code: "",
+      id,
+      code: "", 
       name: "",
       amount: 0,
       currency: "",
       createdBy: "",
       updatedBy: "",
-      createdatetime: currentDate,
-      updatedatetime: currentDate,
+      createdatetime: now,
+      updatedatetime: now,
       isNew: true,
+      _originalData: undefined,
     };
-
-    const originalData = { ...newRow };
-    delete (originalData as any).isNew;
-    newRow._originalData = originalData;
 
     setLocalData((prev) => [newRow, ...prev]);
   };
 
-const updateRow = (event: CellValueChangedEvent<BalanceRows>) => {
-  const { data, colDef } = event;
+  /** Hücre değişikliğini local state’e uygula */
+  const updateRow = (e: CellValueChangedEvent<BalanceRows>) => {
+    const { data, colDef, newValue } = e;
+    if (!data || !colDef?.field) return;
 
-  if (!data?.id || !colDef?.field) {
-    notify.error("Geçersiz güncelleme: Satır kodu veya alan eksik");
+    setLocalData((prev) =>
+      prev.map((row) =>
+        row.id === data.id
+          ? {
+              ...row,
+              [colDef.field as keyof BalanceRows]: newValue,
+            }
+          : row
+      )
+    );
+  };
+
+
+  const deleteRows = async (ids: string[]) => {
+    try {
+      if (!ids.length) return;
+
+      const toDelete = localData.filter((r) => ids.includes(r.id ?? ""));
+      if (!toDelete.length) return;
+
+      notify.showLoading("Siliniyor...");
+      const codes = toDelete.map((r) => r.code);
+      await deleteBalances(token!, codes);
+
+      await fetchData();
+      notify.success("Silme işlemi başarılı");
+    } catch (err) {
+      notify.handleError(err);
+    } finally {
+      notify.dismiss();
+    }
+  };
+
+
+  const validateRows = (rows: BalanceRows[]): boolean => {
+    let errorCount = 0;
+    const grouped = new Map<string, number>();
+
+    rows.forEach((row) => {
+      const messages = validateBalanceRow(row);
+      if (messages.length > 0) {
+        errorCount += messages.length;
+        messages.forEach((m) => grouped.set(m, (grouped.get(m) ?? 0) + 1));
+      }
+    });
+
+    if (errorCount > 0) {
+      const top3 = Array.from(grouped.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([msg, cnt]) => `${msg} (${cnt}x)`)
+        .join(" | ");
+
+      notify.error(
+        `Toplam ${errorCount} doğrulama hatası. ${top3 ? "Özet: " + top3 : ""}`
+      );
+      return true; 
+    }
+    return false;
+  };
+
+
+const saveChanges = async () => {
+  gridRef.current?.getGridApi()?.stopEditing();
+
+  const added = localData.filter((r) => r.isNew);
+  const modified = localData.filter((r) => !r.isNew && isRowModified(r));
+  const deleted = originalData.filter(
+    (orig) => !localData.some((loc) => loc.id === orig.id)
+  );
+
+  const hasOps = added.length + modified.length + deleted.length > 0;
+  if (!hasOps) {
+    notify.error("Kaydedilecek işlem bulunamadı.");
     return;
   }
 
-  const field = colDef.field as keyof BalanceRows;
+  if (validateRows([...added, ...modified])) return;
 
-  setLocalData((prev) =>
-    prev.map((item) => {
-      if (!item.id || item.id !== data.id) return item;
+  try {
+    notify.showLoading("Kaydediliyor...");
 
-      let value: any = data[field];
-      if (["amount"].includes(field)) {
-        const numValue =
-          typeof value === "string" ? parseFloat(value) : Number(value);
-        value = isNaN(numValue) ? 0 : numValue;
-      }
+    if (added.length > 0) {
+      const addPayload: NewBalancePayload[] = added.map(
+        ({ name, currency, amount }) => ({
+          name,
+          currency,
+          amount,
+        })
+      );
+      await addBalances(token!, addPayload);
+    }
 
-      const updatedItem = {
-        ...item,
-        [field]: value,
-      };
+    if (modified.length > 0) {
+      const updatePayload: UpdateBalancePayload[] = modified.map((r) => ({
+        id: r.id!,
+        name: r.name,
+        currency: r.currency,
+        amount: r.amount,
+      }));
+      await updateBalances(token!, updatePayload);
+    }
 
-      return updatedItem;
-    })
-  );
+    if (deleted.length > 0) {
+      const codes = deleted.map((r) => r.code);
+      await deleteBalances(token!, codes);
+    }
+
+    await fetchData();
+
+    // ✅ Başarı: önce loading’i kapat, sonra başarı toast
+    notify.dismiss();
+    notify.success("Kayıt başarılı");
+  } catch (error) {
+    const { errorMessage } = extractApiError(error);
+
+    // ✅ Hata: önce loading’i kapat, sonra error toast (kapatma yok)
+    notify.dismiss();
+    notify.error(errorMessage);
+  }
+  // ❌ finally’de dismiss YOK — error’u hemen kapatıyordu
 };
 
-  const deleteRows = (selected: BalanceRows[]) => {
-    const validSelectedRows = selected.filter(row => row.id);
-    
-    if (validSelectedRows.length !== selected.length) {
-      notify.error("Bazı satırlar ID eksikliği nedeniyle silinemedi");
-    }
-
-    setLocalData(prev => {
-      const deletedIds = new Set(validSelectedRows.map(row => row.id));
-      return prev.filter(row => row.id && !deletedIds.has(row.id));
-    });
-  };
-
-  const getModifiedFields = (current: BalanceRows, original: Partial<BalanceRows>): UpdateBalancePayload => {
-    const modifiedFields: UpdateBalancePayload = {
-      code: current.code
-    };
-
-     const fieldsToCheck = [
-      'code',
-      'name',
-      'amount',
-      'currency',
-    ] as const;
-
-    fieldsToCheck.forEach(field => {
-      if (current[field] !== original[field]) {
-        (modifiedFields as any)[field] = current[field];
-      }
-    });
-
-    return modifiedFields;
-  };
-
-
-  const saveChanges = async () => {
-    try {
-      if (!hasChanges) {
-        notify.error("Kaydedilecek işlem bulunamadı.");
-        return;
-      }
-      gridRef.current?.getGridApi()?.stopEditing();
-
-      const added = localData.filter((row) => row.isNew);
-      const modified = localData.filter(
-        (row) => !row.isNew && isRowModified(row)
-      );
-      const deleted = originalData.filter(
-        (row) => !localData.some((localRow) => localRow.id === row.id)
-      );
-
-      const hasErrors = validateRows([...added, ...modified]);
-      if (hasErrors) return;
-
-      notify.showLoading("Kaydediliyor...");
-
-      if (added.length > 0) {
-        const addedItems = added.map(
-          ({ isNew, _originalData, ...rest }) => rest
-        );
-        await addBalances(token!, addedItems);
-      }
-
-      if (modified.length > 0) {
-        const payload = modified.map((row) => {
-          const originalRow = row._originalData;
-          if (!originalRow) {
-            return { code: row.code } as UpdateBalancePayload;
-          }
-          return getModifiedFields(row, originalRow);
-        });
-        await updateBalances(token!, payload);
-      }
-
-      if (deleted.length > 0) {
-        const codes = deleted.map((row) => row.code);
-        await deleteBalances(token!, codes);
-      }
-
-      await fetchData();
-      notify.dismiss();
-      notify.success("Kayıt başarılı");
-    } catch (err) {
-      notify.handleError(err);
-    }
-  };
-  const validateRows = (rows: BalanceRows[]): boolean => {
-    let rowsWithErrors = 0;
-    const messageCount = new Map<string, number>();
-
-    rows.forEach((row) => {
-      const errors = validateBalanceRow(row); // mevcut fonksiyon aynen kullanılıyor
-      if (errors.length > 0) {
-        rowsWithErrors++;
-        errors.forEach((msg) =>
-          messageCount.set(msg, (messageCount.get(msg) ?? 0) + 1)
-        );
-      }
-    });
-
-    if (rowsWithErrors > 0) {
-      const totalIssues = Array.from(messageCount.values()).reduce(
-        (a, b) => a + b,
-        0
-      );
-
-      const top3 = Array.from(messageCount.entries())
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([msg, cnt]) => `${msg} (${cnt})`)
-        .join(" • ");
-
-      notify.error(
-        `Eksik/Geçersiz alanlar var: ${rowsWithErrors} satırda ${totalIssues} sorun. ${
-          top3 ? "Özet: " + top3 : ""
-        }`
-      );
-      return true;
-    }
-
-    return false;
-  };
+  const hasChanges = useMemo(() => {
+    if (localData.some((r) => r.isNew)) return true;
+    if (originalData.length !== localData.length) return true; // ekleme/silme
+    return localData.some((r) => !r.isNew && isRowModified(r));
+  }, [localData, originalData]);
 
   return {
     localData,
@@ -251,6 +224,8 @@ const updateRow = (event: CellValueChangedEvent<BalanceRows>) => {
     updateRow,
     deleteRows,
     saveChanges,
-    gridRef
+    gridRef,
+    hasChanges,
+    fetchData,
   };
 };

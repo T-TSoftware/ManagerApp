@@ -43,15 +43,6 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       employeeYN: false,
       visibleIn: ["project"],
     },
-    {
-      label: "Genel Bakış",
-      href: "/employees-portal/overview",
-      icon: LayoutDashboard,
-      portalYN: false,
-      adminYN: false,
-      employeeYN: true,
-      visibleIn: ["employee"],
-    },
 
     {
       label: "Admin Genel Bakış",
@@ -228,7 +219,7 @@ export const PageMenuItems = (projectId?: string): PagesMenuItemType[] => {
       visibleIn: ["employee"],
     },
     {
-      label: "Yıllık İzin",
+      label: "İzinler",
       href: "/employees-portal/annual-leave",
       icon: FileUser,
       adminYN: false,

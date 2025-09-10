@@ -8,7 +8,6 @@ export const getAllLoanPayments = async (
   const response = await axios.get(`loan-payments/loan/${loanId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  console.log(response)
   return response.data.loanPayments;
 };
 
@@ -27,6 +26,7 @@ export const addLoanPayments = async (
   items: NewLoanPaymentPayload[],
   loanId:string
 ): Promise<void> => {
+  console.log(items);
   const res = await axios.post(`loan-payments/${loanId}`, items, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -39,9 +39,11 @@ export const updateLoanPayments = async (
   token: string,
   data: Partial<LoanPaymentRows>
 ): Promise<LoanPaymentRows> => {
+    console.log(data);
   const response = await axios.patch(`loan-payments/${data.id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log(response);
   return response.data;
 };
 

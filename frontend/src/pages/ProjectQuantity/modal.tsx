@@ -17,56 +17,20 @@ import {
   DatePicker,
   AutoComplete,
 } from "../../components/inputs";
-import { useProjects } from "../../hooks/useProjects";
-import { AutocompleteOption } from "../../types/grid/commonTypes";
 import { useReferenceOptions } from "../../hooks/useReferenceOptions";
 import { useParams } from "react-router-dom";
 import { useNotifier } from "../../hooks/useNotifier";
+import Button from "../../components/buttons/Button";
 
 const optionalString = z.string().optional().or(z.literal(""));
-const schema = z
-  .object({
-    type: z.string().min(1, "Tür zorunludur."),
-    source: optionalString,
-    amount: z.coerce.number().positive("Tutar pozitif olmalı."),
-    currency: z.string().min(1, "Para birimi zorunludur."),
-    code: optionalString,
-    projectId: optionalString,
-    orderCode: optionalString,
-    fromAccountCode: z.string().min(1, "Kaynak Hesap (Giden) zorunludur."),
-    toAccountCode: optionalString,
-    transactionDate: z.date({
-      required_error: "İşlem tarihi zorunludur.",
-      invalid_type_error: "Geçerli bir tarih girin.",
-    }),
-    method: z.string().min(1, "Yöntem zorunludur."),
-    category: z.string().min(1, "Kategori zorunludur."),
-    description: optionalString,
-    invoiceCode: optionalString,
-    targetName: optionalString,
-    referenceCode: optionalString,
-  })
-  .superRefine((values, ctx) => {
-    if (values.category != "TRANSFER" && values.category != "") {
-      if (values.referenceCode === "" || values.referenceCode === undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["referenceCode"],
-          message: "Reference Kodu zorunludur.",
-        });
-      }
-    }
-    if (values.category === "TRANSFER") {
-      if (values.toAccountCode === "" || values.toAccountCode === undefined) {
-        console.log("a");
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["toAccountCode"],
-          message: "Hedef Hesap (Alan) zorunludur.",
-        });
-      }
-    }
-  });
+const schema = z.object({
+  code: optionalString,
+  category: z.string().min(1, "Kategori zorunludur."),
+  unit: z.string().min(1, "Birim zorunludur."),
+  quantity: z.coerce.number().positive("Miktar pozitif olmalı."),
+  description: optionalString,
+  projectId:optionalString,
+});
 
 type FinanceFormSchema = z.infer<typeof schema>;
 
@@ -94,7 +58,7 @@ const QuantityItemModal = ({
     watch,
     control,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FinanceFormSchema>({
     resolver: zodResolver(schema),
   });
@@ -114,26 +78,14 @@ const QuantityItemModal = ({
 
     return {
       code: "",
-      description: "",
-      amount: 0,
-      transactionDate: new Date(),
-      type: "",
-      source: "",
-      currency: "",
-      projectId: "",
-      fromAccountCode: "",
-      toAccountCode: "",
-      orderCode: "",
-      method: "",
       category: "",
-      invoiceYN: "",
-      invoiceCode: "",
-      targetName: "",
-      referenceCode: "",
+      unit: "",
+      quantity: 0,
+      description: "",
+      projectId: projectId
     };
   }, [defaultValues, mode]);
 
-  const { projectOptionsById } = useProjects();
   const notify = useNotifier();
 
   useEffect(() => {
@@ -142,6 +94,11 @@ const QuantityItemModal = ({
 
   const onFormSubmit = async (data: FinanceFormSchema) => {
     try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
+      
       const transformed: Partial<QuantityRows> = {
         ...data,
       };
@@ -165,44 +122,10 @@ const QuantityItemModal = ({
           className="grid grid-cols-3 gap-4"
         >
           <TextInput
-            name="targetName"
-            label="Hedef Adı"
+            name="code"
+            label="Kod"
             register={register}
-            error={errors.targetName?.message}
-          />
-
-          <NumberInput
-            name="amount"
-            label="Tutar"
-            register={register}
-            error={errors.amount?.message}
-            required
-          />
-          <Dropdown
-            name="currency"
-            label="Para Birimi"
-            options={currencyList}
-            register={register}
-            error={errors.currency?.message}
-            required
-          />
-
-          <Dropdown
-            name="method"
-            label="Yöntem"
-            options={paymentMethods}
-            register={register}
-            error={errors.method?.message}
-            required
-          />
-
-          <Dropdown
-            name="type"
-            label="Tür"
-            options={financeTypes}
-            register={register}
-            error={errors.type?.message}
-            required
+            hidden={mode === "create" ? true : false}
           />
 
           <Dropdown
@@ -210,45 +133,24 @@ const QuantityItemModal = ({
             label="Kategori"
             options={financeCategory}
             register={register}
-            required
-          />
-
-          <Dropdown
-            name="referenceCode"
-            label="Referans Kodu"
-            options={referenceOptions}
-            register={register}
-            error={errors.referenceCode?.message}
-          />
-
-          <Dropdown
-            name="projectId"
-            label="Proje"
-            options={[{ code: "", name: "Seçiniz" }, ...projectOptionsById]}
-            register={register}
-            error={errors.projectId?.message}
-          />
-
-          <DatePicker
-            label="İşlem Tarihi"
-            value={watch("transactionDate")}
-            onChange={(val) => setValue("transactionDate", val!)}
-            error={errors.transactionDate?.message}
+            error={errors.category?.message}
             required
           />
 
           <TextInput
-            name="invoiceCode"
-            label="Fatura Kodu"
+            name="unit"
+            label="Birim"
             register={register}
-            error={errors.invoiceCode?.message}
+            error={errors.unit?.message}
+            required
           />
 
-          <TextInput
-            name="source"
-            label="Kaynak"
+          <NumberInput
+            name="quantity"
+            label="Miktar"
             register={register}
-            error={errors.source?.message}
+            error={errors.quantity?.message}
+            required
           />
 
           <TextAreaInput
@@ -257,21 +159,21 @@ const QuantityItemModal = ({
             label="Açıklama"
             register={register}
           />
+
           <div className="col-span-4 pt-6 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500  hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+              disabled
+            />
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth  dark:bg-fourth transition"
-            >
-              {isSubmitting ? "Güncelleniyor..." : "Kaydet"}
-            </button>
+              label="Kaydet"
+              loading={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
+            />
           </div>
         </form>
       </div>

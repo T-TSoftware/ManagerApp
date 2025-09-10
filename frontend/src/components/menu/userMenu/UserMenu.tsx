@@ -17,7 +17,7 @@ const UserMenu = ({ items }: UserMenuProps) => {
         <span className="flex min-w-0 items-center gap-3">
           <span className="absolute top-1/2 left-[calc(-16px+1px)] size-[max(100%,2.25rem)] -translate-x-1/2 -translate-y-1/2">
             <img
-              className="size-full rounded-full"
+              className="size-full rounded-full shadow-md cursor-pointer  shadow-slate-300 dark:shadow-slate-500 hover:size-11/12"
               src={Avatar}
               alt="user"
             ></img>

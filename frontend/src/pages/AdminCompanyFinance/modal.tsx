@@ -59,7 +59,6 @@ const schema = z
     }
     if (values.category === "TRANSFER") {
       if (values.toAccountCode === "" || values.toAccountCode === undefined) {
-      
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["toAccountCode"],
@@ -95,7 +94,7 @@ const FinanceTransactionModal = ({
     reset,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FinanceFormSchema>({
     resolver: zodResolver(schema),
   });
@@ -152,6 +151,10 @@ const FinanceTransactionModal = ({
 
   const onFormSubmit = async (data: FinanceFormSchema) => {
     try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
       const transformed: Partial<FinanceTransactionRows> = {
         ...data,
         amount: Number(data.amount),
@@ -303,7 +306,7 @@ const FinanceTransactionModal = ({
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

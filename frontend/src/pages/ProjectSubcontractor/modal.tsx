@@ -54,7 +54,7 @@ const SubcontractorModal = ({
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
@@ -87,6 +87,10 @@ const SubcontractorModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
+            if (mode === "edit" && !isDirty) {
+              notify.error("Kaydedilecek değişiklik yok.");
+              return;
+            }
       const transformed: Partial<SubcontractorRows> = {
         ...data,
       };
@@ -176,7 +180,7 @@ const SubcontractorModal = ({
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

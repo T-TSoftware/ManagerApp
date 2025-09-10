@@ -9,15 +9,14 @@ export const useStocks = () => {
   const token = getToken();
 
   useEffect(() => {
-    if (!token) return;
-    getAllStocks(token)
+    getAllStocks(token!)
       .then(setStocks)
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   const stockOptions = stocks.map((stock) => ({
-    code: stock.code, 
+    id: stock.id || stock.code, 
     name: stock.name,
     
   }));

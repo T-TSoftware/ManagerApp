@@ -13,7 +13,6 @@ import {
   NumberInput,
   TextAreaInput,
   DatePicker,
-  AutoComplete,
 } from "../../components/inputs";
 import { useNotifier } from "../../hooks/useNotifier";
 import Button from "../../components/buttons/Button";
@@ -69,7 +68,7 @@ const CheckFinanceModal = ({
     reset,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
@@ -114,6 +113,11 @@ const CheckFinanceModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
+
       const transformed: Partial<CheckFinanceRows> = {
         ...data,
         amount: Number(data.amount),
@@ -183,14 +187,13 @@ const CheckFinanceModal = ({
             required
           />
 
-          <AutoComplete
-            options={options}
+          <Dropdown
+            name="bankId"
             label="Banka"
-            value={watch("bankId")!}
-            onChange={(val) => setValue("bankId", val)}
-            placeholder="Banka"
-            error={errors.bankId?.message}
             valueKey="id"
+            options={[{ id: "", name: "Seçiniz" }, ...options]}
+            register={register}
+            error={errors.bankId?.message}
             required
           />
 
@@ -237,7 +240,7 @@ const CheckFinanceModal = ({
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

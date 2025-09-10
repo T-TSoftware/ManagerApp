@@ -19,9 +19,6 @@ export const userMenuItems: UserMenuItemType[] = [
     id: "logout",
     label: "Çıkış",
     icon: LogOut,
-    onClick: () => {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    },
   },
 ];
+

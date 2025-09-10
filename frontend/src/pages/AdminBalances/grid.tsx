@@ -81,7 +81,6 @@ const BalanceGrid = () => {
         columnDefs={colDefs}
         getRowId={getRowId}
         onAddRow={addRow}
-        onDeleteRow={deleteRows}
         onSaveChanges={saveChanges}
         onCellValueChanged={updateRow}
         isLoading={loading}

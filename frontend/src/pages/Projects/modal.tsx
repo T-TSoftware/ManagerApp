@@ -50,7 +50,7 @@ const ProjectModal = ({
     reset,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<ProjectFormSchema>({
     resolver: zodResolver(schema),
   });
@@ -95,6 +95,10 @@ const ProjectModal = ({
 
   const onFormSubmit = async (data: ProjectFormSchema) => {
     try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
       const transformed: Partial<ProjectRows> = {
         ...data,
         estimatedStartDate: data.estimatedStartDate
@@ -186,12 +190,13 @@ const ProjectModal = ({
               onClick={onClose}
               label="İptal Et"
               variant="secondary"
+              disabled
             />
             <Button
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

@@ -3,17 +3,17 @@ import React, { useState, useRef } from "react";
 import { useDashboard } from "./hook";
 import BaseGrid, { BaseGridHandle } from "../../components/grid/BaseGrid";
 import type { ColDef, GetRowIdParams } from "ag-grid-community";
-import { UpcomingPaymentsRows } from "./type";
+import { UpcomingCollectionsRows } from "./type";
 import { status } from "../../constants/common/status";
 import { upcomingType } from "../../constants/dashboard/upcomingType";
 
-const UpcomingPaymentsGrid = () => {
-  const { upcomingPayments, loading } = useDashboard();
+const UpcomingCollectionsGrid = () => {
+  const { upcomingCollections, loading } = useDashboard();
 
-  const baseGridRef = useRef<BaseGridHandle<UpcomingPaymentsRows>>(null);
+  const baseGridRef = useRef<BaseGridHandle<UpcomingCollectionsRows>>(null);
 
   // Kolonlar
-  const colDefs: ColDef<UpcomingPaymentsRows>[] = [
+  const colDefs: ColDef<UpcomingCollectionsRows>[] = [
     {
       field: "code",
       headerName: "Kod",
@@ -72,18 +72,18 @@ const UpcomingPaymentsGrid = () => {
       minWidth: 200,
     },
   ];
-  const getRowId = (params: GetRowIdParams<UpcomingPaymentsRows>) =>
+  const getRowId = (params: GetRowIdParams<UpcomingCollectionsRows>) =>
     params.data.id!;
 
   return (
-    <BaseGrid<UpcomingPaymentsRows>
+    <BaseGrid<UpcomingCollectionsRows>
       ref={baseGridRef}
-      rowData={upcomingPayments}
+      rowData={upcomingCollections}
       columnDefs={colDefs}
       isLoading={loading}
       getRowId={getRowId}
-      title= "Yaklaşan Ödemeler"
-      enableSelection= {false}
+      title="Yaklaşan Tahsilatlar"
+      enableSelection={false}
       showButtons={{
         refresh: true,
         add: false,
@@ -94,4 +94,4 @@ const UpcomingPaymentsGrid = () => {
     />
   );
 };
-export default UpcomingPaymentsGrid;
+export default UpcomingCollectionsGrid;

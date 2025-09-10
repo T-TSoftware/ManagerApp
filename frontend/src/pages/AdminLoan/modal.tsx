@@ -15,6 +15,7 @@ import {
 } from "../../components/inputs";
 import { loanStatus } from "../../constants/loan/loanStatus";
 import { useProjects } from "../../hooks/useProjects";
+import Button from "../../components/buttons/Button";
 import { AutocompleteOptionById } from "../../types/grid/commonTypes";
 import { useNotifier } from "../../hooks/useNotifier";
 import { extractApiError } from "../../utils/axios";
@@ -77,7 +78,7 @@ const LoanModal = ({
     reset,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<LoanFormSchema>({
     resolver: zodResolver(schema),
   });
@@ -123,6 +124,11 @@ const { projectOptionsById } = useProjects();
 
 const onFormSubmit = async (data: LoanFormSchema) => {
   try {
+    if (mode === "edit" && !isDirty) {
+      notify.error("Kaydedilecek değişiklik yok.");
+      return;
+    }
+    
     const transformed: Partial<LoansRows> = {
       ...data,
       totalAmount: Number(data.totalAmount),
@@ -254,20 +260,19 @@ const onFormSubmit = async (data: LoanFormSchema) => {
             register={register}
           />
           <div className="col-span-4 pt-6 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border-light_primary bg-light_primary text-gray-500 hover:shadow-sm dark:bg-secondary dark:hover:shadow-tertiary dark:text-white dark:border-secondary"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+              disabled
+            />
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg text-white bg-light_fourth hover:shadow-sm hover:shadow-light_fourth dark:bg-fourth transition"
-            >
-              {isSubmitting ? "Güncelleniyor..." : "Kaydet"}
-            </button>
+              label="Kaydet"
+              loading={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
+            />
           </div>
         </form>
       </div>
