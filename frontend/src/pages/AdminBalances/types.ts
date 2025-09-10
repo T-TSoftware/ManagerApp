@@ -31,15 +31,18 @@ export interface BalanceRows {
 }
 
 // Type for new balance payload (without tracking fields)
-export type NewBalancePayload = Omit<
-  BalanceRows,
-  "id" |  "isNew" | "_originalData"
->;
+export type NewBalancePayload = {
+  name: string;
+  currency: string;
+  amount: number;
+};
 
-// Update için özel tip - sadece değişen alanları içerir
 export type UpdateBalancePayload = {
-  code: string;
-} & Partial<Omit<BalanceRows, "id" | "isNew" | "_originalData">>;
+  id: string;
+  name: string;
+  currency: string;
+  amount: number;
+};
 
 // Type for row validation
 export interface ValidationError {

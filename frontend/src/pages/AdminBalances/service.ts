@@ -12,6 +12,7 @@ export const addBalances = async (
   token: string,
   data: NewBalancePayload[]
 ) => {
+  console.log(data);
   const res = await axios.post("balances", data, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -19,6 +20,7 @@ export const addBalances = async (
 };
 
 export const updateBalances = async (token: string, data: UpdateBalancePayload[]) => {
+    console.log(data);
   const res = await axios.put(`balances`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });

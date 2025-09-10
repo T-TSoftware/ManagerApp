@@ -39,7 +39,7 @@ const QuantityGrid = () => {
     const notify = useNotifier();
 
   const colDefs: ColDef<QuantityRows>[] = [
-    {
+    /* {
       headerName: "",
       field: "edit",
       pinned: "left",
@@ -68,10 +68,9 @@ const QuantityGrid = () => {
           </button>
         );
       },
-    },
+    }, */
     {
       field: "id",
-      headerName: "ID",
       hide: true,
     },
     {
@@ -83,9 +82,8 @@ const QuantityGrid = () => {
     {
       field: "category",
       headerName: "Kategori",
-      editable: true,
+      editable: false,
       minWidth: 200,
-      cellEditor: "agSelectCellEditor",
       cellEditorParams: {
         values: stockCategories.map((c) => c.code),
       },
@@ -97,9 +95,8 @@ const QuantityGrid = () => {
     {
       field: "unit",
       headerName: "Birim",
-      editable: true,
+      editable: false,
       minWidth: 200,
-      cellEditor: "agSelectCellEditor",
       cellEditorParams: {
         values: units.map((c) => c.code),
       },
@@ -111,24 +108,24 @@ const QuantityGrid = () => {
     {
       field: "quantity",
       headerName: "Miktar",
-      editable: true,
+      editable: false,
       minWidth: 200,
       type: "numberColumn",
     },
     {
       field: "description",
       headerName: "Açıklama",
-      editable: true,
+      editable: false,
       minWidth: 200,
     },
     {
-      field: "createdBy",
+      field: "createdBy.email",
       headerName: "Oluşturan Kişi",
       editable: false,
       minWidth: 200,
     },
     {
-      field: "updatedBy",
+      field: "updatedBy.email",
       headerName: "Güncelleyen Kişi",
       editable: false,
       minWidth: 200,

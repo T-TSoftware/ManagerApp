@@ -7,6 +7,8 @@ import type { SalesRows } from "./types";
 import ModalWrapper from "../../components/layout/ModalWrapper";
 import { Dropdown, NumberInput, TextAreaInput } from "../../components/inputs";
 import { financeTypes } from "../../constants/finance/financeTypes";
+import { useNotifier } from "../../hooks/useNotifier";
+import Button from "../../components/buttons/Button";
 
 const schema = z.object({
   customerName: z.string().min(1, "Müşteri zorunludur"),
@@ -40,12 +42,12 @@ const SalesModal = ({
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
 
-
+ const notify = useNotifier();
     const memoizedDefaultValues = useMemo(() => {
       if (mode === "edit" && defaultValues) {
         return {
@@ -69,6 +71,10 @@ const SalesModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
       await onSubmit(data);
       onSuccess();
     } catch {
@@ -134,20 +140,19 @@ const SalesModal = ({
           />
 
           <div className="col-span-3 pt-6 flex justify-end gap-3">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg border bg-gray-200 text-gray-700 hover:bg-gray-300"
-            >
-              İptal
-            </button>
-            <button
+              label="İptal Et"
+              variant="secondary"
+              disabled
+            />
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2 rounded-lg bg-primary text-white hover:bg-blue-700 transition"
-            >
-              {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
-            </button>
+              label="Kaydet"
+              loading={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
+            />
           </div>
         </form>
       </div>

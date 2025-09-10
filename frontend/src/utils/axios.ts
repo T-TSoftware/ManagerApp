@@ -1,4 +1,3 @@
-// utils/axios.ts
 import axios, { AxiosError } from "axios";
 import { getToken } from "./token";
 
@@ -10,6 +9,11 @@ const axiosInstance = axios.create({
   timeout: 10000,
 });
 
+let onUnauthorized: (() => void) | null = null;
+export const setUnauthorizedHandler = (fn: () => void) => {
+  onUnauthorized = fn;
+};
+
 axiosInstance.interceptors.request.use((config) => {
   const token = getToken();
   const isLogin = config.url?.includes("/auth/login");
@@ -17,11 +21,6 @@ axiosInstance.interceptors.request.use((config) => {
   return config;
 });
 
-/**
- * API/Network hatalarını normalize eder.
- * - AxiosError: response payload'ından message/fieldErrors toplanır
- * - Plain Error: error.message kullanılır (hook'ların throw ettiği durum)
- */
 export function extractApiError(error: unknown): {
   errorMessage: string;
   fieldErrors?: Record<string, string>;
@@ -72,10 +71,28 @@ export function extractApiError(error: unknown): {
   return { errorMessage: "Bilinmeyen bir hata oluştu." };
 }
 
-// Global response interceptor: sadece forward et
+// Global response interceptor: 401 yakala + mevcut hata akışını bozma
 axiosInstance.interceptors.response.use(
   (r) => r,
-  (error) => Promise.reject(error)
+  (error) => {
+    const status = (error as AxiosError)?.response?.status;
+    if (status === 401 && typeof onUnauthorized === "function") {
+      try {
+        onUnauthorized(); // token temizle + login'e yönlendir (AuthContext içinde tanımlanacak)
+      } catch {
+        // burada swallow ediyoruz; ana hata akışını bozmuyoruz
+      }
+    }
+    // ❗ Burada reject etmeye devam ediyoruz ki mevcut extract... akışı aynen çalışsın
+    return Promise.reject(error);
+  }
 );
+
+// Authorization header set/clear (merkezi)
+export const setAuthHeader = (token?: string | null) => {
+  if (token) axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  else delete axiosInstance.defaults.headers.common["Authorization"];
+};
+
 
 export default axiosInstance;

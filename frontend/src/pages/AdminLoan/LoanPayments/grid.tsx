@@ -179,6 +179,7 @@ const LoanPaymentGrid = ({ loanId }: { loanId: string }) => {
         open={modalOpen}
         defaultValues={editData}
         onClose={() => setModalOpen(false)}
+        onSuccess={() => setModalOpen(false)}
         onSubmit={handleModalSubmit}
       />
 

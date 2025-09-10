@@ -1,23 +1,62 @@
-import axios from "../utils/axios";
+// services/authService.ts
+import api, { extractApiError } from "../utils/axios";
 
-const apiUrl = import.meta.env.VITE_API_BASE_URL;
+export type NormalizedLoginResponse = {
+  token: string;
+  user?: {
+    id?: string;
+    email?: string;
+    name?: string;
+    // extend as your API returns
+  };
+};
 
-export const login = async (email: string, password: string) => {
+/**
+ * Always returns { token, user? }.
+ * Accepts common token field names or raw string body.
+ */
+export const login = async (
+  email: string,
+  password: string
+): Promise<NormalizedLoginResponse> => {
   try {
-    const response = await axios.post(
-      `${apiUrl}auth/login`,
-      { email, password },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    // RELATIVE PATH — baseURL is already on axios instance
+    const res = await api.post("/auth/login", { email, password });
+    const data = res?.data;
 
-    return response.data;
-  } catch (error: any) {
+    // Accept multiple shapes; normalize
+    const candidate =
+      typeof data === "string"
+        ? data
+        : data?.token ?? data?.accessToken ?? data?.jwt;
+
+    if (!candidate || typeof candidate !== "string") {
+      // propagate a clean, standard error
+      throw new Error("Invalid login response: token not found.");
+    }
+
+    return {
+      token: candidate,
+      user: typeof data === "object" ? data?.user : undefined,
+    };
+  } catch (err: any) {
+    // Keep global error style consistent via extractApiError
     const message =
-      error?.response?.data?.message || "Giriş işlemi başarısız oldu";
-    throw new Error(message);
+      typeof extractApiError === "function"
+        ? extractApiError(err)
+        : err?.message || "Login failed";
+        console.log(err)
+        console.log(message)
+    throw new Error(message.errorMessage);
   }
-}; 
+};
+
+export const logout = async (): Promise<void> => {
+  try {
+    // RELATIVE PATH — baseURL is already on axios instance
+    await api.post("/auth/logout");
+  } catch {
+    // Intentionally swallow logout transport errors:
+    // We still want to clear local state & redirect.
+  }
+};

@@ -1,80 +1,109 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { getToken, setToken, clearToken } from "../utils/token";
-import { login as loginRequest } from "../services/authService";
+// context/AuthContext.tsx
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+} from "../services/authService";
+import {
+  getToken,
+  setToken as persistToken,
+  clearToken,
+  isExpired,
+} from "../utils/token";
+import api, { setUnauthorizedHandler, setAuthHeader } from "../utils/axios";
 
-interface AuthContextType {
+const LOGIN_PATH = "/login";
+
+type AuthContextValue = {
+  token: string | null;
   isAuthenticated: boolean;
-  user: any | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  initializing: boolean;
   loading: boolean;
   error: string | null;
-}
+  login: (email: string, password: string) => Promise<void>;
+  logout: (silent?: boolean) => Promise<void>;
+};
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextValue | null>(null);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({
+  children,
+}) => {
+  const [token, setToken] = useState<string | null>(() => getToken());
+  const [initializing, setInitializing] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = getToken();
-    if (token) {
-      setIsAuthenticated(true);
-      // TODO: Burada token'ı kullanarak kullanıcı bilgilerini çekebiliriz
-      setUser({ email: "user@example.com" }); // Örnek kullanıcı
-    }
-    setLoading(false);
+  const logout = useCallback(async (silent?: boolean) => {
+    try {
+      await logoutRequest();
+    } catch {}
+    setToken(null);
+    clearToken();
+    setAuthHeader(undefined);
+    window.location.replace(LOGIN_PATH);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  useEffect(() => {
+    if (token) {
+      if (isExpired(token)) {
+        clearToken();
+        setToken(null);
+        setAuthHeader(undefined);
+      } else {
+        setAuthHeader(token);
+      }
+    } else {
+      setAuthHeader(undefined);
+    }
+    setInitializing(false);
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => logout(true));
+  }, [logout]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const response = await loginRequest(email, password);
-      setToken(response.token);
-      setUser(response.user);
-      setIsAuthenticated(true);
-      navigate("/admin-dashboard");
-    } catch (err: any) {
-      setError(err.message || "Giriş başarısız");
-      setIsAuthenticated(false);
+      const { token: tkn } = await loginRequest(email.trim(), password.trim());
+      setToken(tkn);
+      persistToken(tkn);
+      setAuthHeader(tkn);
+    } catch (e: any) {
+      setError(e?.message || "Login failed");
+      throw e;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const logout = () => {
-    clearToken();
-    setUser(null);
-    setIsAuthenticated(false);
-    navigate("/login");
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        user,
-        login,
-        logout,
-        loading,
-        error,
-      }}
-    >
-      {!loading && children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      token,
+      isAuthenticated: !!token,
+      initializing,
+      loading,
+      error,
+      login,
+      logout,
+    }),
+    [token, initializing, loading, error, login, logout]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within <AuthProvider>");
+  return ctx;
 };

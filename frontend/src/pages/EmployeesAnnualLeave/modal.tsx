@@ -153,8 +153,9 @@ const AnnualLeavesModal = ({
               type="submit"
               label="İptal Et"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled
               variant= "secondary"
+              
             />
 
             <Button

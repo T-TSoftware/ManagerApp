@@ -37,6 +37,7 @@ type Props = {
   defaultValues?: Partial<LoanPaymentRows>;
   onClose: () => void;
   onSubmit: (data: Partial<LoanPaymentRows>) => Promise<void>;
+  onSuccess: () => void;
 };
 
 export default function LoanPaymentModal({
@@ -44,13 +45,12 @@ export default function LoanPaymentModal({
   defaultValues,
   onClose,
   onSubmit,
+  onSuccess,
 }: Props) {
   const {
     register,
     handleSubmit,
     reset,
-    setValue,
-    watch,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({ resolver: zodResolver(schema) });
 
@@ -68,22 +68,23 @@ export default function LoanPaymentModal({
     if (open) reset(memoDefaults);
   }, [open, memoDefaults, reset]);
 
-    const onFormSubmit = async (data: FormSchema) => {
-      try {
-        if (!isDirty) {
-          notify.error("Kaydedilecek değişiklik yok.");
-          return;
-        }
-        const transformed: Partial<LoanPaymentRows> = {
-          ...data,
-        };
-
-        await onSubmit(transformed);
-      } catch (error) {
-        const { errorMessage } = extractApiError(error);
-        notify.error(errorMessage);
+  const onFormSubmit = async (data: FormSchema) => {
+    try {
+      if (!isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
       }
-    };
+      const transformed: Partial<LoanPaymentRows> = {
+        ...data,
+      };
+
+      await onSubmit(transformed);
+      onSuccess();
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
+    }
+  };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>

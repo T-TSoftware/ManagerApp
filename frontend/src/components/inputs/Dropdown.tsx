@@ -1,7 +1,7 @@
 import { SelectInputProps } from "../../types/inputs/BaseInputProps";
 import FormFieldWrapper from "../layout/FormFieldWrapper";
 
-export default function SelectInput({
+export default function Dropdown({
   name,
   label,
   register,
@@ -12,7 +12,18 @@ export default function SelectInput({
   hidden,
   editable = true,
   placeholder,
+  valueKey, 
 }: SelectInputProps) {
+  const getKeyFor = (opt: any) => {
+    if (valueKey) return valueKey;
+    return "code" in opt ? "code" : "id";
+  };
+
+  const getVal = (opt: any) => {
+    const k = getKeyFor(opt);
+    return opt[k] ?? "";
+  };
+
   return (
     <FormFieldWrapper
       label={label}
@@ -26,11 +37,17 @@ export default function SelectInput({
         disabled={!editable}
         className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-light_fourth dark:bg-secondary dark:border-black ${className}`}
       >
-        {options.map((option) => (
-          <option key={option.code} value={option.code}>
-            {option.name}
-          </option>
-        ))}
+        {options.map((option, idx) => {
+          const val = getVal(option);
+          const key =
+            val ||
+            `${("code" in option ? option.code : option.id) || "opt"}-${idx}`;
+          return (
+            <option key={key} value={val}>
+              {option.name}
+            </option>
+          );
+        })}
       </select>
     </FormFieldWrapper>
   );

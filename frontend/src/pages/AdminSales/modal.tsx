@@ -25,7 +25,7 @@ const schema = z.object({
   totalAmount: z.coerce.number().positive("Toplam Ödeme zorunludur"),
   projectId: optionalString,
   stockType: z.string().min(1, "Stok Tipi zorunludur."),
-  stockCode: z.string().min(1, "Stok Kodu zorunludur."),
+  stockId: z.string().min(1, "Stok Kodu zorunludur."),
 });
 
 type FormSchema = z.infer<typeof schema>;
@@ -73,7 +73,7 @@ const SalesModal = ({
       totalAmount: 0,
       projectCode: "",
       stockType: "",
-      stockCode: "",
+      stockId: "",
     };
   }, [defaultValues, mode]);
 
@@ -131,11 +131,11 @@ const SalesModal = ({
           />
 
           <Dropdown
-            name="stockCode"
+            name="stockId"
             label="Stok Kodu"
-            options={[{ code: "", name: "Seçiniz" }, ...stockOptions]}
+            options={[{ id: "", name: "Seçiniz" }, ...stockOptions]}
             register={register}
-            error={errors.stockCode?.message}
+            error={errors.stockId?.message}
             required
           />
 

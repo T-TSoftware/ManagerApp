@@ -228,6 +228,7 @@ const FinanceGrid = () => {
     if (modalMode === "create") {
       try {
         const newItems = await create(formData);
+        addRow(newItems);
         notify.success(
           newItems.length > 1
             ? "Transfer kayıtları başarıyla oluşturuldu"

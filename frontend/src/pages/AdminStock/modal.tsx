@@ -61,7 +61,7 @@ const StockModal = ({
     watch,
     setValue,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({
     resolver: zodResolver(schema),
   });
@@ -100,6 +100,12 @@ const StockModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
+
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
+
       const transformed: Partial<StockRows> = {
         ...data,
         stockDate: data.stockDate ? new Date(data.stockDate) : undefined,
@@ -126,14 +132,14 @@ const StockModal = ({
         >
           <TextInput
             name="code"
-            label="Stock Kodu"
+            label="Stok Kodu"
             register={register}
             editable={mode === "create" ? true : false}
             hidden={mode === "create" ? true : false}
           />
           <TextInput
             name="name"
-            label="Stock Adı"
+            label="Stok Adı"
             register={register}
             error={errors.name?.message}
             required
@@ -167,7 +173,7 @@ const StockModal = ({
             register={register}
           />
           <DatePicker
-            label="Stock Tarihi"
+            label="Stok Tarihi"
             value={watch("stockDate")}
             onChange={(val) => setValue("stockDate", val!)}
           />
@@ -199,7 +205,7 @@ const StockModal = ({
               type="submit"
               label="Kaydet"
               loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isSubmitting || (mode === "edit" && !isDirty)}
             />
           </div>
         </form>

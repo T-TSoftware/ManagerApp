@@ -1,4 +1,3 @@
-import { data } from "react-router-dom";
 import axios from "../../utils/axios";
 import { QuantityRows} from "./types";
 
@@ -6,12 +5,12 @@ export const getAllQuantityByProject = async (
   projectId: string,
   token: string
 ): Promise<QuantityRows[]> => {
-  const res = await axios.get(`/projects/${projectId}/quantities`, {
+  const response = await axios.get(`/projects/${projectId}/quantities`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-  return res.data;
+  return response.data;
 };
 
 export const getQuantityById = async (
@@ -39,7 +38,7 @@ export const addQuantity = async (
       Authorization: `Bearer ${token}`,
     },
   });
-  return res.data;
+  return res.data.newRecord;
 };
 
 export const updateQuantity = async (

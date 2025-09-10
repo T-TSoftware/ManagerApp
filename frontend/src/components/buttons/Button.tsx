@@ -26,7 +26,7 @@ export default function Button({
 
   return (
     <button className={`${baseStyle} ${variants[variant]}`} {...props}>
-      {loading ? "Güncelleniyor..." : label}
+      {loading ? "İşleniyor..." : label}
     </button>
   );
 }
