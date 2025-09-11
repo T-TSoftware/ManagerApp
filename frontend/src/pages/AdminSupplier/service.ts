@@ -13,7 +13,6 @@ export const getSupplierById = async (
   token: string,
   id: string
 ): Promise<SupplierListRows> => {
-  console.log("a:");
   const res = await fetch(`${API_BASE_URL}projects/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });

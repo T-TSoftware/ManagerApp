@@ -27,8 +27,7 @@ const schema = z.object({
   quantity: z.coerce.number().positive("Miktar pozitif olmalı."),
   contractAmount: z.coerce.number().positive("Sözleşme Tutarı pozitif olmalı."),
   description: optionalString,
-  status: z.string().min(1, "Durum zorunludur"),
-  type: optionalString,
+  status: optionalString,
 });
 
 type FormSchema = z.infer<typeof schema>;
@@ -75,7 +74,7 @@ const SupplyModal = ({
       contractAmount: 0,
       remainingAmount: 0,
       description: "",
-      status: "",
+      status: "NEW",
       type: "",
     };
   }, [defaultValues, mode]);
@@ -121,8 +120,8 @@ const SupplyModal = ({
             label="Durum"
             options={supplierStatus}
             register={register}
-            error={errors.status?.message}
-            required
+            editable={false}
+            hidden={mode === "create" ? true : false}
           />
 
           <TextInput name="companyName" label="Şirket" register={register} />

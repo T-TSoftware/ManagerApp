@@ -125,10 +125,10 @@ const CheckFinanceModal = ({
         checkDate: data.checkDate ? new Date(data.checkDate) : undefined,
         code: defaultValues?.code,
       };
-
+      if (!data.projectId) delete (transformed as any).projectId;
       await onSubmit(transformed);
       onSuccess();
-    } catch (error){
+    } catch (error) {
       const { errorMessage } = extractApiError(error);
       notify.error(errorMessage);
     }
@@ -166,7 +166,7 @@ const CheckFinanceModal = ({
             label="Son Ödeme Tarihi"
             value={watch("dueDate")}
             onChange={(val) => setValue("dueDate", val!)}
-            error={errors.checkDate?.message}
+            error={errors.dueDate?.message}
             required
           />
 

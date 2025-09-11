@@ -46,7 +46,7 @@ const schema = z.object({
   currency: z.string().min(1, "Döviz Türü zorunludur."),
   loanType: z.string().min(1, "Kredi Türü zorunludur."),
   projectId: optionalString,
-  bankId:optionalString,
+  bankId: optionalString,
   status: optionalString,
   description: z.string().optional(),
 });
@@ -85,7 +85,6 @@ const LoanModal = ({
   const notify = useNotifier();
   const memoizedDefaultValues = useMemo(() => {
     if (mode === "edit" && defaultValues) {
-     
       return {
         ...defaultValues,
         loanDate: defaultValues?.loanDate
@@ -112,36 +111,35 @@ const LoanModal = ({
       remainingInstallmentAmount: 0,
       projectId: "",
       bankId: "",
-      currency:"",
+      currency: "",
     };
   }, [defaultValues, mode]);
-const { projectOptionsById } = useProjects();
-  
+  const { projectOptionsById } = useProjects();
+
   useEffect(() => {
     reset(memoizedDefaultValues);
   }, [reset, memoizedDefaultValues]);
 
+  const onFormSubmit = async (data: LoanFormSchema) => {
+    try {
+      if (mode === "edit" && !isDirty) {
+        notify.error("Kaydedilecek değişiklik yok.");
+        return;
+      }
 
-const onFormSubmit = async (data: LoanFormSchema) => {
-  try {
-    if (mode === "edit" && !isDirty) {
-      notify.error("Kaydedilecek değişiklik yok.");
-      return;
+      const transformed: Partial<LoansRows> = {
+        ...data,
+        totalAmount: Number(data.totalAmount),
+        loanDate: data.loanDate ? new Date(data.loanDate) : undefined,
+      };
+      if (!data.projectId) delete (transformed as any).projectId;
+      await onSubmit(transformed);
+      onSuccess();
+    } catch (error) {
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
     }
-    
-    const transformed: Partial<LoansRows> = {
-      ...data,
-      totalAmount: Number(data.totalAmount),
-      loanDate: data.loanDate ? new Date(data.loanDate) : undefined, 
-    };
-
-    await onSubmit(transformed);
-    onSuccess();
-  } catch (error) {
-     const { errorMessage } = extractApiError(error);
-     notify.error(errorMessage);
-  }
-};
+  };
 
   return (
     <ModalWrapper open={open} onClose={onClose}>

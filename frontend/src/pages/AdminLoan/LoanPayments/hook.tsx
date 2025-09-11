@@ -165,7 +165,6 @@ export const useLoanPaymentDetails = (loanId: string) => {
         const addedItems = added.map(
           ({ isNew, _originalData, ...rest }) => rest
         );
-        console.log(loanId);
         await addLoanPayments(token!, addedItems, loanId);
       }
 

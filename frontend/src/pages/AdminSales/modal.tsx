@@ -88,7 +88,11 @@ const SalesModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
-      await onSubmit(data);
+       const transformed: Partial<SalesRows> = {
+         ...data,
+       };
+       if (!data.projectId) delete (transformed as any).projectId;
+      await onSubmit(transformed);
       onSuccess();
     } catch {
       notify.error("Bir hata oluştu.");

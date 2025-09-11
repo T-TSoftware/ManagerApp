@@ -36,13 +36,11 @@ export const updateStock = async (
   token: string,
   data: Partial<StockRows>
 ): Promise<StockRows> => {
-    console.log(data);
   const response = await axios.patch(`stocks/${data.id}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-    console.log(response);
   return response.data;
 };
 

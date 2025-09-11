@@ -7,7 +7,6 @@ import { currencyList } from "../../../../constants/common/currencyList";
 
 const CashDetailsGrid = ({ barterItemId }: { barterItemId: string }) => {
   const { localData, loading, gridRef } = useCashDetails(barterItemId);
-  console.log(localData);
   const colDefs: ColDef<BarterItemCashDetailRows>[] = [
     {
       field: "amount",

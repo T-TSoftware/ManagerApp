@@ -124,7 +124,6 @@ const BarterItemModal = ({
       relatedSupplierCode: "",
     };
   }, [defaultValues, mode]);
-console.log(projectId);
   useEffect(() => {
     if (open) {
       reset(memoizedDefaultValues);

@@ -5,17 +5,13 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ModalWrapper from "../../components/layout/ModalWrapper";
 import type { QuantityRows } from "./types";
-import { financeTypes } from "../../constants/finance/financeTypes";
-import { financeCategory } from "../../constants/finance/financeCategory";
-import { currencyList } from "../../constants/common/currencyList";
-import { paymentMethods } from "../../constants/finance/paymentMethods";
+import { stockCategories } from "../../constants/stock/stockCategories";
+import { units } from "../../constants/stock/units";
 import {
   TextInput,
   Dropdown,
   NumberInput,
   TextAreaInput,
-  DatePicker,
-  AutoComplete,
 } from "../../components/inputs";
 import { useReferenceOptions } from "../../hooks/useReferenceOptions";
 import { useParams } from "react-router-dom";
@@ -89,8 +85,10 @@ const QuantityItemModal = ({
   const notify = useNotifier();
 
   useEffect(() => {
-    reset(memoizedDefaultValues);
-  }, [reset, memoizedDefaultValues]);
+    if (open) {
+      reset(memoizedDefaultValues);
+    }
+  }, [open, reset, memoizedDefaultValues]);
 
   const onFormSubmit = async (data: FinanceFormSchema) => {
     try {
@@ -131,15 +129,16 @@ const QuantityItemModal = ({
           <Dropdown
             name="category"
             label="Kategori"
-            options={financeCategory}
+            options={stockCategories}
             register={register}
             error={errors.category?.message}
             required
           />
 
-          <TextInput
+          <Dropdown
             name="unit"
             label="Birim"
+            options={units}
             register={register}
             error={errors.unit?.message}
             required

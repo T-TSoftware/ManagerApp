@@ -118,7 +118,6 @@ const ProjectModal = ({
       await onSubmit(transformed);
       onSuccess();
     } catch (error) {
-      console.log(error)
       const { errorMessage } = extractApiError(error);
       notify.error(errorMessage);
     }

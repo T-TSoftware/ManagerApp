@@ -217,7 +217,6 @@ export const useStock = () => {
       notify.dismiss();
       notify.success("Kayıt başarılı");
     } catch (err) {
-      console.log("Errors:", err);
       notify.handleError(err);
     }
   };

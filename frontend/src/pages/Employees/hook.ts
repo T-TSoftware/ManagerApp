@@ -17,7 +17,6 @@ export const useEmployees = () => {
   const [alert, setAlert] = useState<any>(null);
   const notify = useNotifier();
   const token = getToken();
-  console.log(token)
 
   useEffect(() => {
     fetchData();

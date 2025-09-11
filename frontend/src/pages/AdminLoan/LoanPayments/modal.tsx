@@ -8,25 +8,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoanPaymentRows } from "./types";
 import { extractApiError } from "../../../utils/axios";
 import { useNotifier } from "../../../hooks/useNotifier";
-import { DatePicker, Dropdown, NumberInput, TextInput } from "../../../components/inputs";
+import { DatePicker, Dropdown, NumberInput, TextAreaInput, TextInput } from "../../../components/inputs";
 import { loanPaymentStatus } from "../../../constants/loan/loanPaymentStatus";
 import Button from "../../../components/buttons/Button";
 
 const optionalString = z.string().optional().or(z.literal(""));
+const optionalNumber = z.coerce.number().optional();
 
 const schema = z.object({
-  installmentNumber: z.coerce.number().positive("Taksit No pozitif olmalı."),
   dueDate: z.coerce.date({
     required_error: "Vade tarihi zorunludur.",
     invalid_type_error: "Geçerli bir tarih girin.",
   }),
-  totalAmount: z.coerce.number().positive("Toplam Tutar pozitif olmalı."),
-  interestAmount: z.coerce.number().positive("Faiz Tutarı pozitif olmalı."),
-  principalAmount: z.coerce.number().positive("Anapara Tutarı pozitif olmalı."),
-  paymentAmount: z.coerce.number().positive("Ödenen Tutar pozitif olmalı."),
-  paymentDate: z.coerce.date().optional(),
-  status: optionalString,
-  penaltyAmount: z.coerce.number().optional(),
   description: z.string().optional(),
 });
 
@@ -51,6 +44,8 @@ export default function LoanPaymentModal({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting, isDirty },
   } = useForm<FormSchema>({ resolver: zodResolver(schema) });
 
@@ -76,6 +71,7 @@ export default function LoanPaymentModal({
       }
       const transformed: Partial<LoanPaymentRows> = {
         ...data,
+        dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
       };
 
       await onSubmit(transformed);
@@ -109,52 +105,63 @@ export default function LoanPaymentModal({
             editable={false}
           />
 
+          <DatePicker
+            label="Son Ödeme Tarihi"
+            value={watch("dueDate")}
+            onChange={(val) => setValue("dueDate", val!)}
+            error={errors.dueDate?.message}
+            required
+          />
+
           <NumberInput
             name="installmentNumber"
             label="Taksit No"
             register={register}
-            error={errors.installmentNumber?.message}
-            required
+            editable={false}
           />
 
           <NumberInput
             name="penaltyAmount"
             label="Ceza Tutarı"
             register={register}
-            error={errors.penaltyAmount?.message}
-            required
+            editable={false}
           />
 
           <NumberInput
             name="totalAmount"
             label="Toplam Tutar"
             register={register}
-            error={errors.totalAmount?.message}
-            required
+            editable={false}
           />
 
           <NumberInput
             name="interestAmount"
             label="Faiz Tutarı"
             register={register}
-            error={errors.interestAmount?.message}
-            required
+            editable={false}
           />
 
           <NumberInput
             name="principalAmount"
             label="Anapara Tutarı"
             register={register}
-            error={errors.principalAmount?.message}
-            required
+            editable={false}
           />
+
           <NumberInput
             name="paymentAmount"
             label="Ödenen Tutar"
             register={register}
-            error={errors.paymentAmount?.message}
-            required
+            editable={false}
           />
+
+          <TextAreaInput
+            classes="col-span-4"
+            name="description"
+            label="Açıklama"
+            register={register}
+          />
+
           <div className="col-span-4 pt-6 flex justify-end gap-4">
             <Button
               type="button"

@@ -24,7 +24,6 @@ export const useSales = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      console.log(projectId)
       const result = await getAllSales(token!, projectId!);
       setLocalData(result);
     } catch (err) {
@@ -75,8 +74,7 @@ export const useSales = () => {
   };
 
   const saveChanges = async (allRows: SalesRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
-    setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
+    console.log("Tüm kayıtlar kaydedildi.");
   };
 
   return {

@@ -34,7 +34,6 @@ export const updateCheck = async (
   token: string,
   data: Partial<CheckFinanceRows>
 ): Promise<CheckFinanceRows> => {
-    console.log(data);
   const response = await axios.patch(`checks/${data.id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });

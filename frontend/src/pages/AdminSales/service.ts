@@ -24,11 +24,9 @@ export const addSales = async (
   token: string,
   data: Partial<SalesRows>
 ): Promise<SalesRows> => {
-  console.log(data,token);
   const response = await axios.post(`orders`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  console.log(response)
   return response.data;
 };
 

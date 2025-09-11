@@ -85,7 +85,6 @@ export const useFinance = () => {
   const addRow = (items: FinanceTransactionRows | FinanceTransactionRows[]) => {
     setLocalData((prev) => {
       const arr = Array.isArray(items) ? items : [items];
-      console.log(arr);
       return [...arr, ...prev];
     });
   };

@@ -8,7 +8,6 @@ export const getAllSupplies = async (
   const response = await axios.get(`/projects/${projectId}/suppliers`, {
     headers: { Authorization: `Bearer ${token}` }
   });
-  console.log(response)
   return response.data;
 };
 
@@ -29,6 +28,7 @@ export const addSupply = async (
   projectId: string,
   data: Partial<SupplyRows>
 ): Promise<SupplyRows> => {
+  console.log(data)
   const response = await axios.post(`projects/${projectId}/suppliers`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -40,7 +40,8 @@ export const updateSupply = async (
   projectId: string,
   data: Partial<SupplyRows>
 ): Promise<SupplyRows> => {
-  const response = await axios.patch(`projects/suppliers/${data.id}`, data, {
+  const { id, ...payload } = data;
+  const response = await axios.patch(`projects/suppliers/${id}`, payload, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
