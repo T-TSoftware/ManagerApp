@@ -73,7 +73,6 @@ export const useAnnualLeave = () => {
   };
 
   const saveChanges = async (allRows: AnnualLeavesRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
     setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
   };
 

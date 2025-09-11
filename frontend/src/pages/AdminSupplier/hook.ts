@@ -72,7 +72,6 @@ export const useSupplierList = () => {
   };
 
   const saveChanges = async (allRows: SupplierListRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
     setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
   };
 

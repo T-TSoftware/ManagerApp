@@ -163,7 +163,8 @@ const FinanceTransactionModal = ({
           : undefined,
         invoiceYN: data.invoiceCode ? "Y" : "N",
       };
-
+      if (!data.projectId) delete (transformed as any).projectId;
+      if (!data.toAccountCode) delete (transformed as any).toAccountCode;
       await onSubmit(transformed);
     } catch (error) {
       const { errorMessage } = extractApiError(error);
@@ -263,7 +264,7 @@ const FinanceTransactionModal = ({
             options={[{ code: "", name: "Seçiniz" }, ...options]}
             register={register}
             error={errors.toAccountCode?.message}
-            required
+            required={selectedCategory != "" && selectedCategory == "TRANSFER"}
           />
 
           <DatePicker

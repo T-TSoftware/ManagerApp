@@ -5,7 +5,6 @@ export const getEURCurrency = async () => {
   const res = await axios.get(
     `https://api.frankfurter.app/latest?from=EUR&to=TRY`
   );
-  console.log(res);
   return res.data.rates.TRY;
 };
 

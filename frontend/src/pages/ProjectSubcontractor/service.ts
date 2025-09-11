@@ -46,9 +46,10 @@ export const updateSubcontractor = async (
   token: string,
   data: Partial<SubcontractorRows>
 ): Promise<SubcontractorRows> => {
+    const { id, ...payload } = data;
   const response = await axios.patch(
-    `/projects/subcontractors/${data.id}`,
-    data,
+    `/projects/subcontractors/${id}`,
+    payload,
     {
       headers: {
         Authorization: `Bearer ${token}`,

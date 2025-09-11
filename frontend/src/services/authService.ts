@@ -45,8 +45,6 @@ export const login = async (
       typeof extractApiError === "function"
         ? extractApiError(err)
         : err?.message || "Login failed";
-        console.log(err)
-        console.log(message)
     throw new Error(message.errorMessage);
   }
 };

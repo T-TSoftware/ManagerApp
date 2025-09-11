@@ -26,7 +26,6 @@ export const addLoanPayments = async (
   items: NewLoanPaymentPayload[],
   loanId:string
 ): Promise<void> => {
-  console.log(items);
   const res = await axios.post(`loan-payments/${loanId}`, items, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -39,11 +38,11 @@ export const updateLoanPayments = async (
   token: string,
   data: Partial<LoanPaymentRows>
 ): Promise<LoanPaymentRows> => {
-    console.log(data);
-  const response = await axios.patch(`loan-payments/${data.id}`, {
+  console.log(data)
+  const response = await axios.patch(`loan-payments/${data.id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  console.log(response);
+  console.log(response.data);
   return response.data;
 };
 

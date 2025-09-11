@@ -10,7 +10,6 @@ export const getAllStocks = async (
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log(res)
   return res.data;
 };
 

@@ -48,18 +48,6 @@ const DashboardGrid = () => {
     baseGridRef.current?.addRow(newItem);
   };
 
-  // Seçilen satırları silme
-  const handleDeleteRow = (selected: DashboardRows[]) => {
-    baseGridRef.current?.deleteSelectedRows();
-    console.log("Silinecek satırlar:", selected);
-    // İstersen burada bir API ile silme işlemi yapabilirsin
-  };
-
-  // Tüm verileri kaydet
-  const handleSaveChanges = (allRows: DashboardRows[]) => {
-    console.log("Kaydedilecek tüm satırlar:", allRows);
-    // API gönderimi buraya yapılabilir
-  };
 
   return (
     <BaseGrid<DashboardRows>
@@ -68,8 +56,6 @@ const DashboardGrid = () => {
       columnDefs={colDefs}
       getRowId={getRowId}
       onAddRow={handleAddRow}
-      onDeleteRow={handleDeleteRow}
-      onSaveChanges={handleSaveChanges}
       isLoading={loading}
       showButtons={{
         refresh: false,

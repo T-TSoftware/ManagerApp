@@ -37,7 +37,6 @@ export const updateFinance = async (
   token: string,
   data: Partial<FinanceTransactionRows>
 ): Promise<FinanceTransactionRows> => {
-  console.log(data)
   const response =  await axios.patch(`finances/${data.id}`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -75,7 +75,7 @@ const StockModal = ({
         stockDate: defaultValues?.stockDate
           ? new Date(defaultValues.stockDate)
           : undefined,
-        projectId: defaultValues.project?.id
+        projectId: defaultValues.project?.id,
       };
     }
 
@@ -100,7 +100,6 @@ const StockModal = ({
 
   const onFormSubmit = async (data: FormSchema) => {
     try {
-
       if (mode === "edit" && !isDirty) {
         notify.error("Kaydedilecek değişiklik yok.");
         return;
@@ -110,13 +109,13 @@ const StockModal = ({
         ...data,
         stockDate: data.stockDate ? new Date(data.stockDate) : undefined,
       };
-
+      if (!data.projectId) delete (transformed as any).projectId;
       await onSubmit(transformed);
       onSuccess();
     } catch (error) {
-       const { errorMessage} = extractApiError(error);
-       notify.error(errorMessage);
-  }
+      const { errorMessage } = extractApiError(error);
+      notify.error(errorMessage);
+    }
   };
 
   return (

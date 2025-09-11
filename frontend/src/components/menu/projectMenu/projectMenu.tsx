@@ -28,7 +28,7 @@ const ProjectMenu = ({ items, inHeader = false }: ProjectMenuProps) => {
   return (
     <Menu as="div" className="relative h-full">
       <MenuButton
-        className={`h-full flex items-center gap-2 px-2 text-sm font-semibold text-black shadow-md shadow-slate-300 hover:bg-gray-50/50 dark:shadow-slate-800 dark:text-white dark:hover:bg-white/5 rounded-md ${
+        className={`h-full flex items-center gap-2 px-2 text-sm font-semibold text-black shadow-sm shadow-slate-300 hover:bg-gray-50/50 dark:shadow-slate-800 dark:text-white dark:hover:bg-white/5 rounded-md ${
           inHeader ? "py-1.5" : "w-full py-2"
         }`}
       >

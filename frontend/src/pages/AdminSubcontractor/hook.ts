@@ -72,7 +72,6 @@ export const SubcontractorList = () => {
   };
 
   const saveChanges = async (allRows: SubcontractorListRows[]) => {
-    console.log("Tüm kayıtlar kaydedildi:", allRows);
     setAlert({ message: "Değişiklikler kaydedildi", type: "success" });
   };
 

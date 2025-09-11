@@ -7,7 +7,6 @@ export const getAllBankMovements = async (
   const response = await axios.get(`bank-movements`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  console.log(response.data);
   return response.data;
 };
 
